@@ -183,7 +183,7 @@ _bool ContactSpot::OverLayAreaGen(){
 
 		TopExp_Explorer edgeExp;
 		for (edgeExp.Init(smlSurf->Face(), TopAbs_EDGE); edgeExp.More(); edgeExp.Next()){
-			TopLoc_Location loc;
+			
 			_real ui, us;
 			
 			//Handle_Geom_Curve curv = BRep_Tool::Curve(TopoDS::Edge(edgeExp.Current()), loc, ui, us);
@@ -192,7 +192,7 @@ _bool ContactSpot::OverLayAreaGen(){
 			_real dlt = (us - ui) / AmtPntForCS();
 			for (_int k = 0; k<AmtPntForCS(); k++){
 				ContactSpot::facePntCorrespond corPnts;
-				faceCurve->D0(dlt*k,corPnts.pnt2d.first);
+				faceCurve->D0(ui+dlt*k, corPnts.pnt2d.first);
 
 				gp_Vec tanU, tanV;
 				

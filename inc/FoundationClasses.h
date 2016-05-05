@@ -51,7 +51,7 @@ inline Standard_Real AsmVecTol(){
 }
 
  inline Standard_Integer AmtPntForCS(){
-	 return 4;
+	 return 5;
  }
  inline Standard_Integer MinContactSquare(){
 	 return 5;

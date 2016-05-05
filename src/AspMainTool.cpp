@@ -64,8 +64,8 @@ void AspMainTool::Init(std::string stepfileName, Viewer *aView, MainFrame* mainW
 
 	mainWindow->SetStatus("Finding assembly sequence is started");
 
-	AsmTreeBuilding = true;
-	AsmTreeInit();
+//	AsmTreeBuilding = true;
+//	AsmTreeInit();
 	
 	
 
@@ -520,6 +520,47 @@ Handle_TopTools_HSequenceOfShape AspMainTool::ListOfPart(){
 	product->GetAllParts(list);
 	return list;
 }
+_bool NotOverlay(Bnd_Box *box1, Bnd_Box *box2, _real OverLaySize){
+
+	_real eps = LinTol();
+	if (box1->IsThin(eps) || box2->IsThin(eps))
+		return true;
+
+	gp_Pnt b1_i = box1->CornerMin();
+	gp_Pnt b1_s = box1->CornerMax();
+	gp_Pnt b2_i = box2->CornerMin();
+	gp_Pnt b2_s = box2->CornerMax();
+
+
+	Standard_Boolean bRet = false;
+	Standard_Real delta;
+
+	delta = box2->GetGap() + box2->GetGap() + OverLaySize;
+	_int count = 0;
+	if (!box1->IsXThin(eps) && !box2->IsXThin(eps) &&
+		((b2_s.X() - b1_i.X() > delta) && (b1_s.X() - b2_i.X() > delta)))
+		count++;
+
+	if (!box1->IsYThin(eps) && !box2->IsYThin(eps) &&
+		((b2_s.Y() - b1_i.Y() > delta) && (b1_s.Y() - b2_i.Y() > delta)))
+		count++;
+	if (!box1->IsZThin(eps) && !box2->IsZThin(eps) &&
+		((b2_s.Z() - b1_i.Z() > delta) && (b1_s.Z() - b1_i.Z() > delta)))
+		count++;
+	return count<2;
+
+}
+_bool NotInContact(SurfaceAttribute &sp, SurfaceAttribute &obstSp, _real OverLaySize, _real gap){
+
+	if ((0<sp.Type && sp.Type<4 || sp.Type == GeomAbs_SurfaceOfRevolution) && (0<obstSp.Type && obstSp.Type<4 || sp.Type == GeomAbs_SurfaceOfRevolution))
+		return obstSp.myBox.IsOut(sp.myBox) || NotOverlay(&sp.myBox, &obstSp.myBox, OverLaySize);
+	else {
+		_bool Dist = sp.myBox.Distance(obstSp.myBox)>gap;
+		_bool Overlay = NotOverlay(&sp.myBox, &obstSp.myBox, OverLaySize);
+		return  Dist || Overlay;
+
+	}
+}
 void AspMainTool::TestContactSpotProcess(Viewer *view){
 
 	auto unitMap = product->GetUnitMap();
@@ -567,13 +608,19 @@ void AspMainTool::TestContactSpotProcess(Viewer *view){
 				//==========================================
 				//			Launch function Contact Spot
 				
-					//if (NotInContact(sp, obstSp, 1, Gap))
-					//	continue;
+					if (NotInContact(sp, obstSp, 1, Gap))
+						continue;
 
 					ContactSpot spot(sp, obstSp, Gap);
 					if (orient1 == TopAbs_REVERSED || orient2 == TopAbs_REVERSED)
 						orient1 = TopAbs_FORWARD;
 				//==========================================
+					auto vecArray = spot.getF1ContactAxis();
+					for (auto &dir : vecArray){
+						Handle_ISession_Direction axis = new ISession_Direction(dir.Location(), dir.Direction(), 10);
+						context->LocalContext()->Display(axis, AIS_WireFrame);
+					}
+					view->getView()->Redraw();
 				}
 			}
 		}

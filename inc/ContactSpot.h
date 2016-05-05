@@ -44,7 +44,7 @@ namespace asp{
 
 		_bool OverLayAreaEl( _real delta []);
 
-		_bool OverLayAreaGen(_real delta[]);
+		_bool OverLayAreaGen();
 
 		_bool SameVectorInSetAlready(gp_Ax1 &axis, std::vector<gp_Ax1> &collection);
 
