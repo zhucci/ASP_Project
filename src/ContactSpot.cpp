@@ -6,6 +6,7 @@
 #include "BRepLProp_SLProps.hxx"
 #include "Geom2dAdaptor.hxx"
 #include "BRepTools.hxx"
+#include "Extrema_ExtPS.hxx"
 using namespace asp;
 
 ContactSpot::ContactSpot(const BRepAdaptor_Surface &surface1, const BRepAdaptor_Surface &surface2, _real gapSize)
@@ -62,8 +63,11 @@ void ContactSpot::Perform(){
 	ImportantSpotOfContact(f2,&delta[2]);
 
 	//Try simple some lighter algorithm 
-	if(OverLayAreaEl(delta))
-		ErrorInContactIdentification=false;
+	//if(OverLayAreaEl(delta))
+	//	ErrorInContactIdentification=false;
+
+	if(OverLayAreaGen())
+		isDone=true;
 	//else 
 	//	ErrorInContactIdentification=true;
 	/*
@@ -89,7 +93,7 @@ void ContactSpot::Perform(){
 		else{  //Not parallel surfaces
 
 		
-			OverLayAreaGen(delta);	
+			
 		} 
 		*/
 }
@@ -136,10 +140,10 @@ _bool ContactSpot::OverLayAreaPar(_int NbIter, _real delta []){
 	}
 	}
 
-_bool ContactSpot::OverLayAreaGen(_real delta[]){
+_bool ContactSpot::OverLayAreaGen(){
 
 	/*We have some points right now*/
-	try{
+	//try{
 
 		//f1 - surface 1
 		//f2 - surface 2
@@ -147,7 +151,7 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 
 		_real f1_perimeter =0;
 		_real f2_perimeter =0;
-		
+		_int NeedPntAmount =5;
 		GProp_GProps propsTester;
 		BRepGProp::LinearProperties(f1.Face(),propsTester);
 		f1_perimeter=propsTester.Mass();
@@ -182,44 +186,27 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 			TopLoc_Location loc;
 			_real ui, us;
 			
-			Handle_Geom_Curve curv = BRep_Tool::Curve(TopoDS::Edge(edgeExp.Current()), loc, ui, us);
-			_real dlt = (us - ui) /( AmtPntForCS()-1);
+			//Handle_Geom_Curve curv = BRep_Tool::Curve(TopoDS::Edge(edgeExp.Current()), loc, ui, us);
+			Handle_Geom2d_Curve faceCurve = BRep_Tool::CurveOnSurface(TopoDS::Edge(edgeExp.Current()), smlSurf->Face(), ui, us);
+			
+			_real dlt = (us - ui) / AmtPntForCS();
 			for (_int k = 0; k<AmtPntForCS(); k++){
-				gp_Pnt pnt;
-				curv->D0(dlt*k, pnt);
-				TopoDS_Vertex curVertex = BRepBuilderAPI_MakeVertex(pnt);
-				gp_Pnt2d pnt2d = BRep_Tool::Parameters(curVertex, smlSurf->Face());
-				
 				ContactSpot::facePntCorrespond corPnts;
-				corPnts.pnt3d.first = pnt;
-				corPnts.pnt2d.first=pnt2d;
+				faceCurve->D0(dlt*k,corPnts.pnt2d.first);
+
+				gp_Vec tanU, tanV;
 				
+				smlSurf->D1(corPnts.pnt2d.first.X(), corPnts.pnt2d.first.X(), corPnts.pnt3d.first, tanU, tanV);
+						tanU.Cross(tanV);
 
-				Extrema_ExtPS pntProj(pnt,smlSurf->Surface(),Precision::Confusion(),Precision::Confusion(),Extrema_ExtFlag_MIN); 
-				if (pntProj.IsDone()&& pntProj.NbExt()){
-					Extrema_POnSurf POnSurf;
-					
-					
-					POnSurf=pntProj.Point(1);
-					gp_Vec tanU, tanV;
-					_real U, V;
-					gp_Pnt pntOnF1;
-
-					POnSurf.Parameter(U, V);
-						smlSurf->D1(U, V, pntOnF1, tanU, tanV);
-							tanU.Cross(tanV);
-
-						if (smlFaceOrientation != TopAbs_FORWARD)
+					if (smlFaceOrientation != TopAbs_FORWARD)
 							tanU.Reverse();
-					
 					corPnts.normal.first=tanU;
-				}
-
+			
 				mainPnts.push_back(corPnts);
 				}
 			}
-		
-
+		/*goto End;
 		//Extremum points on bigger face
 
 		BRepExtrema_ExtPF extBuilder;
@@ -251,14 +238,18 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 
 	
 		//Extremum points back to initial face
-
+		_int GoodPntAmount = 0;
 		extBuilder.Initialize(smlSurf->Face(), Extrema_ExtFlag_MIN, Extrema_ExtAlgo_Grad);
 		for (auto p = mainPnts.begin(); p != mainPnts.end();){
 			gp_Vec p1p2(p->pnt3d.first,p->pnt3d.second);
 
 			_real magnitude = p1p2.Magnitude();
-			if (magnitude<Precision::Confusion())
+			if (magnitude<Precision::Confusion()){
+				GoodPntAmount++;
+				p->correctPair = true;
+				p++;
 				continue;
+			}
 			extBuilder.Perform(BRepBuilderAPI_MakeVertex(p->pnt3d.second), smlSurf->Face());
 			if (extBuilder.IsDone() && extBuilder.NbExt()){
 				_real U, V;
@@ -282,12 +273,14 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 				p = mainPnts.erase(p);
 		}
 
-		_int GoodPntAmount=0;
-	for (auto p = mainPnts.begin(); p != mainPnts.end();){
-			gp_Vec p1p2(p->pnt3d.first, p->pnt3d.second);
-		
+		if (GoodPntAmount<NeedPntAmount)
+	for (auto p = mainPnts.begin(); p != mainPnts.end();p++){
+		if (p->correctPair)
+			continue;
+		gp_Vec p1p2(p->pnt3d.first, p->pnt3d.second);
+
 		_real magnitude = p1p2.Magnitude();
-		
+
 		if (magnitude<RealSmall()){
 			p->correctPair=true;
 			GoodPntAmount++;
@@ -310,7 +303,7 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 
 		}	
 	}
-	if (GoodPntAmount>4){
+	if (GoodPntAmount>NeedPntAmount){
 		//pair on edge situation check
 
 		//Square calculation
@@ -319,7 +312,7 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 		Bnd_Box2d SSBndBox;
 		Bnd_Box2d BSBndBox;	
 		_real Square1=0,Square2=0;
-		for (auto p = mainPnts.begin(); p != mainPnts.end();){
+		for (auto p = mainPnts.begin(); p != mainPnts.end();p++){
 			if (p->correctPair){
 				SSBndBox.Add(p->pnt2d.first);
 				BSBndBox.Add(p->pnt2d.second);
@@ -333,11 +326,13 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 		try{
 			Handle_Geom_Surface ss = BRep_Tool::Surface(smlSurf->Face());
 			BRepBuilderAPI_MakeFace MF(ss, u_i1, u_s1, v_i1, v_s1, Precision::Confusion());
-			for (TopExp_Explorer exp(smlSurf->Face(), TopAbs_WIRE); exp.More(); exp.Next()){
-				MF.Add(TopoDS::Wire(exp.Current()));
-			}
+		//	for (TopExp_Explorer exp(smlSurf->Face(), TopAbs_WIRE); exp.More(); exp.Next()){
+		//		MF.Add(TopoDS::Wire(exp.Current()));
+		//	}
 			 cntFace1 = MF.Face();
 			GProp_GProps propsTester;
+
+
 			BRepGProp::SurfaceProperties(cntFace1, propsTester);
 			Square1 = propsTester.Mass();
 		}
@@ -346,45 +341,54 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 		}
 		try{
 			Handle_Geom_Surface bs = BRep_Tool::Surface(bgSurf->Face());
+			_real _u_i1, _u_s1, _v_i1, _v_s1;
+			bs->Bounds(_u_i1, _u_s1, _v_i1, _v_s1);
+
 			BRepBuilderAPI_MakeFace MF(bs, u_i2, u_s2, v_i2, v_s2, Precision::Confusion());
-			for (TopExp_Explorer exp(smlSurf->Face(), TopAbs_WIRE); exp.More(); exp.Next()){
-				MF.Add(TopoDS::Wire(exp.Current()));
-			}
+			
+		//	for (TopExp_Explorer exp(bgSurf->Face(), TopAbs_WIRE); exp.More(); exp.Next()){
+		//		MF.Add(TopoDS::Wire(exp.Current()));
+		//	}
+
 			cntFace2 = MF.Face();
 			GProp_GProps propsTester;
 			BRepGProp::SurfaceProperties(cntFace2, propsTester);
-			Square1 = propsTester.Mass();
+			Square2 = propsTester.Mass();
 		}
 		catch (Standard_Failure){
 			std::cerr << __FILE__ << " " << __LINE__ << " Contact face constraction failure" << std::endl;
 		}
+
 		if (Square1 > MinContactSquare() && Square2 > MinContactSquare()){
-			
-				for (auto p = mainPnts.begin(); p != mainPnts.end();){
-					if (p->correctPair){
+			*/
+		//End :
+
+
+				for (auto p = mainPnts.begin(); p != mainPnts.end();p++){
+				//	if (p->correctPair){
 							gp_Ax1 sS(p->pnt3d.first,p->normal.first);
 							gp_Ax1 gS(p->pnt3d.first, p->normal.first);
 							gp_Ax1 *f1Axis = AreFacesSwaped ? &sS : &gS;
 							gp_Ax1 *f2Axis = AreFacesSwaped ? &gS : &sS;
-							if (!SameVectorInSetAlready(*f1Axis, f1VecSpot)){
+						//	if (!SameVectorInSetAlready(*f1Axis, f1VecSpot)){
 								f1VecSpot.push_back(*f1Axis);
 								f2VecSpot.push_back(*f2Axis);
-							}
+						//	}
 						
-				}
+				//}
 			}
 
 			return true;
-		}
+	//	}
 			
-	}
+	//}
 
-	}
-	catch(Standard_Failure)
-	{
-		std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
-	}
-	return false;
+	//}
+	//catch(Standard_Failure)
+	//{
+	//	std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
+	//}
+	//return false;
 	
 }
 _bool ContactSpot::SameVectorInSetAlready(gp_Ax1 &axis, std::vector<gp_Ax1> &collection){
