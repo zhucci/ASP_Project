@@ -1,0 +1,1 @@
+$(QTDIR)\bin\moc.exe "%(FullPath)" -o "%(ProjectDir)\moc_%(Filename).cpp

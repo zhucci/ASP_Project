@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainFrame</class>
+ <widget class="QMainWindow" name="MainFrame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>100</width>
+    <height>50</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+    <pointsize>10</pointsize>
+    <italic>false</italic>
+    <kerning>true</kerning>
+   </font>
+  </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
+  <property name="windowTitle">
+   <string>Система АППС</string>
+  </property>
+  <widget class="QWidget" name="mainwidget">
+   <property name="minimumSize">
+    <size>
+     <width>100</width>
+     <height>50</height>
+    </size>
+   </property>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_FILE">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <widget class="QMenu" name="menu_IMPORT">
+     <property name="title">
+      <string>Открыть</string>
+     </property>
+     <addaction name="actionSTEP"/>
+     <addaction name="actionPrevSession"/>
+    </widget>
+    <widget class="QMenu" name="menu_EXPORT">
+     <property name="title">
+      <string>Сохранить</string>
+     </property>
+     <addaction name="actionSAVESEQ"/>
+    </widget>
+    <addaction name="separator"/>
+    <addaction name="menu_IMPORT"/>
+    <addaction name="menu_EXPORT"/>
+    <addaction name="actionEXIT"/>
+   </widget>
+   <widget class="QMenu" name="menu_VIEW">
+    <property name="title">
+     <string>Вид</string>
+    </property>
+    <addaction name="actionCONTROLPANEL"/>
+   </widget>
+   <widget class="QMenu" name="menu_HELP">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+    <addaction name="actionABOUT"/>
+   </widget>
+   <addaction name="menu_FILE"/>
+   <addaction name="menu_VIEW"/>
+   <addaction name="menu_HELP"/>
+  </widget>
+  <widget class="QStatusBar" name="ProgressBar"/>
+  <widget class="QToolBar" name="MainBar">
+   <property name="windowTitle">
+    <string>Main ToolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="separator"/>
+   <addaction name="actionSTEP"/>
+   <addaction name="actionSAVESEQ"/>
+  </widget>
+  <widget class="QToolBar" name="AsmPlaneBar">
+   <property name="windowTitle">
+    <string>Assembly Sequence Planning Bar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionPlayBack"/>
+   <addaction name="actionSTEPBack"/>
+   <addaction name="actionStop"/>
+   <addaction name="actionNextStep"/>
+   <addaction name="actionPlayFoward"/>
+   <addaction name="actionDBGShow"/>
+   <addaction name="actionFoto"/>
+  </widget>
+  <widget class="QToolBar" name="TestFunction">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionT1"/>
+   <addaction name="actionT2"/>
+   <addaction name="actionT3"/>
+   <addaction name="actionT4"/>
+   <addaction name="actionT5"/>
+   <addaction name="actionVoxel"/>
+  </widget>
+  <action name="actionEXIT">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/check.png</normaloff>:/check.png</iconset>
+   </property>
+   <property name="text">
+    <string>Выход</string>
+   </property>
+  </action>
+  <action name="actionSAVESEQ">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/downloads.png</normaloff>:/downloads.png</iconset>
+   </property>
+   <property name="text">
+    <string>Последовательность</string>
+   </property>
+  </action>
+  <action name="actionSTEP">
+   <property name="icon">
+    <iconset theme="New" resource="IconRes.qrc">
+     <normaloff>:/file.png</normaloff>:/file.png</iconset>
+   </property>
+   <property name="text">
+    <string>STEP файл</string>
+   </property>
+  </action>
+  <action name="actionCONTROLPANEL">
+   <property name="text">
+    <string>Панель управления</string>
+   </property>
+  </action>
+  <action name="actionABOUT">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/help.png</normaloff>:/help.png</iconset>
+   </property>
+   <property name="text">
+    <string>О приложении...</string>
+   </property>
+  </action>
+  <action name="actionSTEPBack">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/stepback.png</normaloff>:/stepback.png</iconset>
+   </property>
+   <property name="text">
+    <string>STEPBack</string>
+   </property>
+  </action>
+  <action name="actionPlayBack">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/playback.png</normaloff>:/playback.png</iconset>
+   </property>
+   <property name="text">
+    <string>PlayBack</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/pause.png</normaloff>:/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionNextStep">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/stepfoward.png</normaloff>:/stepfoward.png</iconset>
+   </property>
+   <property name="text">
+    <string>NextStep</string>
+   </property>
+  </action>
+  <action name="actionPlayFoward">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/play.png</normaloff>:/play.png</iconset>
+   </property>
+   <property name="text">
+    <string>PlayFoward</string>
+   </property>
+  </action>
+  <action name="actionFoto">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/camera.png</normaloff>:/camera.png</iconset>
+   </property>
+   <property name="text">
+    <string>Foto</string>
+   </property>
+   <property name="toolTip">
+    <string>Сохранить изображение</string>
+   </property>
+  </action>
+  <action name="actionDBGShow">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/dbg.png</normaloff>:/dbg.png</iconset>
+   </property>
+   <property name="text">
+    <string>DBGShow</string>
+   </property>
+   <property name="toolTip">
+    <string>Показывать свободные направления извлекаемой детали</string>
+   </property>
+  </action>
+  <action name="actionSTEPFile">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/file.png</normaloff>:/file.png</iconset>
+   </property>
+   <property name="text">
+    <string>STEP файл</string>
+   </property>
+  </action>
+  <action name="actionPrevSession">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/undo.png</normaloff>:/undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Предыдущую сессию</string>
+   </property>
+  </action>
+  <action name="actionSaveSession">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/downloads.png</normaloff>:/downloads.png</iconset>
+   </property>
+   <property name="text">
+    <string>Текущую сессию</string>
+   </property>
+  </action>
+  <action name="actionT1">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>T1</string>
+   </property>
+  </action>
+  <action name="actionVoxel">
+   <property name="text">
+    <string>Voxel</string>
+   </property>
+  </action>
+  <action name="actionT2">
+   <property name="text">
+    <string>T2</string>
+   </property>
+  </action>
+  <action name="actionT3">
+   <property name="text">
+    <string>T3</string>
+   </property>
+  </action>
+  <action name="actionT4">
+   <property name="text">
+    <string>T4</string>
+   </property>
+  </action>
+  <action name="actionT5">
+   <property name="text">
+    <string>T5</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="IconRes.qrc"/>
+ </resources>
+ <connections/>
+</ui>

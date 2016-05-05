@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="AspTool">
+      <UniqueIdentifier>{71af2497-6d54-4d8a-a79d-6acf51af2c52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AspTool\inc">
+      <UniqueIdentifier>{f8d79e3b-4b57-4f46-84da-c791ab08530f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AspTool\src">
+      <UniqueIdentifier>{5def9cdb-cb8d-4509-8d9f-d664be754e7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Voxel">
+      <UniqueIdentifier>{e5088537-e72d-4a28-bffc-0a099cc6e149}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AspUI">
+      <UniqueIdentifier>{ad798584-855d-45ac-80d4-895fa05b4463}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="win64\vc12\srcd\moc_MainFrame.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win64\vc12\srcd\moc_Viewer.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="win64\vc12\srcd\qrc_iconRes.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\ISession_Text.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\ISession_Surface.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\ISession_Direction.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AsmShowManager.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AspMainTool.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Assembly.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContactSpot.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FoundationMethods.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ISession_Part.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Part.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\surfaceAttribute.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Timer.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Unit.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainFrame.cpp">
+      <Filter>AspUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Viewer.cpp">
+      <Filter>AspUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VoxelClient_VisDrawer.cxx">
+      <Filter>Voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VoxelTool.cpp">
+      <Filter>Voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\DBGBuilder.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\AsmTreeNode.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AsmTreeBuilder.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Application.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="win64\vc12\srcd\ui_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="win64\vc12\srcd\ui_mainframe.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\AspMainTool.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Assembly.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ContactSpot.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\FoundationClasses.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ISession_Direction.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ISession_Part.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ISession_Surface.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ISession_Text.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\OCCT_Headers.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Part.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\STL_Headers.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\surfaceAttribute.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Timer.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Unit.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VoxelClient_VisDrawer.h">
+      <Filter>Voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\VoxelTool.h">
+      <Filter>Voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\DBGBuilder.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\AsmTreeNode.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\AsmTreeBuilder.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Text.txt" />
+    <Text Include="src\Text.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="win64\vc12\srcd\IconRes.rcc">
+      <Filter>Generated Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="inc\MainFrame.h">
+      <Filter>AspUI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="inc\Viewer.h">
+      <Filter>AspUI</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\IconRes.qrc" />
+    <CustomBuild Include="src\mainframe.ui" />
+  </ItemGroup>
+</Project>
