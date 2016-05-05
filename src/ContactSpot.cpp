@@ -1,6 +1,11 @@
 #include "ContactSpot.h"
-
-
+#include "BRepExtrema_ExtPF.hxx"
+#include "TopoDS_Vertex.hxx"
+#include "BRepBuilderAPI_MakeVertex.hxx"
+#include "LProp3d_SLProps.hxx"
+#include "BRepLProp_SLProps.hxx"
+#include "Geom2dAdaptor.hxx"
+#include "BRepTools.hxx"
 using namespace asp;
 
 ContactSpot::ContactSpot(const BRepAdaptor_Surface &surface1, const BRepAdaptor_Surface &surface2, _real gapSize)
@@ -36,7 +41,7 @@ ContactSpot::ContactSpot(const SurfaceAttribute &surface1,
 	f2 = surface2.surf;
 	O_f1 = surface1.myShape.Orientation();
 	O_f2 = surface2.myShape.Orientation();
-
+	
 	if (gapSize<0)
 		gap = SGap();
 	else
@@ -135,64 +140,259 @@ _bool ContactSpot::OverLayAreaGen(_real delta[]){
 
 	/*We have some points right now*/
 	try{
-	for(_int i=1;i<=extrema.NbExt();i++)
-	{
-				if(extrema.SquareDistance(i)>SquareGap){
-					continue;
-				}
-				else {
-				Extrema_POnSurf pnt1 ,pnt2;
-				extrema.Points(i,pnt1,pnt2);
-				gp_Vec tanU,tanV;
-				_real U,V;
-				gp_Pnt pntOnF1;
-				pnt1.Parameter(U,V);
-				f1.D1(U,V,pntOnF1,tanU,tanV);
 
-				if(extrema.SquareDistance(i)-LinTol()>0){
-					gp_Vec blockDir(pnt1.Value(),pnt2.Value());
-					if(!tanU.Crossed(tanV).IsParallel(gp_Vec(pnt1.Value(),pnt2.Value()),AsmVecTol()))
-						continue;
-					else{
-						/*Area investigation*/
-						f1VecSpot.push_back(gp_Ax1(pnt1.Value(),gp_Dir(blockDir)));
-					}
-				}
-				else {
-					gp_Vec tanU2,tanV2;
-					_real U2,V2;
-					gp_Pnt pntOnF2;
-					pnt2.Parameter(U2,V2);
-					f2.D1(U2,V2,pntOnF2,tanU2,tanV2);
-					tanU.Cross(tanV);
-					if(!tanU2.Crossed(tanV2).IsParallel(tanU,AsmVecTol()))
-						continue;
-					else 
-					{
-						//Area investigation
-						f1VecSpot.push_back(gp_Ax1(pntOnF2,gp_Dir(tanU)));
+		//f1 - surface 1
+		//f2 - surface 2
+		//which surface has the longest edge perimeter 
 
-						ContactBnd[0]=ContactBnd[1]=U;
-						ContactBnd[2]=ContactBnd[3]=V;
-						ContactBnd[4]=ContactBnd[5]=U2;
-						ContactBnd[6]=ContactBnd[7]=V2;
+		_real f1_perimeter =0;
+		_real f2_perimeter =0;
+		
+		GProp_GProps propsTester;
+		BRepGProp::LinearProperties(f1.Face(),propsTester);
+		f1_perimeter=propsTester.Mass();
+		
+		BRepGProp::LinearProperties(f2.Face(), propsTester);
+		f2_perimeter = propsTester.Mass();
+		BRepAdaptor_Surface * smlSurf;
+		BRepAdaptor_Surface * bgSurf;
+		Standard_Boolean smlFaceOrientation, bgFaceOrientation;
+		Standard_Boolean AreFacesSwaped=false;
+		//k - Point generation on each edge from smaller wire
 
-					}
-				}
-				}
+		if (f1_perimeter < f2_perimeter){
+			smlSurf = &f1;
+			bgSurf = &f2;
+			smlFaceOrientation = O_f1;
+			bgFaceOrientation = O_f2;
+		}
+		else {
+			smlSurf = &f2;
+			bgSurf = &f1;
+			smlFaceOrientation = O_f2;
+			bgFaceOrientation = O_f1;
+			AreFacesSwaped = true;
+		}
+			
+		std::list<ContactSpot::facePntCorrespond> mainPnts;
+		
+
+		TopExp_Explorer edgeExp;
+		for (edgeExp.Init(smlSurf->Face(), TopAbs_EDGE); edgeExp.More(); edgeExp.Next()){
+			TopLoc_Location loc;
+			_real ui, us;
+			
+			Handle_Geom_Curve curv = BRep_Tool::Curve(TopoDS::Edge(edgeExp.Current()), loc, ui, us);
+			_real dlt = (us - ui) /( AmtPntForCS()-1);
+			for (_int k = 0; k<AmtPntForCS(); k++){
+				gp_Pnt pnt;
+				curv->D0(dlt*k, pnt);
+				TopoDS_Vertex curVertex = BRepBuilderAPI_MakeVertex(pnt);
+				gp_Pnt2d pnt2d = BRep_Tool::Parameters(curVertex, smlSurf->Face());
+				
+				ContactSpot::facePntCorrespond corPnts;
+				corPnts.pnt3d.first = pnt;
+				corPnts.pnt2d.first=pnt2d;
 				
 
+				Extrema_ExtPS pntProj(pnt,smlSurf->Surface(),Precision::Confusion(),Precision::Confusion(),Extrema_ExtFlag_MIN); 
+				if (pntProj.IsDone()&& pntProj.NbExt()){
+					Extrema_POnSurf POnSurf;
+					
+					
+					POnSurf=pntProj.Point(1);
+					gp_Vec tanU, tanV;
+					_real U, V;
+					gp_Pnt pntOnF1;
+
+					POnSurf.Parameter(U, V);
+						smlSurf->D1(U, V, pntOnF1, tanU, tanV);
+							tanU.Cross(tanV);
+
+						if (smlFaceOrientation != TopAbs_FORWARD)
+							tanU.Reverse();
+					
+					corPnts.normal.first=tanU;
+				}
+
+				mainPnts.push_back(corPnts);
+				}
+			}
 		
+
+		//Extremum points on bigger face
+
+		BRepExtrema_ExtPF extBuilder;
+		extBuilder.Initialize(bgSurf->Face(),Extrema_ExtFlag_MIN,Extrema_ExtAlgo_Grad);
+		for (auto p = mainPnts.begin(); p != mainPnts.end();){
+			extBuilder.Perform(BRepBuilderAPI_MakeVertex(p->pnt3d.first),bgSurf->Face());
+			if (extBuilder.IsDone() && extBuilder.NbExt()){
+				
+				p->pnt3d.second = extBuilder.Point(1);
+				_real U, V;
+				extBuilder.Parameter(1, U, V);
+				gp_Pnt2d pnt2d(U,V);
+				p->pnt2d.second=pnt2d;
+
+				gp_Pnt pntOnF1;
+				gp_Vec tanU,tanV;
+				bgSurf->D1(U, V, pntOnF1, tanU, tanV);
+				tanU.Cross(tanV);
+				if (bgFaceOrientation != TopAbs_FORWARD)
+					tanU.Reverse();
+				tanU.Normalize();
+				p->normal.second = tanU;
+
+				p++;
+			}
+			else
+				p = mainPnts.erase(p);
+		}
+
+	
+		//Extremum points back to initial face
+
+		extBuilder.Initialize(smlSurf->Face(), Extrema_ExtFlag_MIN, Extrema_ExtAlgo_Grad);
+		for (auto p = mainPnts.begin(); p != mainPnts.end();){
+			gp_Vec p1p2(p->pnt3d.first,p->pnt3d.second);
+
+			_real magnitude = p1p2.Magnitude();
+			if (magnitude<Precision::Confusion())
+				continue;
+			extBuilder.Perform(BRepBuilderAPI_MakeVertex(p->pnt3d.second), smlSurf->Face());
+			if (extBuilder.IsDone() && extBuilder.NbExt()){
+				_real U, V;
+				extBuilder.Parameter(1, U, V);
+				gp_Pnt2d pnt2d(U, V);
+				gp_Pnt pntOnF1;
+				gp_Vec tanU, tanV;
+				bgSurf->D1(U, V, pntOnF1, tanU, tanV);
+				tanU.Cross(tanV);
+				if (smlFaceOrientation != TopAbs_FORWARD)
+					tanU.Reverse();
+				tanU.Normalize();
+
+				p->normal.first = tanU;
+				p->pnt3d.first = pntOnF1;
+				p->pnt2d.first = pnt2d;
+
+				p++;
+			}
+			else
+				p = mainPnts.erase(p);
+		}
+
+		_int GoodPntAmount=0;
+	for (auto p = mainPnts.begin(); p != mainPnts.end();){
+			gp_Vec p1p2(p->pnt3d.first, p->pnt3d.second);
+		
+		_real magnitude = p1p2.Magnitude();
+		
+		if (magnitude<RealSmall()){
+			p->correctPair=true;
+			GoodPntAmount++;
+			continue;
+		}
+		else{
+			_real p1p2_n1 = p1p2.Dot(p->normal.first);
+			p1p2.Reverse();
+			_real p2p1_n2 = p->normal.second.Dot(p1p2); 
+			if (magnitude<SGap() && p1p2_n1 + ParTol()>1 && p2p1_n2+ParTol()>1){
+				p->correctPair = true;
+				GoodPntAmount++;
+				continue;
+			}
+			if (p1p2_n1 - ParTol()<-1 && p2p1_n2 - ParTol()<-1){
+				p->correctPair = true;
+				GoodPntAmount++;
+				continue;
+			}
+
+		}	
 	}
+	if (GoodPntAmount>4){
+		//pair on edge situation check
+
+		//Square calculation
+		_real u_i1, u_s1, v_i1, v_s1;
+		_real u_i2,u_s2, v_i2, v_s2;
+		Bnd_Box2d SSBndBox;
+		Bnd_Box2d BSBndBox;	
+		_real Square1=0,Square2=0;
+		for (auto p = mainPnts.begin(); p != mainPnts.end();){
+			if (p->correctPair){
+				SSBndBox.Add(p->pnt2d.first);
+				BSBndBox.Add(p->pnt2d.second);
+			}
+		}
+		SSBndBox.Get(u_i1,v_i1,u_s1,v_s1);
+		BSBndBox.Get(u_i2,v_i2,u_s2,v_s2);
+		
+		TopoDS_Face cntFace1;
+		TopoDS_Face cntFace2;
+		try{
+			Handle_Geom_Surface ss = BRep_Tool::Surface(smlSurf->Face());
+			BRepBuilderAPI_MakeFace MF(ss, u_i1, u_s1, v_i1, v_s1, Precision::Confusion());
+			for (TopExp_Explorer exp(smlSurf->Face(), TopAbs_WIRE); exp.More(); exp.Next()){
+				MF.Add(TopoDS::Wire(exp.Current()));
+			}
+			 cntFace1 = MF.Face();
+			GProp_GProps propsTester;
+			BRepGProp::SurfaceProperties(cntFace1, propsTester);
+			Square1 = propsTester.Mass();
+		}
+		catch (Standard_Failure){
+			std::cerr <<__FILE__<<" "<<__LINE__<<" Contact face constraction failure"<<std::endl;
+		}
+		try{
+			Handle_Geom_Surface bs = BRep_Tool::Surface(bgSurf->Face());
+			BRepBuilderAPI_MakeFace MF(bs, u_i2, u_s2, v_i2, v_s2, Precision::Confusion());
+			for (TopExp_Explorer exp(smlSurf->Face(), TopAbs_WIRE); exp.More(); exp.Next()){
+				MF.Add(TopoDS::Wire(exp.Current()));
+			}
+			cntFace2 = MF.Face();
+			GProp_GProps propsTester;
+			BRepGProp::SurfaceProperties(cntFace2, propsTester);
+			Square1 = propsTester.Mass();
+		}
+		catch (Standard_Failure){
+			std::cerr << __FILE__ << " " << __LINE__ << " Contact face constraction failure" << std::endl;
+		}
+		if (Square1 > MinContactSquare() && Square2 > MinContactSquare()){
+			
+				for (auto p = mainPnts.begin(); p != mainPnts.end();){
+					if (p->correctPair){
+							gp_Ax1 sS(p->pnt3d.first,p->normal.first);
+							gp_Ax1 gS(p->pnt3d.first, p->normal.first);
+							gp_Ax1 *f1Axis = AreFacesSwaped ? &sS : &gS;
+							gp_Ax1 *f2Axis = AreFacesSwaped ? &gS : &sS;
+							if (!SameVectorInSetAlready(*f1Axis, f1VecSpot)){
+								f1VecSpot.push_back(*f1Axis);
+								f2VecSpot.push_back(*f2Axis);
+							}
+						
+				}
+			}
+
+			return true;
+		}
+			
+	}
+
 	}
 	catch(Standard_Failure)
 	{
 		std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
 	}
-	return true;
+	return false;
 	
 }
-
+_bool ContactSpot::SameVectorInSetAlready(gp_Ax1 &axis, std::vector<gp_Ax1> &collection){
+	for (auto &ax : collection){
+		if (ax.Direction().Dot(axis.Direction())+AsmVecTol()>1)
+			return true;
+	}
+}
 _bool  ContactSpot::IsOverlaySS(_int NbIter, Extrema_POnSurf &p1, Extrema_POnSurf &p2){
 	try{
 	_real theorDist =0;

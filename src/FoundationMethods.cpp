@@ -7,22 +7,7 @@ _bool IsOneBlkOther(const gp_Dir &one, const gp_Dir& other){
 		return true;
 	return false;
 }
-Standard_Real LinTol(){
-	 return Precision::Confusion();
-}
-Standard_Real AngTol(){
-	//return Precision::Angular();
-	return 1.e-6;
-}
-Standard_Real ParTol(){
-	return 0.01;
-}
- Standard_Real SGap(){
-	 return 0.3;
- }
-Standard_Real AsmVecTol(){
-	return 0.01;
-}
+
  Standard_Boolean IsCodirectional(gp_Dir &D1, gp_Dir &D2){
 	 if(D1.XYZ()*D2.XYZ()+ParTol()>1)
 		 return Standard_True;

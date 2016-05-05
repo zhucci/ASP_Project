@@ -29,18 +29,36 @@ protected:
 
  Standard_Boolean IsCodirectional(gp_Dir &D1, gp_Dir &D2);
 
-//! Return Angular tolerance for my calculation
-Standard_Real AngTol();
 
 //!Return Linear tolerance for my calculation 
- Standard_Real LinTol();
+inline Standard_Real LinTol(){
+	return Precision::Confusion();
+}
+//! Return Angular tolerance for my calculation
+inline Standard_Real AngTol(){
+	//return Precision::Angular();
+	return 1.e-6;
+}
 
- Standard_Real ParTol();
+inline Standard_Real ParTol(){
+	return 0.01;
+}
+inline Standard_Real SGap(){
+	return 0.3;
+}
+inline Standard_Real AsmVecTol(){
+	return 0.01;
+}
 
- Standard_Real SGap();
-
- _real AsmVecTol();
- 
+ inline Standard_Integer AmtPntForCS(){
+	 return 4;
+ }
+ inline Standard_Integer MinContactSquare(){
+	 return 5;
+ }
+ inline Standard_Integer MinContactPntDistance(){
+	 return 1;
+ }
  _bool IsOneBlkOther(const gp_Dir &one, const gp_Dir& other);
  
  Standard_PCharacter typeToStr(GeomAbs_SurfaceType surfType);

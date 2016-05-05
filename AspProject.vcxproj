@@ -59,7 +59,7 @@
     </CustomBuildBeforeTargets>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);inc;</IncludePath>
-    <SourcePath>inc;src;$(VC_SourcePath);</SourcePath>
+    <SourcePath>inc;src;generatedFiles;$(VC_SourcePath);</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -102,7 +102,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>inc;src;$(CSF_OPT_INC);win64\vc12\srcd;$(QTDIR)\include\ActiveQt;$(QTDIR)\mkspecs\default;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtCore;$(QTDIR)\include\Qt;$(QTDIR)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;generatedFiles;src;$(CSF_OPT_INC);$(QTDIR)\include\ActiveQt;$(QTDIR)\mkspecs\default;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtCore;$(QTDIR)\include\Qt;$(QTDIR)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -119,6 +119,7 @@
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>true</MinimalRebuild>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;qtmain.lib;TKCAF.lib;TKXCAF.lib;TKXCAFSchema.lib;TKLCAF.lib;TKXDESTEP.lib;TKService.lib;TKV3d.lib;TKOpenGl.lib;TKBRep.lib;TKIGES.lib;TKSTL.lib;TKVRML.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKXSBase.lib;TKSTEPBase.lib;TKShapeSchema.lib;TKGeomBase.lib;TKGeomAlgo.lib;TKG3d.lib;TKG2d.lib;TKPShape.lib;TKShHealing.lib;TKHLR.lib;TKTopAlgo.lib;TKMesh.lib;TKPrim.lib;TKCDF.lib;TKBool.lib;TKBO.lib;TKFillet.lib;TKOffset.lib;TKernel.lib;PTKernel.lib;TKMath.lib;TKVoxel.lib;QtGui4.lib;QtCore4.lib</AdditionalDependencies>
@@ -141,13 +142,13 @@
       <PreprocessorDefinitions>_WINDOWS;CSFDB;_DEBUG;WNT;WIN32;NO_COMMONSAMPLE_EXPORTS;NO_IESAMPLE_EXPORTS;QT_DLL;QT_GUI_LIB;QT_CORE_LIB;QT_HAVE_MMX;QT_HAVE_3DNOW;QT_HAVE_SSE;QT_HAVE_MMXEXT;QT_HAVE_SSE2;QT_THREAD_SUPPORT;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <CustomBuild>
-      <Command>$(QTDIR)\bin\moc.exe "%(FullPath)" -o "%(ProjectDir)win64\vc12\srcd\moc_%(Filename).cpp"</Command>
+      <Command>$(QTDIR)\bin\moc.exe "%(FullPath)" -o "%(ProjectDir)generatedFiles\moc_%(Filename).cpp"</Command>
     </CustomBuild>
     <CustomBuild>
       <Message>MOC %(Filename)</Message>
     </CustomBuild>
     <CustomBuild>
-      <Outputs>win64\vc12\srcd\moc_%(Filename).cpp</Outputs>
+      <Outputs>generatedFiles\moc_%(Filename).cpp</Outputs>
       <LinkObjects>false</LinkObjects>
       <TreatOutputAsContent>true</TreatOutputAsContent>
     </CustomBuild>
@@ -165,6 +166,9 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="generatedFiles\moc_MainFrame.cpp" />
+    <ClCompile Include="generatedFiles\moc_Viewer.cpp" />
+    <ClCompile Include="generatedFiles\qrc_iconRes.cpp" />
     <ClCompile Include="inc\AsmTreeNode.cpp" />
     <ClCompile Include="inc\DBGBuilder.cpp" />
     <ClCompile Include="inc\ISession_Direction.cpp" />
@@ -189,11 +193,10 @@
     <ClCompile Include="src\Viewer.cpp" />
     <ClCompile Include="src\VoxelClient_VisDrawer.cxx" />
     <ClCompile Include="src\VoxelTool.cpp" />
-    <ClCompile Include="win64\vc12\srcd\moc_MainFrame.cpp" />
-    <ClCompile Include="win64\vc12\srcd\moc_Viewer.cpp" />
-    <ClCompile Include="win64\vc12\srcd\qrc_iconRes.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="generatedFiles\ui_mainframe.h" />
+    <ClInclude Include="generatedFiles\ui_mainwindow.h" />
     <ClInclude Include="inc\Application.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
@@ -207,7 +210,10 @@
     <ClInclude Include="inc\ISession_Part.h" />
     <ClInclude Include="inc\ISession_Surface.h" />
     <ClInclude Include="inc\ISession_Text.h" />
-    <CustomBuild Include="inc\MainFrame.h" />
+    <CustomBuild Include="inc\MainFrame.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe "%(FullPath)" -o "%(ProjectDir)generatedFiles\moc_%(Filename).cpp"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generatedFiles\moc_%(Filename).cpp</Outputs>
+    </CustomBuild>
     <ClInclude Include="inc\OCCT_Headers.h" />
     <ClInclude Include="inc\Part.h" />
     <ClInclude Include="inc\STL_Headers.h" />
@@ -215,11 +221,12 @@
     <ClInclude Include="inc\Timer.h" />
     <ClInclude Include="inc\Unit.h" />
     <ClInclude Include="inc\AsmTreeBuilder.h" />
-    <CustomBuild Include="inc\Viewer.h" />
+    <CustomBuild Include="inc\Viewer.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe "%(FullPath)" -o "%(ProjectDir)generatedFiles\moc_%(Filename).cpp"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generatedFiles\moc_%(Filename).cpp</Outputs>
+    </CustomBuild>
     <ClInclude Include="inc\VoxelClient_VisDrawer.h" />
     <ClInclude Include="inc\VoxelTool.h" />
-    <ClInclude Include="win64\vc12\srcd\ui_mainframe.h" />
-    <ClInclude Include="win64\vc12\srcd\ui_mainwindow.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="src\Text.txt" />
@@ -227,17 +234,19 @@
   <ItemGroup>
     <CustomBuild Include="src\IconRes.qrc">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\rcc.exe -no-compress -o win64\vc12\srcd\qrc_iconRes.cpp  src\iconRes.qrc</Command>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RCC: "%(Filename)" to "%(ProjectDir)win64\vc12\srcd\qrc_%(Filename).cpp"</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">win64\vc12\srcd\qrc_iconRes.cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\rcc.exe -no-compress -o generatedFiles\qrc_iconRes.cpp  src\iconRes.qrc</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RCC: "%(Filename)" to "%(ProjectDir)generatedFiles\qrc_%(Filename).cpp"</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generatedFiles\qrc_iconRes.cpp</Outputs>
     </CustomBuild>
     <CustomBuild Include="src\mainframe.ui">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe "%(FullPath)" -o "%(ProjectDir)win64\vc12\srcd\ui_%(Filename).h"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe "%(FullPath)" -o "%(ProjectDir)generatedFiles\ui_%(Filename).h"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UIC compile %(Filename)</Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">win64\vc12\srcd\ui_%(Filename).h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generatedFiles\ui_%(Filename).h</Outputs>
     </CustomBuild>
-    <None Include="win64\vc12\srcd\IconRes.rcc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="generatedFiles\IconRes.rcc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

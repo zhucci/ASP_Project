@@ -26,7 +26,13 @@ namespace asp{
 			}
 	
 	private:
-	
+		struct facePntCorrespond{
+			facePntCorrespond():correctPair{ false }{}
+			std::pair<gp_Pnt,gp_Pnt> pnt3d;
+			std::pair<gp_Pnt2d, gp_Pnt2d> pnt2d;
+			std::pair<gp_Vec,gp_Vec> normal;
+			Standard_Boolean correctPair;
+		};
 		
 		void Perform();
 
@@ -39,6 +45,8 @@ namespace asp{
 		_bool OverLayAreaEl( _real delta []);
 
 		_bool OverLayAreaGen(_real delta[]);
+
+		_bool SameVectorInSetAlready(gp_Ax1 &axis, std::vector<gp_Ax1> &collection);
 
 		//!Compute distance between 2 points on the surface 
 		inline _real DistFF(_real *X);

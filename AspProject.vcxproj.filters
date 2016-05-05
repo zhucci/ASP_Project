@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="AspTool">
       <UniqueIdentifier>{71af2497-6d54-4d8a-a79d-6acf51af2c52}</UniqueIdentifier>
     </Filter>
@@ -34,16 +30,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="win64\vc12\srcd\moc_MainFrame.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="win64\vc12\srcd\moc_Viewer.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="win64\vc12\srcd\qrc_iconRes.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="inc\ISession_Text.cpp">
       <Filter>AspTool\src</Filter>
     </ClCompile>
@@ -107,14 +94,17 @@
     <ClCompile Include="src\Application.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="generatedFiles\moc_MainFrame.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="generatedFiles\moc_Viewer.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="generatedFiles\qrc_iconRes.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="win64\vc12\srcd\ui_mainwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="win64\vc12\srcd\ui_mainframe.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\AspMainTool.h">
       <Filter>AspTool\inc</Filter>
     </ClInclude>
@@ -175,15 +165,15 @@
     <ClInclude Include="inc\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Text.txt" />
-    <Text Include="src\Text.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="win64\vc12\srcd\IconRes.rcc">
+    <ClInclude Include="generatedFiles\ui_mainframe.h">
       <Filter>Generated Files</Filter>
-    </None>
+    </ClInclude>
+    <ClInclude Include="generatedFiles\ui_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\Text.txt" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="inc\MainFrame.h">
@@ -194,5 +184,8 @@
     </CustomBuild>
     <CustomBuild Include="src\IconRes.qrc" />
     <CustomBuild Include="src\mainframe.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="generatedFiles\IconRes.rcc" />
   </ItemGroup>
 </Project>
