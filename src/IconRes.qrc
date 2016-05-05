@@ -1,0 +1,20 @@
+<RCC>
+  <qresource>
+    <file alias="downloads.png">img/download-32.png</file>
+    <file alias="check.png">img/checkmark-32.png</file>
+    <file alias="file.png">img/file-open.png</file>
+    <file alias="help.png">img/help-32.png</file>
+    <file alias="pause.png">img/pause-32.png</file>
+    <file alias="play.png">img/play-32.png</file>
+    <file alias="playback.png">img/playaback-32.png</file>
+    <file alias="undo.png">img/purchased-32.png</file>
+    <file alias="search.png">img/search-32.png</file>
+    <file alias="dbg.png">img/share-32.png</file>
+    <file alias="stepback.png">img/stepback-32.png</file>
+    <file alias="stepfoward.png">img/stepfoward-32.png</file>
+    <file alias="videoCamera.png">img/video_camera-32.png</file>
+  </qresource>
+  <qresource>
+    <file alias="camera.png">img/camera-32.png</file>
+  </qresource>
+</RCC>
