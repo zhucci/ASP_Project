@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainFrame[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      19,   14, // methods
+      21,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -31,36 +31,38 @@ static const uint qt_meta_data_MainFrame[] = {
 
  // slots: signature, parameters, type, tag, flags
       11,   10,   10,   10, 0x08,
-      26,   10,   10,   10, 0x08,
-      39,   10,   10,   10, 0x08,
-      50,   10,   10,   10, 0x08,
-      61,   10,   10,   10, 0x08,
+      29,   10,   10,   10, 0x08,
+      44,   10,   10,   10, 0x08,
+      57,   10,   10,   10, 0x08,
       68,   10,   10,   10, 0x08,
       79,   10,   10,   10, 0x08,
-      92,   10,   10,   10, 0x08,
-     102,   10,   10,   10, 0x08,
-     116,   10,   10,   10, 0x08,
+      86,   10,   10,   10, 0x08,
+      97,   10,   10,   10, 0x08,
+     110,   10,   10,   10, 0x08,
+     120,   10,   10,   10, 0x08,
      134,   10,   10,   10, 0x08,
-     146,  142,   10,   10, 0x08,
-     166,   10,   10,   10, 0x08,
-     173,   10,   10,   10, 0x08,
-     181,   10,   10,   10, 0x08,
-     189,   10,   10,   10, 0x08,
-     197,   10,   10,   10, 0x08,
-     205,   10,   10,   10, 0x08,
-     213,   10,   10,   10, 0x08,
+     152,   10,   10,   10, 0x08,
+     164,  160,   10,   10, 0x08,
+     184,   10,   10,   10, 0x08,
+     191,   10,   10,   10, 0x08,
+     199,   10,   10,   10, 0x08,
+     207,   10,   10,   10, 0x08,
+     215,   10,   10,   10, 0x08,
+     223,   10,   10,   10, 0x08,
+     231,   10,   10,   10, 0x08,
+     243,   10,   10,   10, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_MainFrame[] = {
-    "MainFrame\0\0SaveSequence()\0ImportStep()\0"
-    "PlayBack()\0StepBack()\0Stop()\0NextStep()\0"
-    "PlayFoward()\0DBGShow()\0ExportPhoto()\0"
-    "ShowFullProduct()\0about()\0pos\0"
-    "contextMenu(QPoint)\0Exit()\0Test1()\0"
-    "Test2()\0Test3()\0Test4()\0Test5()\0"
-    "TestVoxelGeneration()\0"
+    "MainFrame\0\0ViewModeChanged()\0"
+    "SaveSequence()\0ImportStep()\0PlayBack()\0"
+    "StepBack()\0Stop()\0NextStep()\0PlayFoward()\0"
+    "DBGShow()\0ExportPhoto()\0ShowFullProduct()\0"
+    "about()\0pos\0contextMenu(QPoint)\0Exit()\0"
+    "Test1()\0Test2()\0Test3()\0Test4()\0Test5()\0"
+    "PartGraph()\0TestVoxelGeneration()\0"
 };
 
 void MainFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -69,25 +71,27 @@ void MainFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         Q_ASSERT(staticMetaObject.cast(_o));
         MainFrame *_t = static_cast<MainFrame *>(_o);
         switch (_id) {
-        case 0: _t->SaveSequence(); break;
-        case 1: _t->ImportStep(); break;
-        case 2: _t->PlayBack(); break;
-        case 3: _t->StepBack(); break;
-        case 4: _t->Stop(); break;
-        case 5: _t->NextStep(); break;
-        case 6: _t->PlayFoward(); break;
-        case 7: _t->DBGShow(); break;
-        case 8: _t->ExportPhoto(); break;
-        case 9: _t->ShowFullProduct(); break;
-        case 10: _t->about(); break;
-        case 11: _t->contextMenu((*reinterpret_cast< const QPoint(*)>(_a[1]))); break;
-        case 12: _t->Exit(); break;
-        case 13: _t->Test1(); break;
-        case 14: _t->Test2(); break;
-        case 15: _t->Test3(); break;
-        case 16: _t->Test4(); break;
-        case 17: _t->Test5(); break;
-        case 18: _t->TestVoxelGeneration(); break;
+        case 0: _t->ViewModeChanged(); break;
+        case 1: _t->SaveSequence(); break;
+        case 2: _t->ImportStep(); break;
+        case 3: _t->PlayBack(); break;
+        case 4: _t->StepBack(); break;
+        case 5: _t->Stop(); break;
+        case 6: _t->NextStep(); break;
+        case 7: _t->PlayFoward(); break;
+        case 8: _t->DBGShow(); break;
+        case 9: _t->ExportPhoto(); break;
+        case 10: _t->ShowFullProduct(); break;
+        case 11: _t->about(); break;
+        case 12: _t->contextMenu((*reinterpret_cast< const QPoint(*)>(_a[1]))); break;
+        case 13: _t->Exit(); break;
+        case 14: _t->Test1(); break;
+        case 15: _t->Test2(); break;
+        case 16: _t->Test3(); break;
+        case 17: _t->Test4(); break;
+        case 18: _t->Test5(); break;
+        case 19: _t->PartGraph(); break;
+        case 20: _t->TestVoxelGeneration(); break;
         default: ;
         }
     }
@@ -127,9 +131,9 @@ int MainFrame::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 19)
+        if (_id < 21)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 19;
+        _id -= 21;
     }
     return _id;
 }

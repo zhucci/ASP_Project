@@ -4,16 +4,15 @@
 #include <Graphic3d_BufferType.hxx>
 #include <AIS_LocalContext.hxx>
 #include "AsmTreeNode.h"
+
 MainFrame::MainFrame(void):QMainWindow(0)
 {
 	setupUi(this);
 	this->setWindowIconText("AsmPlan");
-	
 	myViewer = new Viewer(this);
 	myViewer->setFocus();
 
 	setCentralWidget(myViewer);
-
 	connect(actionEXIT, SIGNAL(triggered()),this,SLOT(Exit()));
 	connect(actionSTEP, SIGNAL(triggered()),this,SLOT(ImportStep()));
 	connect(actionABOUT, SIGNAL(triggered()),this,SLOT(about()));
@@ -31,8 +30,12 @@ MainFrame::MainFrame(void):QMainWindow(0)
 	connect(actionT3, SIGNAL(triggered()), this, SLOT(Test3()));
 	connect(actionT4, SIGNAL(triggered()), this, SLOT(Test4()));
 	connect(actionT5, SIGNAL(triggered()), this, SLOT(Test5()));
-	
+	connect(actionPartGraph, SIGNAL(triggered()), this, SLOT(PartGraph()));
+	connect(actionViewMode, SIGNAL(triggered()), this, SLOT(ViewModeChanged()));
 
+}
+void MainFrame::ViewModeChanged(){
+	justViewMode=!justViewMode;
 }
 MainFrame::~MainFrame(){
 
@@ -47,7 +50,7 @@ void MainFrame::Exit(){
 	close();
 }
 void MainFrame::Stop(){
-	aspTool.StopAssemblyAnimation();
+	aspTool->StopAssemblyAnimation();
 }
 void MainFrame::ImportStep(){
 
@@ -71,15 +74,29 @@ void MainFrame::ImportStep(){
 	QString fn = QFileDialog::getOpenFileName(this, QString::null, QString("c:\\StepModels"), "*.stp");
 
 	 if ( !fn.isEmpty() ){
-		 aspTool.Init(fn.toStdString(), myViewer, this);
-		 
+		 if (!aspTool){
+			aspTool = new asp::AspMainTool;
+		 }
+		 else{
+			 delete aspTool;
+			 delete myViewer;
+			 aspTool=NULL;
+			 myViewer = NULL;
+			 myViewer = new Viewer(this);
+			 myViewer->setFocus();
+			 setCentralWidget(myViewer);
+			 aspTool = new asp::AspMainTool;
+		 }
+		 aspTool->SetAsmTreeCalcStatus(!justViewMode);
+
+		 aspTool->Init(fn.toStdString(), myViewer, this);
 		 statusBar()->showMessage(tr("Ready"));
 	}
 	 
 }
 void MainFrame::ShowFullProduct(){
 
-	aspTool.ShowProduct(myViewer);
+	aspTool->ShowProduct(myViewer);
 }
 void MainFrame::about(){
 	    QMessageBox::about( this, tr("AssemPlan"),
@@ -94,38 +111,38 @@ void MainFrame::ExportPhoto(){
 }
 void MainFrame::NextStep(){
 
-	aspTool.ShowAssemblyStep(asp::AsmTreeNode::DISMANTLE, myViewer);
+	aspTool->ShowAssemblyStep(asp::AsmTreeNode::DISMANTLE, myViewer);
 	statusBar()->showMessage("StepFoward");
 }
 void MainFrame::StepBack(){
-	aspTool.ShowAssemblyStep(asp::AsmTreeNode::MOUNT, myViewer);
+	aspTool->ShowAssemblyStep(asp::AsmTreeNode::MOUNT, myViewer);
 	statusBar()->showMessage("StepBack");
 }
 void MainFrame::PlayBack(){
-	aspTool.PlayAssemblyAnimation(asp::AsmTreeNode::MOUNT, myViewer);
-	//std::string sequence = aspTool.GetSequence(asp::AsmTreeNode::MOUNT);
+	aspTool->PlayAssemblyAnimation(asp::AsmTreeNode::MOUNT, myViewer);
+	//std::string sequence = aspTool->GetSequence(asp::AsmTreeNode::MOUNT);
 	//QMessageBox::about(this, "Sequence", sequence.c_str());
 }
 void MainFrame::PlayFoward(){
 
-	//std::string sequence = aspTool.GetSequence(asp::AsmTreeNode::DISMANTLE);
-	aspTool.PlayAssemblyAnimation(asp::AsmTreeNode::DISMANTLE, myViewer);
+	//std::string sequence = aspTool->GetSequence(asp::AsmTreeNode::DISMANTLE);
+	aspTool->PlayAssemblyAnimation(asp::AsmTreeNode::DISMANTLE, myViewer);
 	//QMessageBox::about(this, "Sequence", sequence.c_str());
 }
 void MainFrame::DBGShow(){
 	
-	aspTool.ShowInformAboutSelectedShape(myViewer);
+	aspTool->ShowInformAboutSelectedShape(myViewer);
 }
 
 void MainFrame::Test1(){
-	aspTool.TestContactSpotProcess(myViewer);
+	aspTool->TestContactSpotProcess(myViewer);
 }
 
 void MainFrame::Test2(){
-	aspTool.FillPartWithPoints(myViewer);
+	aspTool->FillPartWithPoints(myViewer);
 }
 void MainFrame::Test3(){
-	aspTool.TestFindPartsPointsFunction(myViewer );
+	aspTool->TestFindPartsPointsFunction(myViewer );
 }
 void MainFrame::Test4(){
 
@@ -136,7 +153,15 @@ void MainFrame::Test5(){
 void MainFrame::TestVoxelGeneration(){
 
 }
-void TestVoxelGeneration();
+void TestVoxelGeneration(){
+
+}
+void MainFrame::PartGraph(){
+	if (!aspTool){
+		aspTool = new asp::AspMainTool;
+	}
+	aspTool->TestGraphIso(myViewer);
+}
 void MainFrame::contextMenu(const QPoint &pos){
 	QAction *shadingMode = new QAction(tr("Display mode"), this);
 	connect(shadingMode, SIGNAL(triggered()), myViewer, SLOT(ChangeShadingMode()));

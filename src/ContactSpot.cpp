@@ -7,95 +7,52 @@
 #include "Geom2dAdaptor.hxx"
 #include "BRepTools.hxx"
 #include "Extrema_ExtPS.hxx"
+#include "BRepClass3d_SolidClassifier.hxx"
+#include "Part.h"
+#include "BRepClass3d_SolidExplorer.hxx"
+#include "BRepExtrema_DistShapeShape.hxx"
+#include "BRepClass3d_SClassifier.hxx"
+#include "BRepClass_FaceClassifier.hxx"
 using namespace asp;
 
-ContactSpot::ContactSpot(const BRepAdaptor_Surface &surface1, const BRepAdaptor_Surface &surface2, _real gapSize)
+ContactSpot::ContactSpot(const BRepAdaptor_Surface &surface1, const BRepAdaptor_Surface &surface2)
 {
-	if(gapSize<0)
-		gap=SGap();
-	else 
-		gap = gapSize;
-
-			f1 =surface1;
-			f2 = surface2;
-			BoundInit(bnd,f1);
-			BoundInit(&bnd[4],f2);
-			InternalBndInit();
-	SquareGap = gap*gap;
-
-	std::random_device init;
-		
-	gen.seed(init());
-
-		//onf1.Initialize(f1,bnd[0],bnd[1],bnd[2],bnd[3],LinTol(),LinTol());
-		//onf2.Initialize(f2,bnd[4],bnd[5],bnd[6],bnd[7],LinTol(),LinTol());
+	
+	f1 =surface1;
+	f2 = surface2;
 		
 	Perform();
 }
+
 _real ContactSpot::DistFF(_real *X)
 {
 	return f1.Value(X[0], X[1]).Distance(f2.Value(X[2], X[3]));
 }
 ContactSpot::ContactSpot(const SurfaceAttribute &surface1,
-	const SurfaceAttribute &surface2, _real gapSize){
+	const SurfaceAttribute &surface2, Part* Part1, Part* Part2){
+	isDone = false;
+
 	f1 = surface1.surf;
 	f2 = surface2.surf;
+	prt1 = Part1;
+	prt2 = Part2;
 	O_f1 = surface1.myShape.Orientation();
 	O_f2 = surface2.myShape.Orientation();
 	
-	if (gapSize<0)
-		gap = SGap();
-	else
-		gap = gapSize;
-
-	BoundInit(bnd, f1);
-	BoundInit(&bnd[4], f2);
-	InternalBndInit();
-	SquareGap = gap*gap;
-
 	Perform();
 }
 void ContactSpot::Perform(){
 
-	_real delta[4];
-	
-	ImportantSpotOfContact(f1,delta);
-	ImportantSpotOfContact(f2,&delta[2]);
+	//ImportantSpotOfContact(f1,delta);
+	//ImportantSpotOfContact(f2,&delta[2]);
 
 	//Try simple some lighter algorithm 
-	//if(OverLayAreaEl(delta))
-	//	ErrorInContactIdentification=false;
+//	if(OverLayAreaEl())
+//		isDone = true;
 
 	if(OverLayAreaGen())
 		isDone=true;
-	//else 
-	//	ErrorInContactIdentification=true;
-	/*
-	extrema.Initialize(f2,bnd[4],bnd[5],bnd[6],bnd[7],LinTol());
-	extrema.Perform(f1,bnd[4],bnd[5],bnd[6],bnd[7],LinTol());
-	
-	if(extrema.IsDone())
-		if(extrema.IsParallel()){
 
-			_real theorDist = extrema.SquareDistance(1);
-
-			if(theorDist<SquareGap)
-				return;
-
-			
-
-		//General algorithm for parallel surface
-				OverLayAreaPar(10,delta);
-
-			
-		}
-
-		else{  //Not parallel surfaces
-
-		
-			
-		} 
-		*/
 }
 _bool ContactSpot::OverLayAreaPar(_int NbIter, _real delta []){
 	_real point[2];
@@ -139,11 +96,207 @@ _bool ContactSpot::OverLayAreaPar(_int NbIter, _real delta []){
 		std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
 	}
 	}
+_int ContactSpot::CheckPntPairs(std::list<ContactSpot::facePntCorrespond> &mainPnts, _bool ShapeSwap,_int GoodPntRequirement){
+	_int GoodPntAmount=0;
+	_int InToPntAmount=0;
+	_int PntClassifyFailure=0;
+	_int MaxClassifyAttempt=2;
 
+	auto *ProbablyCrossedPntContact =
+		new std::list<facePntCorrespond>::iterator[mainPnts.size()];
+
+for (auto p = mainPnts.begin(); p != mainPnts.end();){
+	if (p->correctPair){
+		GoodPntAmount++; 
+		p++;
+		continue;
+	}
+	
+	gp_Vec p1p2(p->pnt3d.first, p->pnt3d.second);
+
+	_real magnitude = p1p2.Magnitude();
+
+	if (magnitude > Max(SSGapSize, SSCrossSize)){
+		p++;
+		continue;
+	}
+	_real n1_n2 = p->normal.first.Dot(p->normal.second);
+	if (n1_n2 - ContDirParPrecision>-1){
+		p++;
+		continue;
+	}
+	if (magnitude < 1e-2){
+		p->correctPair=true;
+		p->contType=_Contact;
+		p++;
+		continue;
+	}
+	//if |p1p2| > RealSmall we can make normalization
+	p1p2.Normalize();
+
+	_real p1p2_n1 = p1p2.Dot(p->normal.first);
+
+	p1p2.Reverse();
+	_real p2p1_n2 = p->normal.second.Dot(p1p2);
+
+	if (magnitude<SSGapSize && p1p2_n1 + ContDirParPrecision>1 && p2p1_n2 + ContDirParPrecision>1){
+			p->correctPair = true;
+			p->contType=_InGap;
+			GoodPntAmount++;	
+		}
+	else if(/*magnitude<SSCrossSize() && */ //Constant true
+		p1p2_n1 - ContDirParPrecision<-1 && p2p1_n2 - ContDirParPrecision<-1){
+		ProbablyCrossedPntContact[InToPntAmount]=p;
+		InToPntAmount++;	
+	}
+	p++;
+}
+if (GoodPntAmount>GoodPntRequirement)
+	return GoodPntAmount;
+
+//check is p1 in the part2 
+	BRepClass3d_SolidClassifier checker;
+
+	if (ShapeSwap)
+		checker.Load(prt1->getShape());
+	else
+		checker.Load(prt2->getShape());
+	_int delta = InToPntAmount / MaxClassifyAttempt;
+	delta = delta ? delta : 1;
+
+	for (_int i = 0; i<InToPntAmount; i += delta){
+		auto p = ProbablyCrossedPntContact[i];
+		gp_Pnt pnt(p->pnt3d.first.XYZ() + p->normal.first.XYZ() * 10 * Precision::Confusion());
+
+		checker.Perform(pnt, Precision::Confusion());
+		TopAbs_State state = checker.State();
+		if (state == TopAbs_OUT ){
+			PntClassifyFailure++;
+		}	
+	}
+	if (!PntClassifyFailure)
+		for (_int i = 0; i<InToPntAmount; i ++){
+			ProbablyCrossedPntContact[i]->contType=_Intersect;
+			ProbablyCrossedPntContact[i]->correctPair = Standard_True;
+			GoodPntAmount++;
+	}
+
+return GoodPntAmount;
+}
+_bool ContactSpot::PntOnSurfGenerate(BRepAdaptor_Surface *surf, TopAbs_Orientation surfOrient, std::list<facePntCorrespond> *corPnts){
+	try{
+		_real dltU, dltV;
+		BRepClass_FaceClassifier classifier;
+
+		_real Urange, Vrange;
+		_real uSup, vSup, uInf, vInf;
+		BRepTools::UVBounds(surf->Face(),uInf,uSup, vInf,vSup);
+		Urange = uSup - uInf;
+		Vrange = vSup - vInf;
+
+		dltU = Urange / AmtPntForCS;
+		dltV = Vrange / AmtPntForCS;
+
+		if (surf->IsUPeriodic()){
+
+			if(dltU < MinContactPntAngDistance)
+				dltU = MinContactPntAngDistance;
+		}
+		else if (dltU < MinContactPntDistance){
+			dltU = MinContactPntDistance;
+		}
+		if (surf->IsVPeriodic()){
+
+			if (dltV < MinContactPntAngDistance)
+				dltV = MinContactPntAngDistance;
+		}
+		else if (dltV < MinContactPntDistance){
+			dltV = MinContactPntDistance;
+		}
+
+		gp_Pnt2d pnt(uInf,vInf);
+		ContactSpot::facePntCorrespond corPnt;
+
+		while(pnt.X()<uSup){
+
+			pnt.SetY(vInf);
+
+			while(pnt.Y()<vSup){
+
+				classifier.Perform(surf->Face(), pnt, Precision::Confusion());
+
+				// ### Can be TopAbs_IN situation ?
+				if (classifier.State() != TopAbs_OUT ){
+					gp_Vec tanU, tanV;
+					corPnt.pnt2d.first = pnt;
+					surf->D1(pnt.X(), pnt.Y(), corPnt.pnt3d.first, tanU, tanV);
+
+					tanU.Cross(tanV);
+
+					if (surfOrient != TopAbs_FORWARD)
+						tanU.Reverse();
+					tanU.Normalize();
+					corPnt.normal.first = tanU;
+
+					corPnts->push_back(corPnt);
+
+				}
+				pnt.SetY(pnt.Y()+dltV);
+			}
+			pnt.SetX(pnt.X() + dltU);
+		}
+	}
+	catch (Standard_Failure)
+	{
+		return false;
+	}
+
+	return true;
+}
+_bool ContactSpot::PntOnFaceEdgesGenerate(BRepAdaptor_Surface *surf, TopAbs_Orientation surfOrient, std::list<facePntCorrespond> *corPnts){
+	TopExp_Explorer edgeExp;
+	for (edgeExp.Init(surf->Face(), TopAbs_EDGE); edgeExp.More(); edgeExp.Next()){
+
+		_real ui, us;
+		Handle_Geom2d_Curve faceCurve = BRep_Tool::CurveOnSurface(TopoDS::Edge(edgeExp.Current()), surf->Face(), ui, us);
+
+		_real Urange = us - ui;
+
+		_real dlt = Urange / AmtPntForCS;
+		
+		if (faceCurve->IsPeriodic()){
+
+			if (dlt < MinContactPntAngDistance)
+				dlt = MinContactPntAngDistance;
+		}
+		else if (dlt < MinContactPntDistance){
+			dlt = MinContactPntDistance;
+		}
+		_real u=ui;
+		while(u<us){
+			ContactSpot::facePntCorrespond corPnt;
+
+			faceCurve->D0(u, corPnt.pnt2d.first);
+			u += dlt;
+			gp_Vec tanU, tanV;
+
+			surf->D1(corPnt.pnt2d.first.X(), corPnt.pnt2d.first.Y(), corPnt.pnt3d.first, tanU, tanV);
+			tanU.Cross(tanV);
+
+			if (surfOrient != TopAbs_FORWARD)
+				tanU.Reverse();
+			tanU.Normalize();
+			corPnt.normal.first = tanU;
+			
+			corPnts->push_back(corPnt);
+		}
+	}
+	return true;
+}
 _bool ContactSpot::OverLayAreaGen(){
 
 	/*We have some points right now*/
-	//try{
+	try{
 
 		//f1 - surface 1
 		//f2 - surface 2
@@ -151,7 +304,7 @@ _bool ContactSpot::OverLayAreaGen(){
 
 		_real f1_perimeter =0;
 		_real f2_perimeter =0;
-		_int NeedPntAmount =5;
+		_int NeedPntAmount =4;
 		GProp_GProps propsTester;
 		BRepGProp::LinearProperties(f1.Face(),propsTester);
 		f1_perimeter=propsTester.Mass();
@@ -160,7 +313,7 @@ _bool ContactSpot::OverLayAreaGen(){
 		f2_perimeter = propsTester.Mass();
 		BRepAdaptor_Surface * smlSurf;
 		BRepAdaptor_Surface * bgSurf;
-		Standard_Boolean smlFaceOrientation, bgFaceOrientation;
+		TopAbs_Orientation smlFaceOrientation, bgFaceOrientation;
 		Standard_Boolean AreFacesSwaped=false;
 		//k - Point generation on each edge from smaller wire
 
@@ -179,51 +332,32 @@ _bool ContactSpot::OverLayAreaGen(){
 		}
 			
 		std::list<ContactSpot::facePntCorrespond> mainPnts;
-		
 
-		TopExp_Explorer edgeExp;
-		for (edgeExp.Init(smlSurf->Face(), TopAbs_EDGE); edgeExp.More(); edgeExp.Next()){
-			
-			_real ui, us;
-			
-			//Handle_Geom_Curve curv = BRep_Tool::Curve(TopoDS::Edge(edgeExp.Current()), loc, ui, us);
-			Handle_Geom2d_Curve faceCurve = BRep_Tool::CurveOnSurface(TopoDS::Edge(edgeExp.Current()), smlSurf->Face(), ui, us);
-			
-			_real dlt = (us - ui) / AmtPntForCS();
-			for (_int k = 0; k<AmtPntForCS(); k++){
-				ContactSpot::facePntCorrespond corPnts;
-				faceCurve->D0(ui+dlt*k, corPnts.pnt2d.first);
+		PntOnSurfGenerate(smlSurf, smlFaceOrientation, &mainPnts);
+		if (mainPnts.size()<2*NeedPntAmount)
+			PntOnFaceEdgesGenerate(smlSurf, smlFaceOrientation, &mainPnts);
 
-				gp_Vec tanU, tanV;
-				
-				smlSurf->D1(corPnts.pnt2d.first.X(), corPnts.pnt2d.first.X(), corPnts.pnt3d.first, tanU, tanV);
-						tanU.Cross(tanV);
-
-					if (smlFaceOrientation != TopAbs_FORWARD)
-							tanU.Reverse();
-					corPnts.normal.first=tanU;
-			
-				mainPnts.push_back(corPnts);
-				}
-			}
-		/*goto End;
 		//Extremum points on bigger face
-
 		BRepExtrema_ExtPF extBuilder;
-		extBuilder.Initialize(bgSurf->Face(),Extrema_ExtFlag_MIN,Extrema_ExtAlgo_Grad);
+		extBuilder.Initialize(bgSurf->Face(), Extrema_ExtFlag_MIN, Extrema_ExtAlgo_Grad);
+		gp_Pnt pnt3d;
+		_real U, V;
+		gp_Vec tanU, tanV;
+		//Handle_Geom_Surface bgCorSurf = BRep_Tool::Surface(bgSurf->Face());
 		for (auto p = mainPnts.begin(); p != mainPnts.end();){
 			extBuilder.Perform(BRepBuilderAPI_MakeVertex(p->pnt3d.first),bgSurf->Face());
 			if (extBuilder.IsDone() && extBuilder.NbExt()){
 				
-				p->pnt3d.second = extBuilder.Point(1);
-				_real U, V;
 				extBuilder.Parameter(1, U, V);
-				gp_Pnt2d pnt2d(U,V);
-				p->pnt2d.second=pnt2d;
 
-				gp_Pnt pntOnF1;
-				gp_Vec tanU,tanV;
-				bgSurf->D1(U, V, pntOnF1, tanU, tanV);
+				gp_Pnt2d pnt2d(U,V);
+				
+				bgSurf->D1(U, V, p->pnt3d.second, tanU, tanV);
+
+				//pnt3d.Transform(bgSurf->Face().Location().Transformation());
+				p->pnt2d.second = pnt2d;
+				//p->pnt3d.second=pnt3d;
+
 				tanU.Cross(tanV);
 				if (bgFaceOrientation != TopAbs_FORWARD)
 					tanU.Reverse();
@@ -236,17 +370,16 @@ _bool ContactSpot::OverLayAreaGen(){
 				p = mainPnts.erase(p);
 		}
 
-	
+		
+		
+		CheckPntPairs(mainPnts, AreFacesSwaped, NeedPntAmount);
+
 		//Extremum points back to initial face
-		_int GoodPntAmount = 0;
+		
 		extBuilder.Initialize(smlSurf->Face(), Extrema_ExtFlag_MIN, Extrema_ExtAlgo_Grad);
 		for (auto p = mainPnts.begin(); p != mainPnts.end();){
-			gp_Vec p1p2(p->pnt3d.first,p->pnt3d.second);
 
-			_real magnitude = p1p2.Magnitude();
-			if (magnitude<Precision::Confusion()){
-				GoodPntAmount++;
-				p->correctPair = true;
+			if (p->correctPair){
 				p++;
 				continue;
 			}
@@ -255,16 +388,16 @@ _bool ContactSpot::OverLayAreaGen(){
 				_real U, V;
 				extBuilder.Parameter(1, U, V);
 				gp_Pnt2d pnt2d(U, V);
-				gp_Pnt pntOnF1;
+				
 				gp_Vec tanU, tanV;
-				bgSurf->D1(U, V, pntOnF1, tanU, tanV);
+				smlSurf->D1(U, V, p->pnt3d.first, tanU, tanV);
 				tanU.Cross(tanV);
 				if (smlFaceOrientation != TopAbs_FORWARD)
 					tanU.Reverse();
 				tanU.Normalize();
 
 				p->normal.first = tanU;
-				p->pnt3d.first = pntOnF1;
+				
 				p->pnt2d.first = pnt2d;
 
 				p++;
@@ -273,36 +406,9 @@ _bool ContactSpot::OverLayAreaGen(){
 				p = mainPnts.erase(p);
 		}
 
-		if (GoodPntAmount<NeedPntAmount)
-	for (auto p = mainPnts.begin(); p != mainPnts.end();p++){
-		if (p->correctPair)
-			continue;
-		gp_Vec p1p2(p->pnt3d.first, p->pnt3d.second);
-
-		_real magnitude = p1p2.Magnitude();
-
-		if (magnitude<RealSmall()){
-			p->correctPair=true;
-			GoodPntAmount++;
-			continue;
-		}
-		else{
-			_real p1p2_n1 = p1p2.Dot(p->normal.first);
-			p1p2.Reverse();
-			_real p2p1_n2 = p->normal.second.Dot(p1p2); 
-			if (magnitude<SGap() && p1p2_n1 + ParTol()>1 && p2p1_n2+ParTol()>1){
-				p->correctPair = true;
-				GoodPntAmount++;
-				continue;
-			}
-			if (p1p2_n1 - ParTol()<-1 && p2p1_n2 - ParTol()<-1){
-				p->correctPair = true;
-				GoodPntAmount++;
-				continue;
-			}
-
-		}	
-	}
+		
+		_int GoodPntAmount = CheckPntPairs(mainPnts, AreFacesSwaped, NeedPntAmount);
+	
 	if (GoodPntAmount>NeedPntAmount){
 		//pair on edge situation check
 
@@ -312,6 +418,7 @@ _bool ContactSpot::OverLayAreaGen(){
 		Bnd_Box2d SSBndBox;
 		Bnd_Box2d BSBndBox;	
 		_real Square1=0,Square2=0;
+		
 		for (auto p = mainPnts.begin(); p != mainPnts.end();p++){
 			if (p->correctPair){
 				SSBndBox.Add(p->pnt2d.first);
@@ -329,10 +436,9 @@ _bool ContactSpot::OverLayAreaGen(){
 		//	for (TopExp_Explorer exp(smlSurf->Face(), TopAbs_WIRE); exp.More(); exp.Next()){
 		//		MF.Add(TopoDS::Wire(exp.Current()));
 		//	}
-			 cntFace1 = MF.Face();
+
+		   cntFace1 = MF.Face();
 			GProp_GProps propsTester;
-
-
 			BRepGProp::SurfaceProperties(cntFace1, propsTester);
 			Square1 = propsTester.Mass();
 		}
@@ -358,39 +464,64 @@ _bool ContactSpot::OverLayAreaGen(){
 		catch (Standard_Failure){
 			std::cerr << __FILE__ << " " << __LINE__ << " Contact face constraction failure" << std::endl;
 		}
-
-		if (Square1 > MinContactSquare() && Square2 > MinContactSquare()){
-			*/
-		//End :
-
-
+		
+		if (Square1 > MinContactSquare && Square2 > MinContactSquare){
 				for (auto p = mainPnts.begin(); p != mainPnts.end();p++){
-				//	if (p->correctPair){
+					if (p->correctPair){
 							gp_Ax1 sS(p->pnt3d.first,p->normal.first);
-							gp_Ax1 gS(p->pnt3d.first, p->normal.first);
-							gp_Ax1 *f1Axis = AreFacesSwaped ? &sS : &gS;
-							gp_Ax1 *f2Axis = AreFacesSwaped ? &gS : &sS;
-						//	if (!SameVectorInSetAlready(*f1Axis, f1VecSpot)){
-								f1VecSpot.push_back(*f1Axis);
-								f2VecSpot.push_back(*f2Axis);
-						//	}
+							gp_Ax1 gS(p->pnt3d.second, p->normal.second);
+							gp_Ax1 *f1Axis = AreFacesSwaped ? &gS : &sS;
+							gp_Ax1 *f2Axis = AreFacesSwaped ? &sS : &gS;
+							if (!SameVectorInSetAlready(*f1Axis, f1VecSpot)){
+							f1VecSpot.push_back(*f1Axis);
+							f2VecSpot.push_back(*f2Axis);
+							}
 						
-				//}
+				}
 			}
+				_int CrossPnt{ 0 }, GapPnt{ 0 }, ContPnt{ 0 };
+				_int typesCount[3]={0,0,0};
 
+				for (auto & p : mainPnts){
+					if (p.correctPair)
+						switch (p.contType){
+						case ContactType::_Contact :
+							typesCount[0]++;
+							break;
+						case ContactType::_InGap:
+							typesCount[1]++;
+							break;
+						case ContactType::_Intersect:
+							typesCount[2]++;
+							break;
+						}
+				}
+				_int max;
+				if (typesCount[0]>typesCount[1]){
+					max = typesCount[0];
+					contactType=_Contact;
+				}
+				else{
+					max = typesCount[1];
+					contactType = _InGap;
+				}
+				if (typesCount[2] > max){
+					contactType = _Intersect;
+				}
 			return true;
-	//	}
-			
-	//}
+	}
+		
+	}
 
-	//}
-	//catch(Standard_Failure)
-	//{
-	//	std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
-	//}
-	//return false;
-	
+	}
+	catch(Standard_Failure)
+	{
+		std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
+	}
+
+	return false;
 }
+
 _bool ContactSpot::SameVectorInSetAlready(gp_Ax1 &axis, std::vector<gp_Ax1> &collection){
 	for (auto &ax : collection){
 		if (ax.Direction().Dot(axis.Direction())+AsmVecTol()>1)
@@ -476,7 +607,7 @@ _bool  ContactSpot::IsOverlaySS(_int NbIter, Extrema_POnSurf &p1, Extrema_POnSur
 		f1.D1(U,V,pntOnSurf,tanU,tanV);
 		gp_Vec blockDir(pnt1.Value(),pnt2.Value());
 
-		if(tanU.Crossed(tanV).IsParallel(gp_Vec(pnt1.Value(),pnt2.Value()),ParTol()))
+		if(tanU.Crossed(tanV).IsParallel(gp_Vec(pnt1.Value(),pnt2.Value()),ContDirParPrecision))
 			f1VecSpot.push_back(gp_Ax1(pntOnSurf,gp_Dir(blockDir)));
 		
 	}
@@ -492,7 +623,7 @@ _bool  ContactSpot::IsOverlaySS(_int NbIter, Extrema_POnSurf &p1, Extrema_POnSur
 	return true;
 }
 
-_bool ContactSpot:: OverLayAreaEl( _real delta []){
+_bool ContactSpot:: OverLayAreaEl( ){
 
 	
 	_real SSPntPair[4];
@@ -713,31 +844,7 @@ inline _real ContactSpot::rand(){
 			return dist(gen);
 }
 
-_real ContactSpot::Value(_real *X,_bool *IsOnBound /*bool [8]*/){
-				if(X[0]-LinTol()<bnd[0])
-					X[0]=bnd[0], IsOnBound[0]=true;
-				else if(X[0]+LinTol()>bnd[1])
-					X[0]=bnd[1],IsOnBound[1] = true;
-				if(X[1]<bnd[2])
-					X[1]=bnd[2], IsOnBound[2] = true;
-				else if(X[1]>bnd[3])
-					X[1]=bnd[3], IsOnBound[3] = true;
-				if(X[2]<bnd[4])
-					X[2]=bnd[4], IsOnBound[4]=true;
-				else if(X[2]>bnd[5])
-					X[2]=bnd[5],IsOnBound[5] = true;
-				if(X[3]<bnd[6])
-					X[3]=bnd[6], IsOnBound[6] = true;
-				else if(X[3]>bnd[7])
-					X[3]=bnd[7], IsOnBound[7] = true;
-					
-				return f1.Value(X[0],X[1]).Distance(f2.Value(X[3],X[4]));
-}
 
- inline	_real ContactSpot::Value(_real *X)
-{
-	return f1.Value(X[0],X[1]).Distance(f2.Value(X[2],X[3]));
-}
  _bool ContactSpot::IsSimpleContact()
  {
 	 Standard_Failure::Raise("Not implement function use");
@@ -760,12 +867,4 @@ _real ContactSpot::Value(_real *X,_bool *IsOnBound /*bool [8]*/){
 		f2.LastUParameter()-f2.FirstUParameter()+f2.LastVParameter()-f2.FirstVParameter())
 		return true;
 	return false; 		
- }
-
-void ContactSpot::BoundInit(_real *bnd, BRepAdaptor_Surface &f1){
-	
-	bnd[0] = f1.FirstUParameter();
-	bnd[1] = f1.LastUParameter();
-	bnd[2] =  f1.FirstVParameter();
-	bnd[3] = f1.LastVParameter();
  }

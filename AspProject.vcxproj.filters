@@ -103,6 +103,9 @@
     <ClCompile Include="generatedFiles\qrc_iconRes.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AssemblyGraphBuilder.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\AspMainTool.h">
@@ -170,6 +173,9 @@
     </ClInclude>
     <ClInclude Include="generatedFiles\ui_mainwindow.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\AssemblyGraphBuilder.h">
+      <Filter>AspTool\inc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

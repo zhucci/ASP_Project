@@ -32,13 +32,11 @@ _bool DBGBuilder::AddDBGRelation(Unit* product){
 	//Should be changed for adding new parts from product->GetUnitMap() to unitMap ?
 	 unitMap = product->GetUnitMap();
 	 //#ChangeThis
-	for (auto iter=unitMap->begin(); iter!=unitMap->end(); iter++){
+	for (auto iter=unitMap->begin(); iter!=unitMap->end(); ++iter){
 		
-		auto subIter = unitMap->begin();
-		for (; subIter != unitMap->end(); subIter++){
-			if (subIter == iter)
-				continue;
-			
+		auto subIter = iter;
+		for (++subIter; subIter != unitMap->end(); ++subIter){
+
 			DBGEdgeBuild(dynamic_cast<Part*>((*iter).second),
 				dynamic_cast<Part*>((*subIter).second), true);
 		}
@@ -329,20 +327,21 @@ Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boole
 				if (NotInContact(sp, obstSp, Overlay, Gap))
 					continue;
 				
-				ContactSpot spot(sp, obstSp, Gap);
+				ContactSpot spot(sp, obstSp, part, obst);
 
 				if (spot.IsDone()){
 
 					std::vector <gp_Ax1> colOfDir = spot.getF1ContactAxis();
+					//std::vector <gp_Ax1> colOfDir2 = spot.getF2ContactAxis();
 
 					if (colOfDir.size()){
 						MergeCollectionOfDirs(colOfDir,_ContactBlk, blkDirsForPart);
-						//colOfDir = spot.getF2ContactAxis();
-						//MergeCollectionOfDirs(colOfDir,_ContactBlk, blkDirsForObstacle);
+						colOfDir = spot.getF2ContactAxis();
+						MergeCollectionOfDirs(colOfDir,_ContactBlk, blkDirsForObstacle);
 
 						sp.Func = obstSp.Func = _Base;
-						part->SetContact(Contact(i, ObstUri, j,ContactType::_Contact));
-						//obst->SetContact(Contact(colOfDir, j, PartUri, i, _Contact, true, true));
+						part->SetContact(Contact(i, ObstUri, j,spot.GetContactType()));
+						obst->SetContact(Contact(j, PartUri, i, spot.GetContactType()));
 					}
 				}
 
@@ -356,7 +355,7 @@ Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boole
 			myDBG.push_back(newEdge);
 		}
 		if (blkDirsForObstacle.size()){
-			DBGEdge newEdge(PartUri, ObstUri, std::move(blkDirsForObstacle));
+			DBGEdge newEdge(ObstUri, PartUri, std::move(blkDirsForObstacle));
 			myDBG.push_back(newEdge);
 		}
 

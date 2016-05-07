@@ -19,6 +19,7 @@ public:
 	void SetStatus(QString status);
 
 private slots:
+	void ViewModeChanged();
 	void SaveSequence();
 	void ImportStep();
 	void PlayBack();
@@ -38,13 +39,15 @@ private slots:
 	void Test3();
 	void Test4();
 	void Test5();
+	void PartGraph();
 	void TestVoxelGeneration();
 	
 
 	
 protected:
 	
-	asp::AspMainTool aspTool;
+	asp::AspMainTool *aspTool{NULL};
+	_bool justViewMode{false};
 	Viewer* myViewer;
 
 };

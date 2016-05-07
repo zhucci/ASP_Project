@@ -19,7 +19,7 @@
 #include "BRepClass_FaceClassifier.hxx"
 #include "BRepBuilderAPI_MakeVertex.hxx"
 #include "Geom_Point.hxx"
-
+#include "AssemblyGraphBuilder.h"
 #include "assert.h"
 //====================
 //	aps namespace	 =
@@ -28,6 +28,7 @@ using namespace asp;
  
 AspMainTool::AspMainTool(){
 	ocafApplication = XCAFApp_Application::GetApplication();
+	
 	AsmVisualContextId = -1;
 	showMustGoOn = true;
 }
@@ -39,14 +40,20 @@ void AspMainTool::Init(std::string stepfileName, Viewer *aView, MainFrame* mainW
 
 	//	Standard_PCharacter file = new char[stepfileName.LengthOfCString()];
 	mainWindow = mainWin;
+	
 	//	stepfileName.ToUTF8CString(file);
 	if (ocafDocument.IsNull())
 		ocafApplication->NewDocument("MDTV-XCAF", ocafDocument);
+	
 	else if (ocafDocument->IsOpened()){
-		ocafDocument->Close();
+		ocafApplication->Close(ocafDocument);
 		ocafApplication->NewDocument("MDTV-XCAF", ocafDocument);
 		delete product;
 		product = nullptr;
+	}
+	if (!ocafDocument->IsEmpty()){
+		ocafDocument->Close();
+		ocafApplication->NewDocument("MDTV-XCAF", ocafDocument);
 	}
 	mainWindow->SetStatus("Reading STEP file is started");
 
@@ -63,9 +70,10 @@ void AspMainTool::Init(std::string stepfileName, Viewer *aView, MainFrame* mainW
 	ShowProduct(aView);
 
 	mainWindow->SetStatus("Finding assembly sequence is started");
-
-//	AsmTreeBuilding = true;
-//	AsmTreeInit();
+	if (AsmTreeCalculation){
+		AsmTreeBuilding = true;
+		AsmTreeInit();
+	}
 	
 	
 
@@ -431,8 +439,7 @@ void AspMainTool::ShowProduct(Viewer* aView){
 	if (asmSeq.IsDone())
 	asmState = asmSeq.GetFullProductNode();
 }
-void AspMainTool::ShowInformAboutSelectedShape(Viewer* aView){
-	Handle_AIS_InteractiveContext context = aView->getIC();
+std::vector<Part *> AspMainTool::GetSelectedPart(Handle_AIS_InteractiveContext context){
 
 	std::vector<Part *> selectedParts;
 	for (context->InitSelected();
@@ -449,12 +456,21 @@ void AspMainTool::ShowInformAboutSelectedShape(Viewer* aView){
 		}
 		//context->Remove(context->Interactive(),false);
 	}
-	context->ClearSelected();
+	
+	return selectedParts;
+	
+}
+void AspMainTool::ShowInformAboutSelectedShape(Viewer* aView){
+	Handle_AIS_InteractiveContext context = aView->getIC();
+
+	std::vector<Part *> selectedParts = GetSelectedPart(context);
+	
+	context->ClearSelected(false);
 	context->OpenLocalContext(true, true);
+
 	for (auto &p : selectedParts){
 		ShowBlkDirsOfPart(p, aView);
 	}
-
 	aView->Update();
 }
 void AspMainTool::ShowSurface(const Handle_AIS_InteractiveContext &context, SurfaceAttribute &surf){
@@ -465,6 +481,7 @@ void AspMainTool::ShowSurface(const Handle_AIS_InteractiveContext &context, Surf
 	case _Base:
 		shapeColor = Quantity_NOC_RED;
 		DisplayMode = AIS_Shaded;
+	//	DisplayMode = AIS_WireFrame;
 		break;
 	case _UnknownFunction:
 		shapeColor = Quantity_NOC_BLUE1;
@@ -575,8 +592,7 @@ void AspMainTool::TestContactSpotProcess(Viewer *view){
 	for (auto iter = unitMap->begin(); iter!=unitMap->end();iter++){
 		Part *part = dynamic_cast<Part *>(iter->second);
 		auto subItr = iter;
-
-		for (subItr++; subItr!=unitMap->end();subItr++){
+		for (++subItr; subItr != unitMap->end(); subItr++){
 			Part *obstacle = dynamic_cast<Part *>(subItr->second);
 			//==========================================
 			//			Visualise current Parts
@@ -593,6 +609,7 @@ void AspMainTool::TestContactSpotProcess(Viewer *view){
 			for (auto &sp : *part){
 				if (sp.myBox.Distance(*obstacle->BndBox())<Gap)
 				for (auto &obstSp : *obstacle){
+					
 					if (sp.myBox.Distance(obstSp.myBox)>Gap)
 						continue;
 				//==========================================
@@ -611,23 +628,55 @@ void AspMainTool::TestContactSpotProcess(Viewer *view){
 					if (NotInContact(sp, obstSp, 1, Gap))
 						continue;
 
-					ContactSpot spot(sp, obstSp, Gap);
-					if (orient1 == TopAbs_REVERSED || orient2 == TopAbs_REVERSED)
-						orient1 = TopAbs_FORWARD;
+					ContactSpot spot(sp, obstSp, part, obstacle);
+					if (spot.IsDone()){
+
 				//==========================================
-					auto vecArray = spot.getF1ContactAxis();
-					for (auto &dir : vecArray){
-						Handle_ISession_Direction axis = new ISession_Direction(dir.Location(), dir.Direction(), 10);
-						context->LocalContext()->Display(axis, AIS_WireFrame);
+					auto vecArray1 = spot.getF1ContactAxis();
+					auto vecArray2 = spot.getF2ContactAxis();
+
+					if (vecArray1.size() && vecArray2.size()){
+						for (auto &dir : vecArray1){
+							Handle_ISession_Direction axis = new ISession_Direction(dir.Location(), dir.Direction(), 10);
+							context->LocalContext()->Display(axis, AIS_WireFrame);
+						}
+						
+						for (auto &dir : vecArray2){
+							Handle_ISession_Direction axis = new ISession_Direction(dir.Location(), dir.Direction(), 10);
+							context->LocalContext()->Display(axis, AIS_WireFrame);
+						}
+						view->getView()->Redraw();
 					}
-					view->getView()->Redraw();
+					//}
 				}
 			}
+		}
+	
 		}
 	}
 
 }
 
+void AspMainTool::TestGraphIso(Viewer * aView){
+
+	Handle_AIS_InteractiveContext context = aView->getIC();
+
+	std::vector<Part *> selectedParts = GetSelectedPart(context);
+
+	AssemblyGraphBuilder graph;
+
+	graph.Init(product);
+
+	Handle_TopTools_HSequenceOfShape collectionOfParts;
+
+	auto partMap  = product->GetUnitMap();
+	
+	std::string ImaleName = graph.GetPartGraphImageFileName(partMap->begin()->first);
+
+	QGraphicsScene scene;
+	
+
+}
 void AspMainTool::TestFindPartsPointsFunction(Viewer* viewer){
 
 	//assert(product != nullptr);

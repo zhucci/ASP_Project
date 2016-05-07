@@ -59,7 +59,8 @@
     </CustomBuildBeforeTargets>
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);inc;</IncludePath>
-    <SourcePath>inc;src;generatedFiles;$(VC_SourcePath);</SourcePath>
+    <SourcePath>H:\boost_1_57_0;inc;src;generatedFiles;$(VC_SourcePath)</SourcePath>
+    <LibraryPath>H:\boost_1_57_0\lib64-msvc-12.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -102,7 +103,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>inc;generatedFiles;src;$(CSF_OPT_INC);$(QTDIR)\include\ActiveQt;$(QTDIR)\mkspecs\default;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtCore;$(QTDIR)\include\Qt;$(QTDIR)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;generatedFiles;src;$(CSF_OPT_INC);$(QTDIR)\include\ActiveQt;$(QTDIR)\mkspecs\default;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtCore;$(QTDIR)\include\Qt;$(QTDIR)\include\;$(SourcePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -180,6 +181,7 @@
     <ClCompile Include="src\AsmShowManager.cpp" />
     <ClCompile Include="src\AspMainTool.cpp" />
     <ClCompile Include="src\Assembly.cpp" />
+    <ClCompile Include="src\AssemblyGraphBuilder.cpp" />
     <ClCompile Include="src\ContactSpot.cpp" />
     <ClCompile Include="src\FoundationMethods.cpp" />
     <ClCompile Include="src\ISession_Part.cpp" />
@@ -203,6 +205,7 @@
     <ClInclude Include="inc\AsmTreeNode.h" />
     <ClInclude Include="inc\AspMainTool.h" />
     <ClInclude Include="inc\Assembly.h" />
+    <ClInclude Include="inc\AssemblyGraphBuilder.h" />
     <ClInclude Include="inc\ContactSpot.h" />
     <ClInclude Include="inc\DBGBuilder.h" />
     <ClInclude Include="inc\FoundationClasses.h" />

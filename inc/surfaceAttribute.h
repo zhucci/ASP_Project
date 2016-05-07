@@ -9,7 +9,7 @@ namespace asp
 	
 	class Part;
 
-	enum ContactType {_Out, _InGap, _Contact, _Intersect, _Into, _WrapIt, _UnknownContact};
+	enum ContactType {_InGap, _Contact, _Intersect, _Into, _WrapIt, _UnknownContact};
 	enum RelationType {_Precedence, _BlockDir, _Kinematic_Plane, _Kinematic_Cylinder, _Kinematic_Cone};
 	enum StateOfDir {_MoveBlk, _MoveFree,_ContactBlk,_ContactFree};
 	enum SurfaceFunction {_UnknownFunction, _Base, _Grip, _Kinematic, _Default};
@@ -35,10 +35,10 @@ namespace asp
 //! 'colOfAdjSurf' vector of contacts with adjacence faces
 //! 'Func' is a SurafaceFunction enum (_Unknown, _Base, _Grip, ...)
 	struct SurfaceAttribute {
-
+		SurfaceAttribute(){}
 		SurfaceAttribute(const TopoDS_Shape &surfShape);
-		SurfaceAttribute(SurfaceAttribute &att);
-		SurfaceAttribute &SurfaceAttribute::operator=(SurfaceAttribute &att);
+		SurfaceAttribute(const SurfaceAttribute &att);
+		SurfaceAttribute &SurfaceAttribute::operator=(const SurfaceAttribute &att);
 	
 		BRepAdaptor_Surface surf;
 		TopoDS_Face myShape;

@@ -21,18 +21,18 @@ SurfaceAttribute::SurfaceAttribute(const TopoDS_Shape &surfShape)
 	BRepBndLib::Add(surfShape,myBox);
 }
 
-SurfaceAttribute::SurfaceAttribute(SurfaceAttribute &att):
+SurfaceAttribute::SurfaceAttribute(const SurfaceAttribute &att):
 	myBox(att.myBox),Type(att.Type),surf(att.surf),myShape(att.myShape),Func(att.Func),
 	uri(att.uri)
 {
 	for(auto con : att.colOfAdjSurf)
 		colOfAdjSurf.push_back(con);
+	
 }
 
-SurfaceAttribute &SurfaceAttribute::operator=(SurfaceAttribute &att)
+SurfaceAttribute &SurfaceAttribute::operator=(const SurfaceAttribute &att)
 {
 	uri=att.uri;
-	
 	myShape=att.myShape;
 	myBox=att.myBox;
 	Type=att.Type;

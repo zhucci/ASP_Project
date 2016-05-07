@@ -13,12 +13,16 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QGraphicsView>
 #include <QtGui/QHeaderView>
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
+#include <QtGui/QSpacerItem>
 #include <QtGui/QStatusBar>
 #include <QtGui/QToolBar>
+#include <QtGui/QTreeView>
+#include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -47,13 +51,28 @@ public:
     QAction *actionT3;
     QAction *actionT4;
     QAction *actionT5;
+    QAction *actionPartGraph;
+    QAction *actionViewMode;
+    QAction *menu_VariableControl;
+    QAction *menu_VisualizationControl;
+    QAction *action;
     QWidget *mainwidget;
+    QWidget *verticalLayoutWidget;
+    QVBoxLayout *verticalLayout;
+    QTreeView *treeView;
+    QSpacerItem *TreeFrameSpacer;
+    QWidget *verticalLayoutWidget_2;
+    QVBoxLayout *verticalLayout_2;
+    QGraphicsView *ImageViewWindow;
+    QSpacerItem *Image_SecondFrameSpacer;
+    QWidget *SecondWidgetWindow;
     QMenuBar *menubar;
     QMenu *menu_FILE;
     QMenu *menu_IMPORT;
     QMenu *menu_EXPORT;
     QMenu *menu_VIEW;
     QMenu *menu_HELP;
+    QMenu *menu;
     QStatusBar *ProgressBar;
     QToolBar *MainBar;
     QToolBar *AsmPlaneBar;
@@ -63,7 +82,7 @@ public:
     {
         if (MainFrame->objectName().isEmpty())
             MainFrame->setObjectName(QString::fromUtf8("MainFrame"));
-        MainFrame->resize(800, 600);
+        MainFrame->resize(997, 798);
         MainFrame->setMinimumSize(QSize(100, 50));
         QFont font;
         font.setFamily(QString::fromUtf8("Segoe UI"));
@@ -160,13 +179,77 @@ public:
         actionT4->setObjectName(QString::fromUtf8("actionT4"));
         actionT5 = new QAction(MainFrame);
         actionT5->setObjectName(QString::fromUtf8("actionT5"));
+        actionPartGraph = new QAction(MainFrame);
+        actionPartGraph->setObjectName(QString::fromUtf8("actionPartGraph"));
+        actionViewMode = new QAction(MainFrame);
+        actionViewMode->setObjectName(QString::fromUtf8("actionViewMode"));
+        actionViewMode->setCheckable(true);
+        menu_VariableControl = new QAction(MainFrame);
+        menu_VariableControl->setObjectName(QString::fromUtf8("menu_VariableControl"));
+        menu_VisualizationControl = new QAction(MainFrame);
+        menu_VisualizationControl->setObjectName(QString::fromUtf8("menu_VisualizationControl"));
+        action = new QAction(MainFrame);
+        action->setObjectName(QString::fromUtf8("action"));
         mainwidget = new QWidget(MainFrame);
         mainwidget->setObjectName(QString::fromUtf8("mainwidget"));
         mainwidget->setMinimumSize(QSize(100, 50));
+        verticalLayoutWidget = new QWidget(mainwidget);
+        verticalLayoutWidget->setObjectName(QString::fromUtf8("verticalLayoutWidget"));
+        verticalLayoutWidget->setGeometry(QRect(0, 0, 201, 721));
+        verticalLayout = new QVBoxLayout(verticalLayoutWidget);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        treeView = new QTreeView(verticalLayoutWidget);
+        treeView->setObjectName(QString::fromUtf8("treeView"));
+        treeView->setEnabled(false);
+        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(20);
+        sizePolicy.setHeightForWidth(treeView->sizePolicy().hasHeightForWidth());
+        treeView->setSizePolicy(sizePolicy);
+        treeView->setMinimumSize(QSize(100, 400));
+        treeView->setBaseSize(QSize(200, 500));
+
+        verticalLayout->addWidget(treeView);
+
+        TreeFrameSpacer = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+        verticalLayout->addItem(TreeFrameSpacer);
+
+        verticalLayoutWidget_2 = new QWidget(mainwidget);
+        verticalLayoutWidget_2->setObjectName(QString::fromUtf8("verticalLayoutWidget_2"));
+        verticalLayoutWidget_2->setGeometry(QRect(610, 0, 381, 721));
+        verticalLayout_2 = new QVBoxLayout(verticalLayoutWidget_2);
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
+        ImageViewWindow = new QGraphicsView(verticalLayoutWidget_2);
+        ImageViewWindow->setObjectName(QString::fromUtf8("ImageViewWindow"));
+        ImageViewWindow->setEnabled(false);
+        QSizePolicy sizePolicy1(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(ImageViewWindow->sizePolicy().hasHeightForWidth());
+        ImageViewWindow->setSizePolicy(sizePolicy1);
+
+        verticalLayout_2->addWidget(ImageViewWindow);
+
+        Image_SecondFrameSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+        verticalLayout_2->addItem(Image_SecondFrameSpacer);
+
+        SecondWidgetWindow = new QWidget(verticalLayoutWidget_2);
+        SecondWidgetWindow->setObjectName(QString::fromUtf8("SecondWidgetWindow"));
+        SecondWidgetWindow->setEnabled(false);
+
+        verticalLayout_2->addWidget(SecondWidgetWindow);
+
         MainFrame->setCentralWidget(mainwidget);
+        verticalLayoutWidget->raise();
+        verticalLayoutWidget_2->raise();
+        verticalLayoutWidget_2->raise();
         menubar = new QMenuBar(MainFrame);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 800, 21));
+        menubar->setGeometry(QRect(0, 0, 997, 21));
         menu_FILE = new QMenu(menubar);
         menu_FILE->setObjectName(QString::fromUtf8("menu_FILE"));
         menu_IMPORT = new QMenu(menu_FILE);
@@ -177,6 +260,8 @@ public:
         menu_VIEW->setObjectName(QString::fromUtf8("menu_VIEW"));
         menu_HELP = new QMenu(menubar);
         menu_HELP->setObjectName(QString::fromUtf8("menu_HELP"));
+        menu = new QMenu(menubar);
+        menu->setObjectName(QString::fromUtf8("menu"));
         MainFrame->setMenuBar(menubar);
         ProgressBar = new QStatusBar(MainFrame);
         ProgressBar->setObjectName(QString::fromUtf8("ProgressBar"));
@@ -194,6 +279,7 @@ public:
 
         menubar->addAction(menu_FILE->menuAction());
         menubar->addAction(menu_VIEW->menuAction());
+        menubar->addAction(menu->menuAction());
         menubar->addAction(menu_HELP->menuAction());
         menu_FILE->addSeparator();
         menu_FILE->addAction(menu_IMPORT->menuAction());
@@ -203,7 +289,10 @@ public:
         menu_IMPORT->addAction(actionPrevSession);
         menu_EXPORT->addAction(actionSAVESEQ);
         menu_VIEW->addAction(actionCONTROLPANEL);
+        menu_VIEW->addAction(action);
         menu_HELP->addAction(actionABOUT);
+        menu->addAction(menu_VariableControl);
+        menu->addAction(menu_VisualizationControl);
         MainBar->addSeparator();
         MainBar->addAction(actionSTEP);
         MainBar->addAction(actionSAVESEQ);
@@ -220,6 +309,8 @@ public:
         TestFunction->addAction(actionT4);
         TestFunction->addAction(actionT5);
         TestFunction->addAction(actionVoxel);
+        TestFunction->addAction(actionPartGraph);
+        TestFunction->addAction(actionViewMode);
 
         retranslateUi(MainFrame);
 
@@ -256,11 +347,17 @@ public:
         actionT3->setText(QApplication::translate("MainFrame", "T3", 0, QApplication::UnicodeUTF8));
         actionT4->setText(QApplication::translate("MainFrame", "T4", 0, QApplication::UnicodeUTF8));
         actionT5->setText(QApplication::translate("MainFrame", "T5", 0, QApplication::UnicodeUTF8));
+        actionPartGraph->setText(QApplication::translate("MainFrame", "PartGraph", 0, QApplication::UnicodeUTF8));
+        actionViewMode->setText(QApplication::translate("MainFrame", "ViewMode", 0, QApplication::UnicodeUTF8));
+        menu_VariableControl->setText(QApplication::translate("MainFrame", "\320\237\320\265\321\200\320\265\320\274\320\265\320\275\320\275\321\213\320\265 \321\201\321\200\320\265\320\264\321\213", 0, QApplication::UnicodeUTF8));
+        menu_VisualizationControl->setText(QApplication::translate("MainFrame", "\320\222\320\270\320\267\321\203\320\260\320\273\320\270\320\267\320\260\321\206\320\270\321\217", 0, QApplication::UnicodeUTF8));
+        action->setText(QApplication::translate("MainFrame", "\320\224\320\265\321\200\320\265\320\262\320\276 \320\274\320\276\320\264\320\265\320\273\320\270", 0, QApplication::UnicodeUTF8));
         menu_FILE->setTitle(QApplication::translate("MainFrame", "\320\244\320\260\320\271\320\273", 0, QApplication::UnicodeUTF8));
         menu_IMPORT->setTitle(QApplication::translate("MainFrame", "\320\236\321\202\320\272\321\200\321\213\321\202\321\214", 0, QApplication::UnicodeUTF8));
         menu_EXPORT->setTitle(QApplication::translate("MainFrame", "\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214", 0, QApplication::UnicodeUTF8));
         menu_VIEW->setTitle(QApplication::translate("MainFrame", "\320\222\320\270\320\264", 0, QApplication::UnicodeUTF8));
         menu_HELP->setTitle(QApplication::translate("MainFrame", "\320\241\320\277\321\200\320\260\320\262\320\272\320\260", 0, QApplication::UnicodeUTF8));
+        menu->setTitle(QApplication::translate("MainFrame", "\320\230\320\275\321\201\321\202\321\200\321\203\320\274\320\265\320\275\321\202\321\213", 0, QApplication::UnicodeUTF8));
         MainBar->setWindowTitle(QApplication::translate("MainFrame", "Main ToolBar", 0, QApplication::UnicodeUTF8));
         AsmPlaneBar->setWindowTitle(QApplication::translate("MainFrame", "Assembly Sequence Planning Bar", 0, QApplication::UnicodeUTF8));
         TestFunction->setWindowTitle(QApplication::translate("MainFrame", "toolBar_2", 0, QApplication::UnicodeUTF8));

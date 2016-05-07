@@ -38,17 +38,24 @@ public:
 
 	void								TestFindPartsPointsFunction(Viewer * aViewer);
 	
+	void								SetAsmTreeCalcStatus(Standard_Boolean status){AsmTreeCalculation = status;}
 
 	std::string &&					GetLog();
 
 //Test functions
 	void								TestContactSpotProcess(Viewer * view);
+	void								TestGraphIso(Viewer * view);
+
 	
 	std::string						GetSequence(AsmTreeNode::AsmMoveType type);
 	
 protected:
+
 	MainFrame *mainWindow;
+
 	void								PartToAisShapeMap();
+
+	std::vector<Part *>  		AspMainTool::GetSelectedPart(Handle_AIS_InteractiveContext context);
 
 	void								ShowBlkDirsOfPart(Part *part, Viewer *aViewer);
 
@@ -67,6 +74,8 @@ protected:
 	IFSelect_ReturnStatus		SequenceOptimize();
 private:
 	Standard_Boolean				showMustGoOn; //On and on, does anybody know what we are looking for...
+	Standard_Boolean				AsmTreeCalculation{false};
+	Standard_Boolean				FullAsmTreeCalc{false};
 	Standard_Boolean				AsmTreeBuilding;
 	Viewer*							myViewer;
 	std::stringstream				LogFile;

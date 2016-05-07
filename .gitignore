@@ -10,7 +10,8 @@ Makefile
 Makefile.Release
 *.idb
 *.pro
-
+*.dot
+*.txt
 # Build results
 
 [Dd]ebug/

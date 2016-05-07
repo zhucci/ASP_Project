@@ -41,24 +41,17 @@ inline Standard_Real AngTol(){
 }
 
 inline Standard_Real ParTol(){
-	return 0.01;
+	return 0.035;
 }
 inline Standard_Real SGap(){
-	return 0.3;
+	return 4;
 }
+
 inline Standard_Real AsmVecTol(){
 	return 0.01;
 }
 
- inline Standard_Integer AmtPntForCS(){
-	 return 5;
- }
- inline Standard_Integer MinContactSquare(){
-	 return 5;
- }
- inline Standard_Integer MinContactPntDistance(){
-	 return 1;
- }
+
  _bool IsOneBlkOther(const gp_Dir &one, const gp_Dir& other);
  
  Standard_PCharacter typeToStr(GeomAbs_SurfaceType surfType);
