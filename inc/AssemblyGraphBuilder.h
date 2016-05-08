@@ -26,67 +26,73 @@ enum edge_FaceSpartial_t { edge_faceSpartialDesc };
 enum vertex_BodyForm_t{ vertex_BodyFormDesc };
 enum vertex_FaceType_t{vertex_FaceType};
 enum vertex_PartUri_t { vertex_PartUri};
-enum edge_ContactType_t {};
+enum edge_ContactDesc_t { edge_ContactDesc };
 
 namespace boost {
 
-	template <> struct property_kind<edge_FaceSpartial_t> {
-		typedef edge_property_tag type; 
+	BOOST_INSTALL_PROPERTY(edge, FaceSpartial);
+	BOOST_INSTALL_PROPERTY(edge, ContactDesc);
+	BOOST_INSTALL_PROPERTY(vertex, FaceType);
+	BOOST_INSTALL_PROPERTY(vertex, PartUri);
+	BOOST_INSTALL_PROPERTY(vertex, BodyForm);
 };
 
-template <> struct property_kind<vertex_PartUri_t> {
-	typedef vertex_property_tag type;
-};
-
-template <> struct property_kind<vertex_BodyForm_t> {
-	typedef vertex_property_tag type;
-};
-template <> struct property_kind<vertex_FaceType_t> {
-	typedef vertex_property_tag type;
-};
-
-template <> struct property_kind<edge_ContactType_t> {
-	typedef vertex_property_tag type;
-};
-}
 typedef _int PartUri;
 typedef _int FaceUri;
+
 struct PartIsomorphism{
 	std::pair<PartUri, PartUri> isoPart;
 	std::vector<std::pair<FaceUri, FaceUri>> isoFaceSet;
 };
 typedef std::vector<PartIsomorphism> isomorphismPartFaceMap;
 
+namespace asp{
 class AssemblyGraphBuilder {
 public :
+
+	friend class AspMainTest;
 
 	typedef undirectedS graph_orientationType;
 
 	struct FaceSpartial{
-		std::vector<double> exect_match;
-		std::vector<double> tol_match;
+		_real DistDesc;
+		_real AngDesc;
+		friend bool operator==(const FaceSpartial& f1, const FaceSpartial& f2){
+			return std::abs(f1.DistDesc - f2.DistDesc)<0.1 &&
+				std::abs(f1.AngDesc - f2.AngDesc)<0.05 ;
+		}
 	};
 	struct BodyForm{
 		PartUri partUri;
-		std::vector<double> exect_match;
-		std::vector<double> tol_match;
+		_real MatVolRatio;
+		friend bool operator==(const BodyForm& b1, const BodyForm& b2){
+			return std::abs(b1.MatVolRatio - b2.MatVolRatio)<0.2;
+		}
 	};
 	struct FaceType{
 		FaceUri faceUri;
-		std::vector<double> exect_match;
-		std::vector<double> tol_match;
+		_int FaceFunctionType;
+		_int FaceFormType;
+		friend bool operator==(const FaceType& ft1, const FaceType& ft2){
+			if (ft1.FaceFunctionType == ft2.FaceFunctionType &&
+				ft1.FaceFormType == ft2.FaceFormType)
+				return true;
+			else 
+				return false;	
+		}
+		
 	};
-	struct ContactType{
-		std::vector<double> exect_match;
-		std::vector<double> tol_match;
+	
+	struct ContactDesc{
+		_int contactType;
+		friend _bool operator==(const ContactDesc &desc1,const ContactDesc &desc2){
+			return desc1.contactType==desc2.contactType;
+		}
 	};
 
 	template<typename Graph1, typename Graph2>
 	struct user_callback {
-
-		typedef typename graph_traits<Graph1>::vertex_descriptor Vertex1ID;
-
-		typedef typename graph_traits<Graph2>::vertex_descriptor Vertex2ID;
+		friend class AssemblyGraphBuider;
 
 		user_callback(const Graph1& graph1, const Graph2& graph2)
 		: graph1_(graph1), graph2_(graph2) {}
@@ -97,36 +103,62 @@ public :
 
 				// Print (sub)graph isomorphism map
 				BGL_FORALL_VERTICES_T(v, graph1_, Graph1){
-					char *faceIndex = get(vertex_index_t(), graph1_, v);
-					Vertex2ID corFaceIndex = get(vertex_index_t(), graph2_, get(f, v))
+					BodyForm part1 = get(vertex_BodyFormDesc, graph1_, v);
+					BodyForm part2 = get(vertex_BodyFormDesc, graph2_, get(f, v));
+					PartToPartMap.emplace(part1.partUri, part2.partUri);
 				}
 
 				return true;
 			}
 
-	private:
 		const Graph1& graph1_;
 		const Graph2& graph2_;
-		std::map<Vertex1ID, Vertex2ID> FaceToFaceMap;
+		std::map<PartUri, PartUri> PartToPartMap;
 
 	};
 
+	
 	typedef adjacency_list<vecS, vecS, graph_orientationType,
-	property<vertex_FaceType_t,BodyForm> ,
-	property<edge_FaceSpartial_t, FaceSpartial>>  partGraph;
+		property<vertex_FaceType_t, BodyForm>,
+		property<edge_FaceSpartial_t, FaceSpartial >> partGraph;
 
+	
 	typedef adjacency_list<vecS, vecS, graph_orientationType,
 		property<vertex_BodyForm_t, BodyForm>,
-		property<edge_ContactType_t, ContactType >> assemblyGraph;
+		property<edge_ContactDesc_t, ContactDesc >> assemblyGraph;
 
-	typedef property_map<partGraph,edge_FaceSpartial_t>::type edgePropMap;
+//	typedef property_map<partGraph, edge_FaceSpartial_t>::type PartGraph_edgePropMap;
 
-	typedef property_map<partGraph, vertex_BodyForm_t>::type vertexPropMap;
+//	typedef property_map<partGraph, vertex_BodyForm_t>::type AssemblyGraph_vertexPropMap;
+
+// Binary function object that returns true if BodyForm of one part is similar to other
+
+	struct AssemblyGraph_Vertex_equivalent {
+
+		AssemblyGraph_Vertex_equivalent(const property_map<assemblyGraph, vertex_BodyForm_t> property_map1,
+		const property_map<assemblyGraph, vertex_BodyForm_t> property_map2) :
+		m_property_map1(property_map1),
+		m_property_map2(property_map2) { }
+
+		template <typename ItemFirst,
+			typename ItemSecond>
+			bool operator()(const ItemFirst item1, const ItemSecond item2) {
+				BodyForm form1 = get(m_property_map1, item1);
+				BodyForm form2 = get(m_property_map2, item2);
+				return std::abs(form1.MatVolRatio-form2.MatVolRatio)<0.2;		
+			}
+
+	private:
+		const property_map<assemblyGraph, vertex_BodyForm_t> m_property_map1;
+		const property_map<assemblyGraph,vertex_BodyForm_t> m_property_map2;
+	};
+
+
+
 
 	typedef _int PartUri;
 	
 	typedef std::map<PartUri,std::pair<partGraph, partGraph>> partGraphMap;
-
 
 
 	AssemblyGraphBuilder(){};
@@ -141,16 +173,12 @@ private:
 
 	_int addEdgeToAssemblyGraph(PartUri pUri, asp::Part* part);
 
-	_int AssemblyGraphBuilder::addEdgeToAssemblyGraph(PartUri pUri, asp::Part* part){
-
-		return 0;
-	}
-	FaceSpartial getFaceSpartialDescriptor(const SurfaceAttribute &surface1,
-		const SurfaceAttribute &surface2);
-
-	BodyForm getBodyDescriptor(Part* part);
-	FaceType getFaceType(const SurfaceAttribute &surface1);
-	ContactType getContactType(Part* part1, Part* part2);
+	FaceSpartial getFaceSpartialDescriptor(asp::SurfaceAttribute &surface1,
+		asp::SurfaceAttribute &surface2);
+	_bool GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<gp_Pnt, gp_Vec> &traits);
+	BodyForm getBodyDescriptor(asp::Part* part);
+	FaceType getFaceType(const asp::SurfaceAttribute &surface1);
+	_int getContactDesc(asp::Part* part1, asp::Part* part2, AssemblyGraphBuilder::ContactDesc &desc);
 
 	partGraphMap *partGraphSet{NULL};
 	assemblyGraph	*asmGraph{NULL};
@@ -164,5 +192,6 @@ private:
 	//Contact face descriptor (2x double){contact type and ContactSqnare/SquareFace}
 	
 	//Spartial relationship (2x double){Distance ; Angle}
+};
 };
 #endif // !_AsmGraphBuilder
