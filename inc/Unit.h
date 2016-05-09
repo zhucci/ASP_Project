@@ -38,7 +38,7 @@ class Unit : public UnitInterface
 	Unit(const TDF_Label &label, Unit* root=NULL);
 
 	Unit::Unit(const TopoDS_Shape &shape, Unit *root=nullptr);
-
+	bool IsDone(){return IsCorrectBuild;}
 	~Unit(){ }
 
 	TopoDS_Shape getShape(){return myshape;}
@@ -100,7 +100,7 @@ class Unit : public UnitInterface
 
 		Standard_Integer uri;
 		Standard_PCharacter Name;
-
+		bool IsCorrectBuild;
 		unitType myUnitType;
 		TopAbs_ShapeEnum myShapeType;
 

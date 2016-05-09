@@ -21,9 +21,9 @@ namespace asp
 		friend class AspMainTest;
 
 		friend class AssemblyGraphBuilder;
-
+		Part(TopoDS_Shape  &shape, Unit* root=NULL);
 		Part(const TDF_Label &label, Unit* root=NULL);
-
+		_int Init();
 		~Part();
 
 		void Dump(Standard_OStream &stream, Standard_Integer rank);

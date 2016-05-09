@@ -2,35 +2,37 @@
 #include "Part.h"
 
 using namespace asp;
-
+Part::Part(TopoDS_Shape  &shape, Unit* root) :Unit(shape, root){
+	Init();
+	IsCorrectBuild = true;
+}
 Part::Part(const TDF_Label &label, Unit* root/*=NULL*/):
 	Unit(label,root)
 {
-	
-
 	if(myUnitType!=unitType::_Part)
 		Standard_Failure::Raise("shape not suitable for part");
-
-
+	Init();
+}
+_int Part::Init(){
 	/*Part surface exploration */
-	TopExp_Explorer exp(myshape,TopAbs_FACE);
-		for(;exp.More();exp.Next())
-		{
-			//auto aSurface =	BRep_Tool::Surface(TopoDS::Face(exp.Current()));
-			//auto srf = Handle_Geom_ElementarySurface::DownCast(aSurface);
-			//if(!srf.IsNull()){
-			
-			colOfSurf.push_back(SurfaceAttribute(exp.Current()));
+	TopExp_Explorer exp(myshape, TopAbs_FACE);
+	for (; exp.More(); exp.Next())
+	{
+		//auto aSurface =	BRep_Tool::Surface(TopoDS::Face(exp.Current()));
+		//auto srf = Handle_Geom_ElementarySurface::DownCast(aSurface);
+		//if(!srf.IsNull()){
+
+		colOfSurf.push_back(SurfaceAttribute(exp.Current()));
 		//	}
-			
-		}
+
+	}
 
 	/*Volume calculation*/
 	MaterialVolumeUpdate();
 	BoundVolumeUpdate();
-
+	IsCorrectBuild = true;
+	return 0;
 }
-
 void Part::AdjacencyCalc()
 {
 	#ifdef _DEBUG

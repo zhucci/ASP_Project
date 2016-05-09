@@ -2,6 +2,9 @@
 #define _Assembly_
 
 #include "Unit.h"
+#include "Handle_TDocStd_Document.hxx"
+
+
 namespace asp
 {
 //! This class is used to present product structure as tree where nodes is parts or sub-assembly
@@ -12,7 +15,8 @@ namespace asp
 
 		friend class AspMainTest;
 
-
+		Assembly(Handle(TDocStd_Document) &document);
+		Assembly(TopoDS_Shape &shape, Unit* root=NULL);
 		Assembly(const TDF_Label &label, Unit* root=NULL);
 		~Assembly();
 		

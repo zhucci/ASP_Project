@@ -1,22 +1,63 @@
 
 #include "Assembly.h"
 #include "Part.h"
+#include "XCAFDoc_ShapeTool.hxx"
+#include "XCAFDoc_ShapeMapTool.hxx"
+
 using namespace asp;
 using namespace std;
+
+Assembly::Assembly(TopoDS_Shape &shape, Unit* root):Unit(shape,root){
+
+	TopoDS_Iterator iter(shape);
+	
+	for (; iter.More(); iter.Next()){
+		auto newShape = iter.Value();
+		Unit *subUnit;
+		if (newShape.ShapeType()< TopAbs_SOLID){
+
+			subUnit = new Assembly(newShape, this);
+			if (!subUnit->IsDone())
+				continue;
+		}
+		else if (newShape.ShapeType() == TopAbs_SOLID){
+			subUnit = new asp::Part(newShape, this);
+		}
+		else {
+			continue;
+		}
+		ColSubUnit.push_back(subUnit);
+
+		if (subUnit->Type() == _Part)
+			UnitMap.emplace(subUnit->GetUri(), subUnit);
+	}
+
+	if (!ColSubUnit.size())
+		return;
+	
+
+	MaterialVolumeUpdate();
+	BoundVolumeUpdate();
+
+	IsCorrectBuild = true;
+}
 
 Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 	Unit(label, root)
 {
 	
-	if(myUnitType>unitType::_Assembly)
+
+	if(myUnitType > unitType::_Assembly)
 		Standard_Failure::Raise("Shape must be COMPOUND for"
 									"assembly structure");
 
 	if(myUnitType==_Product){
 		
 		WCS = gp_Ax3(gp_Pnt(0,0,0),gp_Dir(0,0,1));
-	}
-	TDF_ChildIterator iter;
+	
+	
+		TDF_ChildIterator iter;
+
 		iter.Initialize(myLabel, Standard_False);
 		
 		for (; iter.More(); iter.Next()){
@@ -27,20 +68,25 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 				if(isAssembly || isRef)
 				{
 				TopoDS_Shape shape =XCAFDoc_ShapeTool::GetShape(iter.Value());
-				auto shpType = shape.ShapeType();
+				
+				//auto newLoc = shape.Location().Multiplied(myLoc);
+				shape.Move(myLoc);
+				auto newShapeType = shape.ShapeType();
 				
 				Unit *subUnit;
 				
-				if(shpType<TopAbs_SOLID){
-					subUnit = new Assembly(iter.Value(),this);
+				if (newShapeType<TopAbs_SOLID){
+					subUnit = new Assembly(shape, this);
+					
 				}
-				else if(shpType==TopAbs_SOLID){
-					subUnit = new asp::Part(iter.Value(),this);
+				else if (newShapeType == TopAbs_SOLID){
+					subUnit = new asp::Part(shape, this);
 				}
 				else {
 					continue;
 				}
-				
+				if (!subUnit->IsDone())
+					continue;
 				ColSubUnit.push_back(subUnit);
 
 				if (subUnit->Type()==_Part)
@@ -54,12 +100,37 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 					std::cerr<<"Msg: "<<error->GetMessageString();		
 			}
 		}
-		if(ColSubUnit.size()==0){
-			 Standard_DomainError::Raise("Empty Assembly");
+	}
+	else {
+		TopoDS_Iterator iter(myshape);
+		for (; iter.More(); iter.Next()){
+			auto newShape = iter.Value();
+			Unit *subUnit;
+			if (newShape.ShapeType()< TopAbs_SOLID)
+
+				subUnit = new Assembly(newShape, this);
+				
+			else if (newShape.ShapeType() == TopAbs_SOLID)
+				subUnit = new asp::Part(newShape, this);
+			
+			else 
+					continue;
+			
+			if (!subUnit->IsDone())
+				continue;
+
+			ColSubUnit.push_back(subUnit);
+			if (subUnit->Type() == _Part)
+				UnitMap.emplace(subUnit->GetUri(), subUnit);
 		}
+		}
+	
+	if(!ColSubUnit.size())
+		return;
 
 	MaterialVolumeUpdate();
 	BoundVolumeUpdate();
+	IsCorrectBuild=true;
 }
 Assembly::~Assembly(){
 	for (auto &part : ColSubUnit){

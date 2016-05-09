@@ -12,6 +12,7 @@ Unit::Unit(const TopoDS_Shape &shape, Unit *root)
 {
 
 	//TopAbs_ShapeEnum terminateAt = TopAbs_FACE;
+	IsCorrectBuild = false;
 	myshape = shape;
 	uri = UnitNumberCounter++;
 	bndBoxVolume = 0.;
@@ -46,7 +47,7 @@ Unit::Unit(const  TDF_Label &label, Unit *root)
 	if(label.IsNull()){
 		Standard_Failure::Raise("Label is null");
 	}
-
+	IsCorrectBuild=false;
 	myLabel = label;
 	uri = UnitNumberCounter++;
 	bndBoxVolume = 0.;
@@ -65,9 +66,8 @@ Unit::Unit(const  TDF_Label &label, Unit *root)
 
 		if(tools->IsShape(myLabel)){
 			myshape = XCAFDoc_ShapeTool::GetShape(myLabel);
-		
 			
-			
+
 			myShapeType = myshape.ShapeType();
 			myLoc = myshape.Location();
 			if(myShapeType==TopAbs_SOLID)
@@ -79,8 +79,9 @@ Unit::Unit(const  TDF_Label &label, Unit *root)
 			Standard_Failure::Raise("Label is not a shape");
 	}
 	else if(myLabel.Depth()==_RootShapeDepth_){
-		tools==NULL;	
+		tools==NULL;	 
 		myShapeType = TopAbs_COMPOUND;
+		myLoc = XCAFDoc_ShapeTool::GetLocation(myLabel);
 		myUnitType = unitType::_Product;	
 	}
 
