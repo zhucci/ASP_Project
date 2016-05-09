@@ -156,7 +156,10 @@ void MainFrame::Test3(){
 	}
 }
 void MainFrame::Test4(){
-
+	if (aspTool){
+		asp::AspMainTest test;
+		test.TestIsoFaceForPartCalculation(this, aspTool);
+	}
 }
 void MainFrame::Test5(){
 

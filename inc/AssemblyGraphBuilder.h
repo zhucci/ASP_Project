@@ -45,7 +45,8 @@ typedef _int PartUri;
 typedef _int FaceUri;
 
 struct PartIsomorphism{
-	std::pair<PartUri, PartUri> isoPart{-1,-1};
+	PartIsomorphism() :isoPart{ std::pair<PartUri, PartUri>(-1, -1) }{}
+	std::pair<PartUri, PartUri> isoPart;
 	std::vector<std::pair<FaceUri, FaceUri>> isoFaceSet;
 };
 typedef std::vector<PartIsomorphism> isomorphismPartFaceMap;
@@ -77,8 +78,9 @@ struct Iso_AssemblyCallback {
 			// Print (sub)graph isomorphism map
 			//	output << "-------------Isomorphism-------------"<<std::endl;
 			//	output << "-------------------------------------"<<std::endl;
-			BGL_FORALL_VERTICES_T(v, graph1_, Graph1){
-				auto w = get(f, v);
+			BGL_FORALL_VERTICES(v, graph1_, Graph1){
+				graph_traits<Graph1>::vertex_descriptor w = get(f, v);
+				
 				auto v1Desc = graph1_[v];
 				//auto v2Desc = graph2_[w];
 				PartToPartMap->find(v1Desc.partUri)->second = graph2_[w].partUri;
@@ -120,7 +122,7 @@ struct Iso_FaceCallback {
 			if (isomorphismFace){
 				
 				PartIsomorphism iso;
-				BGL_FORALL_VERTICES_T(v, graph1_, Graph1){
+				BGL_FORALL_VERTICES(v, graph1_, Graph1){
 					auto w = get(f, v);
 					auto v1Desc = graph1_[v];
 					auto v2Desc = graph2_[w];

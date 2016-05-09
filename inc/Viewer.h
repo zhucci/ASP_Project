@@ -74,7 +74,7 @@ private:
 	bool myRotate;
 	bool myZoom;
 	bool myPan;
-	Quantity_NameOfColor backgroundColor{ Quantity_NOC_GRAY30 };
+	Quantity_NameOfColor backgroundColor;
 	//Quantity_NameOfColor backgroundColor{ Quantity_NOC_WHITESMOKE };
 	QPoint myStartPnt;
 

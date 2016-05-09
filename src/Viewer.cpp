@@ -27,6 +27,7 @@ static Handle(Graphic3d_GraphicDriver) Viewer_aGraphicDriver;
 
 Viewer::Viewer(QWidget* parent):QWidget(parent)
 {
+	backgroundColor = Quantity_NOC_WHITE ;//Quantity_NOC_GRAY30 ;
     if (myGraphicDriver.IsNull())
     {
       if (Viewer_aGraphicDriver.IsNull())
@@ -43,14 +44,14 @@ Viewer::Viewer(QWidget* parent):QWidget(parent)
 	Handle(V3d_Viewer) aViewer = new V3d_Viewer(myGraphicDriver, TCollection_ExtendedString("Visu3D").ToExtString(), "",//Name and Domain
                                 1000,// Space size
 								V3d_XposYnegZpos, //Projection
-								Quantity_NOC_GRAY40,//Background
+								backgroundColor,//Quantity_NOC_GRAY40,//Background
 								V3d_TypeOfVisualization::V3d_ZBUFFER,  // Type of  visualization
 							   V3d_TypeOfShadingModel::V3d_GOURAUD,  // Shading  model  
 								V3d_WAIT, // Update mode 
                                                 true, true, V3d_TEX_NONE);
 
     myView = aViewer->CreateView();
-	 
+	 aViewer->SetDefaultBackgroundColor(backgroundColor);
     myIC = new AIS_InteractiveContext(aViewer);
 	myIC->SetZDetection(true);
     myIC->SetDeviationCoefficient(1.e-3);

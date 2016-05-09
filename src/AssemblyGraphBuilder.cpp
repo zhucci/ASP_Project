@@ -132,7 +132,7 @@ bool AssemblyGraphBuilder::IsomorphismOfPartCompare(std::pair<partGraph, partGra
 	auto edge_comp = FaceSpartialCompare(smallGSet.first, largeGSet.first);
 	auto vert_comp = FaceTypeCompare(smallGSet.first, largeGSet.first);
 
-	if(vf2_subgraph_iso(smallGSet.first, largeGSet.first, sayFalseCallBack, get(&FaceType::Vertex_Index, smallGSet.first), get(&FaceType::Vertex_Index, largeGSet.first), vertex_order_by_mult(smallGSet.first), edge_comp, vert_comp))
+	if(!vf2_subgraph_iso(smallGSet.first, largeGSet.first, sayFalseCallBack, get(&FaceType::Vertex_Index, smallGSet.first), get(&FaceType::Vertex_Index, largeGSet.first), vertex_order_by_mult(smallGSet.first), edge_comp, vert_comp))
 		return false;
 	
 	faceCallBack callBack(smallGSet.second, largeGSet.second,false,result);
@@ -141,7 +141,7 @@ bool AssemblyGraphBuilder::IsomorphismOfPartCompare(std::pair<partGraph, partGra
 	edge_comp = FaceSpartialCompare(smallGSet.second, largeGSet.second);
 	vert_comp = FaceTypeCompare(smallGSet.second, largeGSet.second);
 
-	if (vf2_subgraph_iso(smallGSet.first, largeGSet.first, callBack, get(&FaceType::Vertex_Index, smallGSet.first), get(&FaceType::Vertex_Index, largeGSet.first), vertex_order_by_mult(smallGSet.first), edge_comp, vert_comp)){
+	if (vf2_subgraph_iso(smallGSet.second, largeGSet.second, callBack, get(&FaceType::Vertex_Index, smallGSet.second), get(&FaceType::Vertex_Index, largeGSet.second), vertex_order_by_mult(smallGSet.second), edge_comp, vert_comp)){
 		IsDone = true;
 		return true;
 	}
@@ -187,6 +187,7 @@ std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Par
 	for (auto iter = part->colOfSurf.begin(); iter != end; ++iter){
 		auto coIter = iter;
 		auto v1 = faceToFullGraphMap.find(iter->uri);
+		int res = v1->second;
 		if (v1 != faceToFullGraphMap.end())
 		for (coIter++; coIter != end; ++coIter){
 			auto v2 = faceToFullGraphMap.find(coIter->uri);
@@ -197,7 +198,13 @@ std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Par
 			MaxDistance = MaxDistance>EdgeProp.DistDesc ? MaxDistance : EdgeProp.DistDesc;
 			auto newE = add_edge(v1->second,v2->second, EdgeProp, fullG);
 
-			if (coIter->Func == _Base && coIter->Func == _Base){
+			if (coIter->Func == _Base && iter->Func == _Base){
+				v1 = faceToSmallGraphMap.find(iter->uri);
+				if (v1 == faceToSmallGraphMap.end())
+					continue;
+				v2 = faceToSmallGraphMap.find(coIter->uri);
+				if (v2 == faceToSmallGraphMap.end())
+					continue;
 				auto newE = add_edge(v1->second, v2->second, EdgeProp, smallG);
 			}
 		}
@@ -413,7 +420,7 @@ FaceType AssemblyGraphBuilder::getFaceType(const asp::SurfaceAttribute &surface1
 	else
 		fType.FaceFunctionType = (0);
 
-	fType.FaceFormType=surface1.Type;
+	fType.FaceFormType=(int)surface1.Type;
 
 	return fType;
 }
