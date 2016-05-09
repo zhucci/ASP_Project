@@ -32,7 +32,7 @@ class Unit : public UnitInterface
 {
 	public:	
 		friend class AspMainTool;
-
+		friend class AspMainTest;
 //! If start from Root label It will get a first founded shape and make all
 //! assembly tree
 	Unit(const TDF_Label &label, Unit* root=NULL);

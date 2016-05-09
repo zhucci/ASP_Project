@@ -4,7 +4,7 @@
 #include <Graphic3d_BufferType.hxx>
 #include <AIS_LocalContext.hxx>
 #include "AsmTreeNode.h"
-
+#include "AspMainTestClass.h"
 MainFrame::MainFrame(void):QMainWindow(0)
 {
 	setupUi(this);
@@ -130,19 +130,30 @@ void MainFrame::PlayFoward(){
 	//QMessageBox::about(this, "Sequence", sequence.c_str());
 }
 void MainFrame::DBGShow(){
-	
+	if (aspTool){
 	aspTool->ShowInformAboutSelectedShape(myViewer);
+	}
 }
 
 void MainFrame::Test1(){
-	aspTool->TestContactSpotProcess(myViewer);
+	if (aspTool){
+		asp::AspMainTest test;
+		test.TestContactSpotProcess(this, aspTool);
+	}
+	
 }
 
 void MainFrame::Test2(){
-	aspTool->FillPartWithPoints(myViewer);
+	if (aspTool){
+		asp::AspMainTest test;
+		test.FillPartWithPoints(this, aspTool);
+	}
 }
 void MainFrame::Test3(){
-	aspTool->TestFindPartsPointsFunction(myViewer );
+	if (aspTool){
+		asp::AspMainTest test;
+		test.TestSpartialDescriptorCalculation(this, aspTool);
+	}
 }
 void MainFrame::Test4(){
 
@@ -153,15 +164,14 @@ void MainFrame::Test5(){
 void MainFrame::TestVoxelGeneration(){
 
 }
-void TestVoxelGeneration(){
 
-}
 void MainFrame::PartGraph(){
-	if (!aspTool){
-		aspTool = new asp::AspMainTool;
+	if (aspTool){
+		asp::AspMainTest test;
+		test.TestGraphIso(this,aspTool);
 	}
-	aspTool->TestGraphIso(myViewer);
 }
+
 void MainFrame::contextMenu(const QPoint &pos){
 	QAction *shadingMode = new QAction(tr("Display mode"), this);
 	connect(shadingMode, SIGNAL(triggered()), myViewer, SLOT(ChangeShadingMode()));

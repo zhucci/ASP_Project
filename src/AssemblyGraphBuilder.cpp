@@ -4,9 +4,10 @@
 #include <cstdio>
 #include <process.h>
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
-
+#include <exception>
 using namespace asp;
 using namespace boost;
+
 
 int AssemblyGraphBuilder::Init(asp::Assembly *convertedAsm){
 	//write_graphviz
@@ -14,62 +15,201 @@ int AssemblyGraphBuilder::Init(asp::Assembly *convertedAsm){
 	if (!pShapeMap->size())
 		return -1;
 
-	if(asmGraph)
-		asmGraph = new assemblyGraph(pShapeMap->size());
+	if(!asmGraph)
+		asmGraph = new assemblyGraph();
 
-	if(partGraphSet)
+	if(!partGraphSet)
 		partGraphSet = new partGraphMap;
-
-	auto AsmGraph_EdgeMap =
-		get(edge_ContactDesc, *asmGraph);
-	
-	auto AsmGraph_VMap = get(vertex_BodyFormDesc,*asmGraph);
-	std::map<PartUri, assemblyGraph::vertex_descriptor> partUri_VertexDescMap;
-
+	std::vector<Part*> parts;
 	for (auto &p : *pShapeMap){
-		//pushToPartSetGraph(p.first, dynamic_cast<Part*> (p.second));
+		auto part = dynamic_cast<Part*>(p.second);
+		parts.push_back(part);
+
+		//Create part face graph and emplace theme in partGraphSet
+		auto res = GetPartGraphsSet(part, false);
+		partGraphSet->emplace(part->GetUri(),res);
+
+	}
+
+	asmGraph->clear();
+
+	(*asmGraph) = GetAssemblyGraph(&parts);
+
+		
+	return 0;
+}
+
+assemblyGraph AssemblyGraphBuilder::GetAssemblyGraph(std::vector<Part*> *parts){
+	assemblyGraph aGraph;
+	std::map<PartUri, graph_traits<assemblyGraph>::vertex_descriptor> partUri_VertexDescMap;
+
+	for (auto &part : *parts){
+
 		//addEdgeToAssemblyGraph(p.first, dynamic_cast<Part*> (p.second));
-		Part * part = dynamic_cast<Part*>(p.second);
+
 		auto vertex_desc = getBodyDescriptor(part);
 		auto desc = add_vertex(*asmGraph);
-		put(AsmGraph_VMap,desc,vertex_desc);
-		partUri_VertexDescMap.emplace(part->uri,vertex_desc);
+		vertex_desc.Vertex_Index = desc;
+		(*asmGraph)[desc] = vertex_desc;
+
+		partUri_VertexDescMap.emplace(part->uri, desc);
 	}
+
+	//auto map2 = get(graph_traits<assemblyGraph>::vertex_descriptor(), *asmGraph);
+
 	ContactDesc desc;
-	for (auto p1= pShapeMap->begin();p1!=pShapeMap->end();p1++){
-		Part * part = dynamic_cast<Part*>(p1->second);
+	for (auto p1 = parts->begin(); p1 != parts->end(); p1++){
+		Part * part = *p1;
 		auto V1 = partUri_VertexDescMap.find(part->GetUri());
 		auto p2 = p1;
-		for (++p2;p2!=pShapeMap->end();++p2){
-			Part * coPart = dynamic_cast<Part*>(p2->second);
-			if(getContactDesc(part, coPart, desc)){
+		for (++p2; p2 != parts->end(); ++p2){
+			Part * coPart = *p2;
+			if (getContactDesc(part, coPart, desc)){
 				auto V2 = partUri_VertexDescMap.find(coPart->GetUri());
-				auto edge_Desc = add_edge(V1->second,V2->second,desc, *asmGraph);
+				auto edge_Desc = add_edge(V1->second, V2->second, desc, *asmGraph);
 				//put(AsmGraph_EdgeMap, edge_Desc, desc);
 			}
 		}
 	}
-	assemblyGraph asm2(*asmGraph);
-	typedef property_map<assemblyGraph,edge_ContactDesc_t>::type asmGraph_EdgePropMap;
-	typedef property_map<assemblyGraph,vertex_BodyForm_t>::type asmGraph_VertexPropMap;
-	typedef property_map_equivalent<asmGraph_EdgePropMap, asmGraph_EdgePropMap> asmGraphEdgeComp;
-	typedef property_map_equivalent<asmGraph_VertexPropMap, asmGraph_VertexPropMap> asmGraphVertexComp;
-	asmGraphEdgeComp AG_edge_comp = make_property_map_equivalent(get(edge_ContactDesc,*asmGraph),get(edge_ContactDesc,asm2));
-	asmGraphVertexComp AG_vertex_comp = make_property_map_equivalent(get(vertex_BodyFormDesc, *asmGraph), get(vertex_BodyFormDesc,asm2));
-	user_callback<assemblyGraph, assemblyGraph> result(asm2,*asmGraph);
+	return 0;
+}
+int AssemblyGraphBuilder::GripFacesIsomorphism(std::vector<Part*> *partsWithGripFaces, std::vector<PartIsomorphism> isomorphism, bool ReturnFirstResult){
 
-	vf2_subgraph_iso(asm2, *asmGraph, result, vertex_order_by_mult(asm2),
-		edges_equivalent(AG_edge_comp).vertices_equivalent(AG_vertex_comp));
+	assemblyGraph patternAsm(GetAssemblyGraph(partsWithGripFaces));
+	partGraphMap gripedPartMap;
+	if (currentGraphSetForMatch)
+		 delete currentGraphSetForMatch;
+	currentGraphSetForMatch = new partGraphMap;
+	for (auto &p : *partsWithGripFaces){
+		currentGraphSetForMatch->emplace(p->GetUri(),GetPartGraphsSet(p, true));//true - use just Base and Grip faces for small graph constraction
+	}
 
-	
 	std::ofstream graphStream("Graph.dot");
 	if (graphStream.is_open()){
-	//	write_graphviz(graphStream,graph1);
-	//	execl("dot.exe -Tpng Graph.dot > output.png",NULL);
-	//	execl("output.png",NULL);
+		write_graphviz(graphStream, *asmGraph);
+		//	execl("dot.exe -Tpng Graph.dot > output.png",NULL);
+		//	execl("output.png",NULL);
 	}
-		
+
+	Iso_AssemblyCallback<assemblyGraph, assemblyGraph> result(this, patternAsm, *asmGraph,true);
+
+
+	vf2_subgraph_iso(patternAsm, *asmGraph, result, get(&BodyForm::Vertex_Index, patternAsm), get(&BodyForm::Vertex_Index, *asmGraph), vertex_order_by_mult(patternAsm), ContactDescCompare(patternAsm, *asmGraph), BodyFormCompare(patternAsm,*asmGraph));
 	return 0;
+}
+void AssemblyGraphBuilder::ShowAssemblyIsomorphism(std::map<int, int> *PartToPartMap){
+
+}
+bool AssemblyGraphBuilder::IsomorphismOfPartCompare(std::map<int, int> *currentIsoResult, bool SaveResultFlag){
+	if(!currentGraphSetForMatch)
+		return false;
+	for (auto &pPair : *currentIsoResult){
+		std::pair<partGraph, partGraph> sGSet = currentGraphSetForMatch->find(pPair.first)->second;
+		std::pair<partGraph, partGraph> lGSet = partGraphSet->find(pPair.second)->second;
+		//If contact faces don't match continue assembly isomorphism calc
+		
+		if (SaveResultFlag){
+			currentIsoPart.clear();
+		if (!IsomorphismOfPartCompare(sGSet, lGSet, &currentIsoPart))
+			return false;
+		}
+		else if (!IsomorphismOfPartCompare(sGSet, lGSet, NULL))
+			return false;
+		if (SaveResultFlag){
+			currentIsoPart.back().isoPart.first = pPair.first;
+			currentIsoPart.back().isoPart.second = pPair.second;
+		}
+	}
+	//All parts has isomorphsim
+	return true;
+}
+bool AssemblyGraphBuilder::IsomorphismOfPartCompare(std::pair<partGraph, partGraph> smallGSet, std::pair<partGraph, partGraph> largeGSet,std::vector<PartIsomorphism> *result){
+	try{
+	typedef 	Iso_FaceCallback<partGraph,partGraph> faceCallBack;
+
+	Iso_FaceFalseCallback sayFalseCallBack;
+
+	auto edge_comp = FaceSpartialCompare(smallGSet.first, largeGSet.first);
+	auto vert_comp = FaceTypeCompare(smallGSet.first, largeGSet.first);
+
+	if(vf2_subgraph_iso(smallGSet.first, largeGSet.first, sayFalseCallBack, get(&FaceType::Vertex_Index, smallGSet.first), get(&FaceType::Vertex_Index, largeGSet.first), vertex_order_by_mult(smallGSet.first), edge_comp, vert_comp))
+		return false;
+	
+	faceCallBack callBack(smallGSet.second, largeGSet.second,false,result);
+	
+
+	edge_comp = FaceSpartialCompare(smallGSet.second, largeGSet.second);
+	vert_comp = FaceTypeCompare(smallGSet.second, largeGSet.second);
+
+	if (vf2_subgraph_iso(smallGSet.first, largeGSet.first, callBack, get(&FaceType::Vertex_Index, smallGSet.first), get(&FaceType::Vertex_Index, largeGSet.first), vertex_order_by_mult(smallGSet.first), edge_comp, vert_comp)){
+		IsDone = true;
+		return true;
+	}
+	}
+	catch (std::exception){
+		return false;
+	}
+	return false;
+}
+bool AssemblyGraphBuilder::IsomorphismOfPartCompare(partGraph smallGSet, partGraph largeGSet){
+
+	return true;
+}
+std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Part* part, bool justBaseAndGripFaces){
+	PartUri pUri = part->GetUri();
+	partGraph smallG;
+	partGraph fullG;
+	_real MaxDistance = 0;
+//	_int VertCounter = 0;
+	auto end = part->colOfSurf.end();
+	std::map<FaceUri, int> faceToSmallGraphMap;
+	std::map<FaceUri, int> faceToFullGraphMap;
+
+	for (auto iter = part->colOfSurf.begin(); iter != end; ++iter){
+		auto Vert1Prop = getFaceType(*iter);
+
+		if (justBaseAndGripFaces){
+			if((iter->Func == _Base || iter->Func==_Grip))
+			Vert1Prop.Vertex_Index = add_vertex(fullG);
+		}
+		else
+			Vert1Prop.Vertex_Index = add_vertex(fullG);
+
+		fullG[Vert1Prop.Vertex_Index] = Vert1Prop;
+		faceToFullGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
+		if (iter->Func == _Base){
+			Vert1Prop.Vertex_Index = add_vertex(smallG);
+			smallG[Vert1Prop.Vertex_Index] = Vert1Prop;
+			faceToSmallGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
+		}
+	}
+
+	for (auto iter = part->colOfSurf.begin(); iter != end; ++iter){
+		auto coIter = iter;
+		auto v1 = faceToFullGraphMap.find(iter->uri);
+		if (v1 != faceToFullGraphMap.end())
+		for (coIter++; coIter != end; ++coIter){
+			auto v2 = faceToFullGraphMap.find(coIter->uri);
+			if (v2 == faceToFullGraphMap.end())
+				continue;
+
+			auto EdgeProp = getFaceSpartialDescriptor(*iter, *coIter);
+			MaxDistance = MaxDistance>EdgeProp.DistDesc ? MaxDistance : EdgeProp.DistDesc;
+			auto newE = add_edge(v1->second,v2->second, EdgeProp, fullG);
+
+			if (coIter->Func == _Base && coIter->Func == _Base){
+				auto newE = add_edge(v1->second, v2->second, EdgeProp, smallG);
+			}
+		}
+	}
+
+			BGL_FORALL_EDGES(e, fullG, partGraph){
+				smallG[e].DistDesc /= MaxDistance;
+			}
+			BGL_FORALL_EDGES(e, smallG, partGraph){
+				fullG[e].DistDesc /= MaxDistance;
+			}
+			return std::pair<partGraph,partGraph>(smallG,fullG);
 }
 
 _int AssemblyGraphBuilder::pushToPartSetGraph(PartUri pUri, asp::Part* part){
@@ -78,7 +218,8 @@ _int AssemblyGraphBuilder::pushToPartSetGraph(PartUri pUri, asp::Part* part){
 		return -1;
 	if (partGraphSet->find(pUri) != partGraphSet->end())
 		return -2;
-	
+
+
 	return 0;
 }
 _int AssemblyGraphBuilder::addEdgeToAssemblyGraph(PartUri pUri, Part* part){
@@ -224,7 +365,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 	return true;
 }
 
-AssemblyGraphBuilder::FaceSpartial AssemblyGraphBuilder::getFaceSpartialDescriptor( asp::SurfaceAttribute &s1, asp::SurfaceAttribute &s2){
+FaceSpartial AssemblyGraphBuilder::getFaceSpartialDescriptor( asp::SurfaceAttribute &s1, asp::SurfaceAttribute &s2){
 	
 	FaceSpartial fSpartialDesc;
 	//CenterPoint of surface
@@ -254,7 +395,7 @@ AssemblyGraphBuilder::FaceSpartial AssemblyGraphBuilder::getFaceSpartialDescript
 	return fSpartialDesc;
 }
 
-AssemblyGraphBuilder::BodyForm AssemblyGraphBuilder::getBodyDescriptor(asp::Part* part){
+BodyForm AssemblyGraphBuilder::getBodyDescriptor(asp::Part* part){
 	
 	BodyForm bForm;
 
@@ -262,15 +403,21 @@ AssemblyGraphBuilder::BodyForm AssemblyGraphBuilder::getBodyDescriptor(asp::Part
 	bForm.partUri = part->GetUri();
 	return bForm;
 }
-AssemblyGraphBuilder::FaceType AssemblyGraphBuilder::getFaceType(const asp::SurfaceAttribute &surface1){
+FaceType AssemblyGraphBuilder::getFaceType(const asp::SurfaceAttribute &surface1){
 	FaceType fType;
+
+	fType.faceUri = surface1.uri;
+
 	if (surface1.Func == asp::SurfaceFunction::_Base)
 		fType.FaceFunctionType=(1);
 	else
 		fType.FaceFunctionType = (0);
+
+	fType.FaceFormType=surface1.Type;
+
 	return fType;
 }
-_int AssemblyGraphBuilder::getContactDesc(asp::Part* part1, asp::Part* part2, AssemblyGraphBuilder::ContactDesc &desc){
+_int AssemblyGraphBuilder::getContactDesc(asp::Part* part1, asp::Part* part2, ContactDesc &desc){
 	ContactDesc cType;
 	_int cntTypeValue{0};
 	_int ObstPartUri = part2->GetUri();

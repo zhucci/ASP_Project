@@ -106,6 +106,9 @@
     <ClCompile Include="src\AssemblyGraphBuilder.cpp">
       <Filter>AspTool\src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AspMainTestClass.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\AspMainTool.h">
@@ -175,6 +178,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\AssemblyGraphBuilder.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\AspMainTestClass.h">
       <Filter>AspTool\inc</Filter>
     </ClInclude>
   </ItemGroup>

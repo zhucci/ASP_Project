@@ -20,7 +20,10 @@
 #include <qaction.h>
 #include <AIS_DisplayMode.hxx>
 #include <AIS_LocalContext.hxx>
+
+
 static Handle(Graphic3d_GraphicDriver) Viewer_aGraphicDriver;
+
 
 Viewer::Viewer(QWidget* parent):QWidget(parent)
 {
@@ -40,7 +43,7 @@ Viewer::Viewer(QWidget* parent):QWidget(parent)
 	Handle(V3d_Viewer) aViewer = new V3d_Viewer(myGraphicDriver, TCollection_ExtendedString("Visu3D").ToExtString(), "",//Name and Domain
                                 1000,// Space size
 								V3d_XposYnegZpos, //Projection
-                                Quantity_NOC_GRAY30,//Background
+								Quantity_NOC_GRAY40,//Background
 								V3d_TypeOfVisualization::V3d_ZBUFFER,  // Type of  visualization
 							   V3d_TypeOfShadingModel::V3d_GOURAUD,  // Shading  model  
 								V3d_WAIT, // Update mode 
@@ -101,6 +104,7 @@ Viewer::Viewer(QWidget* parent):QWidget(parent)
     aViewer->SetLightOn(new V3d_AmbientLight(aViewer, Quantity_NOC_WHITE));
 	// aViewer->UpdateLights();
 	 myIC->SetHilightColor(Quantity_NOC_BLUE2);
+	
 	 
 }
 

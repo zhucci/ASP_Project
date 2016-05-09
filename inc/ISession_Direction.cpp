@@ -14,7 +14,8 @@
 #include <Prs3d_LineAspect.hxx>
 #include <Prs3d_Text.hxx>
 #include <SelectMgr_EntityOwner.hxx>
-
+#include <Prs3d_TextAspect.hxx>
+#include <Graphic3d_AspectLine3d.hxx>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -30,7 +31,7 @@ IMPLEMENT_STANDARD_RTTIEXT(ISession_Direction,AIS_InteractiveObject)
 
 ISession_Direction::ISession_Direction()
 {
-
+	arrowColor = Quantity_NameOfColor::Quantity_NOC_RED;
 }
 
 ISession_Direction::ISession_Direction (const gp_Pnt& aPnt,
@@ -41,7 +42,10 @@ ISession_Direction::ISession_Direction (const gp_Pnt& aPnt,
   myDir (aDir),
   myLength (aLength),
   myArrowLength (anArrowLength)
-{}
+  
+{
+	arrowColor = Quantity_NameOfColor::Quantity_NOC_RED;
+}
 
 ISession_Direction::ISession_Direction (const gp_Pnt& aPnt,
                                         const gp_Vec& aVec,
@@ -51,6 +55,8 @@ ISession_Direction::ISession_Direction (const gp_Pnt& aPnt,
   myArrowLength (anArrowLength)
 {
   myLength = aVec.Magnitude();
+  arrowColor = Quantity_NameOfColor::Quantity_NOC_RED;
+  
 }
 
 ISession_Direction::ISession_Direction (const gp_Pnt2d& aPnt2d,
@@ -61,6 +67,7 @@ ISession_Direction::ISession_Direction (const gp_Pnt2d& aPnt2d,
   myLength (aLength)
 {
   myArrowLength = myDrawer->ArrowAspect()->Length();
+  arrowColor = Quantity_NameOfColor::Quantity_NOC_RED;
 }
 
 ISession_Direction::ISession_Direction (const gp_Pnt2d& aPnt2d,
@@ -70,6 +77,7 @@ ISession_Direction::ISession_Direction (const gp_Pnt2d& aPnt2d,
 {
   myLength = aVec2d.Magnitude();
   myArrowLength = myDrawer->ArrowAspect()->Length();
+  arrowColor = Quantity_NameOfColor::Quantity_NOC_RED;
 }
 
 
@@ -83,18 +91,31 @@ void ISession_Direction::Compute (const Handle(PrsMgr_PresentationManager3d)& /*
                                   const Standard_Integer /*aMode*/)
 {
   // Set style for arrow
-  Handle(Prs3d_ArrowAspect) anArrowAspect = myDrawer->ArrowAspect();
+	Handle(Prs3d_ArrowAspect) anArrowAspect = new Prs3d_ArrowAspect(); // myDrawer->ArrowAspect();  
+   anArrowAspect->Aspect() = new Graphic3d_AspectLine3d(arrowColor,Aspect_TypeOfLine::Aspect_TOL_SOLID,2);
   anArrowAspect->SetLength (myArrowLength);
+  anArrowAspect->SetColor(arrowColor);
+
+  SetColor(arrowColor);
 
   gp_Pnt aLastPoint = myPnt;
+
   aLastPoint.Translate (myLength*gp_Vec(myDir));
 
-  // Draw Line
+  myDrawer->SetArrowAspect(anArrowAspect);
+
+  gp_Pnt LastPoint = myPnt;
+  LastPoint.Translate(myLength*gp_Vec(myDir));
+  
+  if (myText.Length() == 0)
+	  DsgPrs_LengthPresentation::Add(aPresentation, myDrawer, myPnt, aLastPoint, DsgPrs_AS_LASTAR);
+
   Handle(Graphic3d_ArrayOfSegments) aPrims = new Graphic3d_ArrayOfSegments (2);
   aPrims->AddVertex (myPnt);
   aPrims->AddVertex (aLastPoint);
   Prs3d_Root::CurrentGroup (aPresentation)->SetPrimitivesAspect (myDrawer->LineAspect()->Aspect());
   Prs3d_Root::CurrentGroup (aPresentation)->AddPrimitiveArray (aPrims);
+ 
   // Draw arrow
   Prs3d_Arrow::Draw (aPresentation,
                      aLastPoint,
@@ -106,6 +127,8 @@ void ISession_Direction::Compute (const Handle(PrsMgr_PresentationManager3d)& /*
   if (myText.Length() != 0)
   {
     gp_Pnt aTextPosition = aLastPoint;
+	 Handle_Prs3d_TextAspect textAspect = myDrawer->TextAspect();
+	 textAspect->SetColor(arrowColor);
     Prs3d_Text::Draw (aPresentation,
                       myDrawer->TextAspect(),
                       myText,
@@ -119,7 +142,7 @@ void ISession_Direction::Compute (const Handle(Prs3d_Projector)& /*aProjector*/,
 {
 }
 
-void ISession_Direction::ComputeSelection (const Handle(SelectMgr_Selection)&																aSelection,
+void ISession_Direction::ComputeSelection (const Handle(SelectMgr_Selection)&	aSelection,
                                            const Standard_Integer aMode) 
 {
 	Handle(SelectMgr_EntityOwner) eown = new SelectMgr_EntityOwner(this);
@@ -128,6 +151,7 @@ void ISession_Direction::ComputeSelection (const Handle(SelectMgr_Selection)&			
   last.SetX(myPnt.X()+myLength*myDir.X());
   last.SetY(myPnt.Y()+myLength*myDir.Y());
   last.SetZ(myPnt.Z()+myLength*myDir.Z());
+  
   Handle(Select3D_SensitiveSegment) seg = new Select3D_SensitiveSegment(eown,
 	  this->myPnt,
 	  last);
@@ -147,4 +171,8 @@ void ISession_Direction::SetText (Standard_CString theText)
 void ISession_Direction::SetLineAspect (const Handle(Prs3d_LineAspect)& theAspect)
 {
   myDrawer->SetLineAspect (theAspect);
+}
+void ISession_Direction::SetArrowColor(Quantity_NameOfColor color)
+{
+	arrowColor = color;
 }

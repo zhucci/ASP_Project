@@ -9,6 +9,10 @@ namespace asp
 	class Assembly : public Unit
 	{		
 	public:
+
+		friend class AspMainTest;
+
+
 		Assembly(const TDF_Label &label, Unit* root=NULL);
 		~Assembly();
 		

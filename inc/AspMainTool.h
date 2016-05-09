@@ -17,6 +17,9 @@ namespace asp{
 class AspMainTool
 {
 public:
+
+	friend class AspMainTest;
+
 	 AspMainTool();
 	~AspMainTool();
 
@@ -31,21 +34,10 @@ public:
 	void								StopAssemblyAnimation(){ if (AsmTreeBuilding) asmSeq.Stop(); showMustGoOn = false; }
 
 	void								ShowProduct(Viewer* aViewer);
-
-	void								FillPartWithPoints(Viewer * aViewer);
-
-	void								FindPointsOnPartSurface(Part* pPart);
-
-	void								TestFindPartsPointsFunction(Viewer * aViewer);
 	
 	void								SetAsmTreeCalcStatus(Standard_Boolean status){AsmTreeCalculation = status;}
 
 	std::string &&					GetLog();
-
-//Test functions
-	void								TestContactSpotProcess(Viewer * view);
-	void								TestGraphIso(Viewer * view);
-
 	
 	std::string						GetSequence(AsmTreeNode::AsmMoveType type);
 	

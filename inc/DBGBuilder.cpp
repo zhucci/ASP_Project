@@ -5,6 +5,7 @@
 
 using namespace asp;
 
+
 asp_Ax1::asp_Ax1(asp_Ax1 &&ax){
 	SetDirection(ax.Direction());
 	SetLocation(ax.Location());

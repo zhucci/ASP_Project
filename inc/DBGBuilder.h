@@ -87,6 +87,8 @@ namespace asp{
 	class DBGBuilder{
 	public:
 
+		friend class AspMainTest;
+
 		DBGBuilder();
 
 		void SyncLists(closed_list<_int> *DisassembledPartList);
@@ -134,8 +136,8 @@ namespace asp{
 		//! purpose: check if 'box' is wraped by 'wrapBox'
 		Standard_Boolean isEnvelopBndBox(Bnd_Box *box, Bnd_Box *wrapBox);
 
-		_bool NotInContact(SurfaceAttribute &sp, SurfaceAttribute &obstSp, _real OverLaySize, _real gap);
-		_bool NotOverlay(Bnd_Box *box1, Bnd_Box *box2, _real OverLaySize);
+		static _bool NotInContact(SurfaceAttribute &sp, SurfaceAttribute &obstSp, _real OverLaySize, _real gap);
+		static _bool NotOverlay(Bnd_Box *box1, Bnd_Box *box2, _real OverLaySize);
 		
 
 

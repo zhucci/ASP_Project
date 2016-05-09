@@ -13,6 +13,10 @@ namespace asp{
 //!Class for assembly sequence building
 class AsmTreeBuilder{
 public:
+
+	friend class AspMainTest;
+
+
 						AsmTreeBuilder();
 		
 						~AsmTreeBuilder();

@@ -17,13 +17,14 @@ public:
   void SetText (TCollection_ExtendedString& aText);
   void SetText (Standard_CString aText);
   void SetLineAspect (const Handle(Prs3d_LineAspect)& theAspect);
+  void SetArrowColor(Quantity_NameOfColor color);
   ISession_Direction();
   ISession_Direction (const gp_Pnt& aPnt,const gp_Dir& aDir,Standard_Real aLength=1,Standard_Real anArrowLength=1);
   ISession_Direction (const gp_Pnt& aPnt,const gp_Vec& aVec,Standard_Real anArrowLength=1);
 
   ISession_Direction (const gp_Pnt2d& aPnt2d,const gp_Dir2d& aDir2d,Standard_Real aLength=1);
   ISession_Direction (const gp_Pnt2d& aPnt2d,const gp_Vec2d& aVec2d);
-
+  
   virtual ~ISession_Direction();
   DEFINE_STANDARD_RTTI(ISession_Direction)
 
@@ -40,6 +41,7 @@ private:
     gp_Dir myDir;
     Standard_Real myLength;
     Quantity_Length myArrowLength;
+	 Quantity_NameOfColor arrowColor;
 };
 
 #endif // !defined(_ISession_Direction_)

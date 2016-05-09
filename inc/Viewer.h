@@ -15,12 +15,17 @@
 #include <Voxel_Prs.hxx>
 #include <Voxel_Selector.hxx>
 
+namespace asp{
+	class AspMainTest;
+};
 class Viewer : public QWidget 
 {
 	
 	Q_OBJECT
 
 public:
+
+	friend class asp::AspMainTest;
 
 	Viewer(QWidget* parent);
 	virtual ~Viewer();
@@ -69,7 +74,8 @@ private:
 	bool myRotate;
 	bool myZoom;
 	bool myPan;
-
+	Quantity_NameOfColor backgroundColor{ Quantity_NOC_GRAY30 };
+	//Quantity_NameOfColor backgroundColor{ Quantity_NOC_WHITESMOKE };
 	QPoint myStartPnt;
 
     void setDegenerateMode(const bool );

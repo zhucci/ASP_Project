@@ -11,6 +11,9 @@ namespace asp{
 	class ContactSpot 
 	{
 	public:
+
+		friend class AspMainTest;
+
 			ContactSpot(const BRepAdaptor_Surface &surface1, 
 				const BRepAdaptor_Surface &surface2);
 			ContactSpot(const SurfaceAttribute &surface1,
@@ -33,7 +36,8 @@ namespace asp{
 		_real MinContactPntAngDistance{ M_PI / 3 };
 		_real ContDirParPrecision{ 0.05};
 		Standard_Real SSGapSize { 4 };
-		 Standard_Real SSCrossSize{ 4 };
+		Standard_Real SSCrossSize{ 4 };
+		Standard_Real SSContactGapSize{1e-1};
 
 		struct facePntCorrespond{
 			facePntCorrespond():correctPair{ false }{}

@@ -18,6 +18,10 @@ namespace asp
 		friend class AssemblyPartPriorityCompare;
 		friend class AspMainTool;
 		friend class AsmTreeBuilder;
+		friend class AspMainTest;
+
+		friend class AssemblyGraphBuilder;
+
 		Part(const TDF_Label &label, Unit* root=NULL);
 
 		~Part();

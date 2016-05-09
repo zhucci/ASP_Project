@@ -271,9 +271,17 @@ _bool AsmTreeBuilder::IsBlocked(asp_Ax1 dir, std::vector<asp_Ax1> *colOfBlkDir){
 }
 
 void AsmTreeBuilder::FindPointsOnPartSurface(Part *pPart){
+	std::vector< int> ForbidenFaces;
+	for (auto &contact : pPart->colOfCont){
+		if (contact.Type == _Intersect){
+			ForbidenFaces.push_back(contact.MySurfNumber);
+		}
+	}
 
 	if (!pPart->pntInPart.size()){
-	for (auto &face : *pPart){
+		for (auto &face : *pPart){
+			if (ForbidenFaces.size() && std::find(ForbidenFaces.begin(),ForbidenFaces.end(),face.uri)!=ForbidenFaces.end())
+				continue;
 		try{
 			static _real dltU, dltV;
 			static BRepClass_FaceClassifier classifier;

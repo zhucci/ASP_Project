@@ -111,7 +111,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WINDOWS;CSFDB;NDEBUG;WNT;WIN32;NO_COMMONSAMPLE_EXPORTS;NO_IESAMPLE_EXPORTS;QT_DLL;QT_GUI_LIB;QT_CORE_LIB;QT_HAVE_MMX;QT_HAVE_3DNOW;QT_HAVE_SSE;QT_HAVE_MMXEXT;QT_HAVE_SSE2;QT_THREAD_SUPPORT;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;CSFDB;NDEBUG;WNT;WIN32;NO_COMMONSAMPLE_EXPORTS;NO_IESAMPLE_EXPORTS;QT_DLL;QT_GUI_LIB;QT_CORE_LIB;QT_HAVE_MMX;QT_HAVE_3DNOW;QT_HAVE_SSE;QT_HAVE_MMXEXT;QT_HAVE_SSE2;QT_THREAD_SUPPORT;_ITERATOR_DEBUG_LEVEL=0;_LOGOUTPUT_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>.\</ProgramDataBaseFileName>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -179,6 +179,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\AsmShowManager.cpp" />
+    <ClCompile Include="src\AspMainTestClass.cpp" />
     <ClCompile Include="src\AspMainTool.cpp" />
     <ClCompile Include="src\Assembly.cpp" />
     <ClCompile Include="src\AssemblyGraphBuilder.cpp" />
@@ -203,6 +204,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="inc\AsmTreeNode.h" />
+    <ClInclude Include="inc\AspMainTestClass.h" />
     <ClInclude Include="inc\AspMainTool.h" />
     <ClInclude Include="inc\Assembly.h" />
     <ClInclude Include="inc\AssemblyGraphBuilder.h" />

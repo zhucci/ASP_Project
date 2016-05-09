@@ -21,6 +21,8 @@ namespace asp{
 	class AsmTreeNode{
 
 	public:
+		friend class AspMainTest;
+
 		enum		AsmMoveType{UNKNOWN, MOUNT, DISMANTLE };
 		typedef  gp_Vec Dir;
 

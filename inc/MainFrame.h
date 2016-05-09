@@ -7,11 +7,18 @@
 //UIC compiled mainFrame.ui file
 //uic.exe src/mainFrame.ui -o win64/vc10/srcd/ui_mainFrame.h
 
+namespace asp{
+ class	AspMainTest;
+};
+
 class MainFrame :
 	public QMainWindow, public Ui::MainFrame
 {
 	Q_OBJECT
 public:
+
+	friend class asp::AspMainTest;
+
 	MainFrame(void);
 
 	~MainFrame(void);

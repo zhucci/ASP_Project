@@ -310,6 +310,7 @@ _bool ContactSpot::OverLayAreaGen(){
 		f1_perimeter=propsTester.Mass();
 		
 		BRepGProp::LinearProperties(f2.Face(), propsTester);
+		
 		f2_perimeter = propsTester.Mass();
 		BRepAdaptor_Surface * smlSurf;
 		BRepAdaptor_Surface * bgSurf;
@@ -648,9 +649,11 @@ _bool ContactSpot:: OverLayAreaEl( ){
 		//		DEBUG section		=
 		//===========================
 					if (!extEl.IsDone())
-						return true;
-					if (!extEl.IsParallel())
-						return true;
+						return false;
+					if (!extEl.IsParallel()){
+						
+						return false;
+					}
 					_real dist = extEl.SquareDistance();
 					if (dist - LinTol() > SquareGap)
 						return true;
@@ -664,13 +667,25 @@ _bool ContactSpot:: OverLayAreaEl( ){
 					else
 						f2Dir = f2.Plane().Axis().Reversed();
 					
-					if(	!f1Dir.Direction().IsOpposite(f2Dir.Direction(), AngTol()))
-						return true;
+					if(!f1Dir.Direction().IsOpposite(f2Dir.Direction(), AngTol()))
+						return false;
 
 					//Blocking direction
+
 					
+				
+					if (dist<SSContactGapSize)
+						contactType=ContactType::_Contact;
+					else {
+						gp_Vec p1p2(f1Dir.Location(), f2Dir.Location());
+						if (p1p2.Dot(f1Dir.Direction())<0)
+							contactType=ContactType::_Intersect;
+						else 
+							contactType = ContactType::_InGap;
+					}
+
 					f1VecSpot.push_back(f1Dir);
-					//f2VecSpot.push_back(f2.Plane().Axis());
+					f2VecSpot.push_back(f2.Plane().Axis());
 
 					return true;
 				}
