@@ -297,16 +297,13 @@ Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boole
 {
 	try{
 
-		_real Gap;
+		_real Gap = 3;
 		_real Overlay = 1;
-		if (allowGap)
-			Gap = SGap();
-		else
-			Gap = LinTol();
-
+	
 		// ### need some optimization until excluded
 		//if (!fastCheckIntersect(part, obst))
 		//	return 0;
+
 		const Bnd_Box &partBox = *part->BndBox();
 		const Bnd_Box &obstBox = *obst->BndBox();
 		if (partBox.Distance(obstBox) > Gap)
@@ -324,10 +321,27 @@ Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boole
 			for (auto &obstSp : *obst){
 				if (obstSp.myBox.Distance(sp.myBox)>Gap)
 					continue;
+
 				//Posibility be at contact check
 				if (NotInContact(sp, obstSp, Overlay, Gap))
 					continue;
+
 				
+				BRepExtrema_ExtFF Ext(sp.myShape, obstSp.myShape);
+			
+				const Standard_Integer NbExtrema = Ext.IsDone() ? Ext.NbExt() : 0;
+				
+				if (NbExtrema > 0)
+				{
+					_real minDist = Gap+Gap;
+					for (int i = 1; i <= NbExtrema; i++){
+						_real dist = std::sqrt(Ext.SquareDistance(i));
+						if (minDist>dist) minDist = dist;
+					}
+					if (minDist>Gap)
+						continue;
+				}
+
 				ContactSpot spot(sp, obstSp, part, obst);
 
 				if (spot.IsDone()){
@@ -336,6 +350,7 @@ Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boole
 					//std::vector <gp_Ax1> colOfDir2 = spot.getF2ContactAxis();
 
 					if (colOfDir.size()){
+
 						MergeCollectionOfDirs(colOfDir,_ContactBlk, blkDirsForPart);
 						colOfDir = spot.getF2ContactAxis();
 						MergeCollectionOfDirs(colOfDir,_ContactBlk, blkDirsForObstacle);

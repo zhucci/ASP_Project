@@ -25,9 +25,17 @@ public:
 
 	void Init(std::string stepfileName, Viewer *aView, MainFrame* appWindow=nullptr);
 
-	void ShowInformAboutSelectedShape(Viewer* aViewer);
+	void ShowInformAboutSelectedShape(Viewer *aViewer);
+
+	void AspMainTool::HideSelectedPart(Viewer *aView);
 
 	void ShowAssemblyStep(AsmTreeNode::AsmMoveType operType, Viewer * aViewer);
+
+	void ShowAssemblyInfo(MainFrame* appWindow);
+
+	void ShowJustSelectedShape(Viewer* aView);
+
+	void SetDisplayMode(AIS_DisplayMode dispMode, Viewer* aView);
 
 	void PlayAssemblyAnimation(AsmTreeNode::AsmMoveType processType, Viewer* aViewer);
 
@@ -77,6 +85,9 @@ private:
 	TopTools_HSequenceOfShape	productShapes;
 //!Part Uri --> AIS_Shape
 	std::map<_int, Handle_AIS_Shape> mapOfShapes;
+
+	AIS_DisplayMode displayMode;
+
 	_int AsmVisualContextId;
 	Handle_AIS_Shape helpShape;
 	_int ProductContext;

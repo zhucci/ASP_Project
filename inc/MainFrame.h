@@ -27,6 +27,7 @@ public:
 
 private slots:
 	void ViewModeChanged();
+	void ShowAssemblyInfo();
 	void SaveSequence();
 	void ImportStep();
 	void PlayBack();
@@ -37,6 +38,10 @@ private slots:
 	void DBGShow();
 	void ExportPhoto();
 	void ShowFullProduct();
+	void HideSelectedPart();
+	void DisplayJustSelected();
+	void SetShadedMode();
+	void SetWireFrameMode();
 	void about();
 	void contextMenu(const QPoint &pos);
 	void Exit();
@@ -52,7 +57,7 @@ private slots:
 
 	
 protected:
-	
+	AIS_DisplayMode displayMode;
 	asp::AspMainTool *aspTool{NULL};
 	_bool justViewMode{false};
 	Viewer* myViewer;

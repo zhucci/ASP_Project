@@ -22,7 +22,7 @@ static const uint qt_meta_data_Viewer[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       8,   14, // methods
+       9,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -39,7 +39,8 @@ static const uint qt_meta_data_Viewer[] = {
  // slots: signature, parameters, type, tag, flags
      220,    7,    7,    7, 0x09,
      240,    7,    7,    7, 0x09,
-     260,    7,    7,    7, 0x09,
+     261,    7,    7,    7, 0x09,
+     281,    7,    7,    7, 0x09,
 
        0        // eod
 };
@@ -50,8 +51,8 @@ static const char qt_meta_stringdata_Viewer[] = {
     "mouseReleased(Qt::KeyboardModifiers,int,int)\0"
     "mouseDoubleClick(Qt::KeyboardModifiers,int,int)\0"
     "pos\0contextMenuSignal(QPoint)\0"
-    "ChangeShadingMode()\0CloseLocalContext()\0"
-    "DisplayAll()\0"
+    "ChangeShadingMode()\0ShapeDecomposition()\0"
+    "CloseLocalContext()\0DisplayAll()\0"
 };
 
 void Viewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -66,8 +67,9 @@ void Viewer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         case 3: _t->mouseDoubleClick((*reinterpret_cast< Qt::KeyboardModifiers(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
         case 4: _t->contextMenuSignal((*reinterpret_cast< const QPoint(*)>(_a[1]))); break;
         case 5: _t->ChangeShadingMode(); break;
-        case 6: _t->CloseLocalContext(); break;
-        case 7: _t->DisplayAll(); break;
+        case 6: _t->ShapeDecomposition(); break;
+        case 7: _t->CloseLocalContext(); break;
+        case 8: _t->DisplayAll(); break;
         default: ;
         }
     }
@@ -105,9 +107,9 @@ int Viewer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 8)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 9;
     }
     return _id;
 }

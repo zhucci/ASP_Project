@@ -8,6 +8,7 @@
 MainFrame::MainFrame(void):QMainWindow(0)
 {
 	setupUi(this);
+	displayMode = AIS_DisplayMode::AIS_WireFrame;
 	this->setWindowIconText("AsmPlan");
 	myViewer = new Viewer(this);
 	myViewer->setFocus();
@@ -32,7 +33,9 @@ MainFrame::MainFrame(void):QMainWindow(0)
 	connect(actionT5, SIGNAL(triggered()), this, SLOT(Test5()));
 	connect(actionPartGraph, SIGNAL(triggered()), this, SLOT(PartGraph()));
 	connect(actionViewMode, SIGNAL(triggered()), this, SLOT(ViewModeChanged()));
-
+	connect(action_AssemlyInfoRequest, SIGNAL(triggered()), this, SLOT(ShowAssemblyInfo()));
+	connect(action_SetFrameDisplayMode, SIGNAL(triggered()), this, SLOT(SetWireFrameMode()));
+	connect(action_SetShadedDisplayMode, SIGNAL(triggered()), this, SLOT(SetShadedMode()));
 }
 void MainFrame::ViewModeChanged(){
 	justViewMode=!justViewMode;
@@ -40,7 +43,11 @@ void MainFrame::ViewModeChanged(){
 MainFrame::~MainFrame(){
 
 }
-
+void MainFrame::ShowAssemblyInfo(){
+	if (aspTool){
+		aspTool->ShowAssemblyInfo(this);
+	}
+}
 void MainFrame::SaveSequence(){
 
 }
@@ -162,7 +169,11 @@ void MainFrame::Test4(){
 	}
 }
 void MainFrame::Test5(){
-
+	if (aspTool){
+		asp::AspMainTest test;
+		test.TestContactSpotTimeCalc(this, aspTool);
+	}
+	
 }
 void MainFrame::TestVoxelGeneration(){
 
@@ -174,7 +185,31 @@ void MainFrame::PartGraph(){
 		test.TestGraphIso(this,aspTool);
 	}
 }
+void MainFrame::HideSelectedPart(){
+	if (aspTool){
+		aspTool->HideSelectedPart(myViewer);
+	}
+}
+void MainFrame::SetShadedMode(){
+	displayMode =  AIS_Shaded;
 
+	if (aspTool)
+		aspTool->SetDisplayMode(displayMode, myViewer);
+	
+}
+void MainFrame::SetWireFrameMode(){
+
+	displayMode = AIS_WireFrame;
+
+	if (aspTool)
+		aspTool->SetDisplayMode(displayMode,myViewer);
+	
+}
+void MainFrame::DisplayJustSelected(){
+	if (aspTool){
+		aspTool->ShowJustSelectedShape(myViewer);
+	}
+}
 void MainFrame::contextMenu(const QPoint &pos){
 	QAction *shadingMode = new QAction(tr("Display mode"), this);
 	connect(shadingMode, SIGNAL(triggered()), myViewer, SLOT(ChangeShadingMode()));
@@ -182,8 +217,15 @@ void MainFrame::contextMenu(const QPoint &pos){
 	connect(clearLocalContext, SIGNAL(triggered()), myViewer, SLOT(CloseLocalContext()));
 	QAction *displayHiddenPart = new QAction(tr("Display hidden parts"), this);
 	connect(displayHiddenPart, SIGNAL(triggered()), this, SLOT(ShowFullProduct()));
+	QAction *HidePart = new QAction(tr("Hide part"), this);
+	connect(HidePart, SIGNAL(triggered()), this, SLOT(HideSelectedPart()));
+	QAction *displayJustSelected = new QAction(tr("Keep just this"), this);
+	connect(displayJustSelected, SIGNAL(triggered()), this, SLOT(DisplayJustSelected()));
 	QMenu menu(tr("Context"), this);
+
 	menu.addAction(shadingMode);
+	menu.addAction(HidePart);
+	menu.addAction(displayJustSelected);
 	menu.addAction(clearLocalContext);
 	menu.addAction(displayHiddenPart);
 	menu.exec(pos);

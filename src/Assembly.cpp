@@ -60,7 +60,8 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 
 		iter.Initialize(myLabel, Standard_False);
 		
-		for (; iter.More(); iter.Next()){
+		//for (; iter.More(); iter.Next()){
+		if (iter.More()){
 			try{
 				_bool isRef =XCAFDoc_ShapeTool::IsReference(iter.Value());
 				_bool isAssembly= XCAFDoc_ShapeTool::IsAssembly(iter.Value());
@@ -70,7 +71,7 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 				TopoDS_Shape shape =XCAFDoc_ShapeTool::GetShape(iter.Value());
 				
 				//auto newLoc = shape.Location().Multiplied(myLoc);
-				shape.Move(myLoc);
+				//shape.Move(myLoc);
 				auto newShapeType = shape.ShapeType();
 				
 				Unit *subUnit;
@@ -82,11 +83,11 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 				else if (newShapeType == TopAbs_SOLID){
 					subUnit = new asp::Part(shape, this);
 				}
-				else {
-					continue;
-				}
-				if (!subUnit->IsDone())
-					continue;
+				//else {
+				///	continue;
+				//}
+				//if (!subUnit->IsDone())
+				//	continue;
 				ColSubUnit.push_back(subUnit);
 
 				if (subUnit->Type()==_Part)

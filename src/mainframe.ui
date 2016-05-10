@@ -138,9 +138,6 @@
      </item>
     </layout>
    </widget>
-   <zorder>verticalLayoutWidget</zorder>
-   <zorder>verticalLayoutWidget_2</zorder>
-   <zorder>verticalLayoutWidget_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -177,8 +174,17 @@
     <property name="title">
      <string>Вид</string>
     </property>
+    <widget class="QMenu" name="menu_2">
+     <property name="title">
+      <string>Вид модели</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="action_SetFrameDisplayMode"/>
+     <addaction name="action_SetShadedDisplayMode"/>
+    </widget>
     <addaction name="actionCONTROLPANEL"/>
     <addaction name="action"/>
+    <addaction name="menu_2"/>
    </widget>
    <widget class="QMenu" name="menu_HELP">
     <property name="title">
@@ -192,6 +198,7 @@
     </property>
     <addaction name="menu_VariableControl"/>
     <addaction name="menu_VisualizationControl"/>
+    <addaction name="action_AssemlyInfoRequest"/>
    </widget>
    <addaction name="menu_FILE"/>
    <addaction name="menu_VIEW"/>
@@ -449,6 +456,33 @@
   <action name="action">
    <property name="text">
     <string>Дерево модели</string>
+   </property>
+  </action>
+  <action name="action_AssemlyInfoRequest">
+   <property name="text">
+    <string>Параметры сборки</string>
+   </property>
+  </action>
+  <action name="action_SetFrameDisplayMode">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Каркасный</string>
+   </property>
+  </action>
+  <action name="action_SetShadedDisplayMode">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Твердотельный</string>
    </property>
   </action>
  </widget>

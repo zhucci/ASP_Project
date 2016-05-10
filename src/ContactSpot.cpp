@@ -15,87 +15,27 @@
 #include "BRepClass_FaceClassifier.hxx"
 using namespace asp;
 
-ContactSpot::ContactSpot(const BRepAdaptor_Surface &surface1, const BRepAdaptor_Surface &surface2)
-{
-	
-	f1 =surface1;
-	f2 = surface2;
-		
-	Perform();
-}
 
-_real ContactSpot::DistFF(_real *X)
-{
-	return f1.Value(X[0], X[1]).Distance(f2.Value(X[2], X[3]));
-}
-ContactSpot::ContactSpot(const SurfaceAttribute &surface1,
-	const SurfaceAttribute &surface2, Part* Part1, Part* Part2){
+ContactSpot::ContactSpot(SurfaceAttribute &surface1,
+	SurfaceAttribute &surface2, Part* Part1, Part* Part2):
+	f1{surface1.surf},f2{surface2.surf},prt1{Part1},prt2{Part2}{
+
 	isDone = false;
-
-	f1 = surface1.surf;
-	f2 = surface2.surf;
-	prt1 = Part1;
-	prt2 = Part2;
 	O_f1 = surface1.myShape.Orientation();
 	O_f2 = surface2.myShape.Orientation();
 	
 	Perform();
 }
 void ContactSpot::Perform(){
-
-	//ImportantSpotOfContact(f1,delta);
-	//ImportantSpotOfContact(f2,&delta[2]);
-
-	//Try simple some lighter algorithm 
-//	if(OverLayAreaEl())
-//		isDone = true;
+//Try simple some lighter algorithm 
+	//if(OverLayAreaEl())
+	//	isDone = true;
 
 	if(OverLayAreaGen())
 		isDone=true;
-
 }
-_bool ContactSpot::OverLayAreaPar(_int NbIter, _real delta []){
-	_real point[2];
-	try{
-				point[0] = rand(bnd[0],bnd[1]);
-				point[1] = rand(bnd[2],bnd[3]);
 
-				gp_Pnt pnt = f1.Value(point[0],point[1]);
-				Extrema_ExtPS ext(pnt,f2,bnd[4],bnd[5],bnd[6],bnd[7],0.1,0.1,Extrema_ExtFlag_MIN);
-				if(ext.IsDone()){
-					
-					_int NbExtrem = ext.NbExt();
-					if(NbExtrem ){
-						_real U,V;
-					ext.Point(1).Parameter(U,V);
-					
-					TopOpeBRep_PointClassifier classif;
-					//classif.Load(f1.Face);
-					TopAbs_State state = classif.Classify(f1.Face(),gp_Pnt2d(U,V),LinTol());
-					if(state == TopAbs_IN || state == TopAbs_ON )
-						if(ext.SquareDistance(1)+LinTol()>Max(gap,extrema.SquareDistance(1)))
-						{
-						_real d = ext.SquareDistance(1);
-						}
-					Extrema_ExtPS ext2(ext.Point(1).Value(),f1,0.1,0.1,Extrema_ExtFlag_MIN);
-					if(ext2.IsDone())
-						ext2.Point(1).Parameter(U,V);
-					classif.Load(f1.Face());
-					state = classif.Classify(f1.Face(),gp_Pnt2d(U,V),LinTol());
-					if(state == TopAbs_IN || state == TopAbs_ON )
-					if(ext2.SquareDistance(1)+LinTol()>Max(gap,extrema.SquareDistance(1)))
-						{
-						_real d = ext.SquareDistance(1);
-						}
-					}
-				}
-				return true;
-	}
-	catch(Standard_Failure)
-	{
-		std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
-	}
-	}
+
 _int ContactSpot::CheckPntPairs(std::list<ContactSpot::facePntCorrespond> &mainPnts, _bool ShapeSwap,_int GoodPntRequirement){
 	_int GoodPntAmount=0;
 	_int InToPntAmount=0;
@@ -105,52 +45,54 @@ _int ContactSpot::CheckPntPairs(std::list<ContactSpot::facePntCorrespond> &mainP
 	auto *ProbablyCrossedPntContact =
 		new std::list<facePntCorrespond>::iterator[mainPnts.size()];
 
-for (auto p = mainPnts.begin(); p != mainPnts.end();){
-	if (p->correctPair){
-		GoodPntAmount++; 
-		p++;
-		continue;
-	}
-	
-	gp_Vec p1p2(p->pnt3d.first, p->pnt3d.second);
-
-	_real magnitude = p1p2.Magnitude();
-
-	if (magnitude > Max(SSGapSize, SSCrossSize)){
-		p++;
-		continue;
-	}
-	_real n1_n2 = p->normal.first.Dot(p->normal.second);
-	if (n1_n2 - ContDirParPrecision>-1){
-		p++;
-		continue;
-	}
-	if (magnitude < 1e-2){
-		p->correctPair=true;
-		p->contType=_Contact;
-		p++;
-		continue;
-	}
-	//if |p1p2| > RealSmall we can make normalization
-	p1p2.Normalize();
-
-	_real p1p2_n1 = p1p2.Dot(p->normal.first);
-
-	p1p2.Reverse();
-	_real p2p1_n2 = p->normal.second.Dot(p1p2);
-
-	if (magnitude<SSGapSize && p1p2_n1 + ContDirParPrecision>1 && p2p1_n2 + ContDirParPrecision>1){
-			p->correctPair = true;
-			p->contType=_InGap;
-			GoodPntAmount++;	
+	for (auto p = mainPnts.begin(); p != mainPnts.end();)
+	{
+		if (p->correctPair){
+			GoodPntAmount++; 
+			p++;
+			continue;
 		}
-	else if(/*magnitude<SSCrossSize() && */ //Constant true
-		p1p2_n1 - ContDirParPrecision<-1 && p2p1_n2 - ContDirParPrecision<-1){
-		ProbablyCrossedPntContact[InToPntAmount]=p;
-		InToPntAmount++;	
+	
+		gp_Vec p1p2(p->pnt3d.first, p->pnt3d.second);
+
+		_real magnitude = p1p2.Magnitude();
+
+		if (magnitude > Max(SSGapSize, SSCrossSize)){
+			p++;
+			continue;
+		}
+		_real n1_n2 = p->normal.first.Dot(p->normal.second);
+		if (n1_n2 - ContDirParPrecision>-1){
+			p++;
+			continue;
+		}
+		if (magnitude < 1e-2){
+			p->correctPair=true;
+			p->contType=_Contact;
+			p++;
+			continue;
+		}
+		//if |p1p2| > RealSmall we can make normalization
+		p1p2.Normalize();
+
+		_real p1p2_n1 = p1p2.Dot(p->normal.first);
+
+		p1p2.Reverse();
+		_real p2p1_n2 = p->normal.second.Dot(p1p2);
+
+		if (magnitude<SSGapSize && p1p2_n1 + ContDirParPrecision>1 && p2p1_n2 + ContDirParPrecision>1){
+				p->correctPair = true;
+				p->contType=_InGap;
+				GoodPntAmount++;	
+			}
+		else if(/*magnitude<SSCrossSize() && */ //Constant true
+			p1p2_n1 - ContDirParPrecision<-1 && p2p1_n2 - ContDirParPrecision<-1){
+			ProbablyCrossedPntContact[InToPntAmount]=p;
+			InToPntAmount++;	
+		}
+		p++;
 	}
-	p++;
-}
+
 if (GoodPntAmount>GoodPntRequirement)
 	return GoodPntAmount;
 
@@ -181,7 +123,8 @@ if (GoodPntAmount>GoodPntRequirement)
 			GoodPntAmount++;
 	}
 
-return GoodPntAmount;
+	return GoodPntAmount;
+
 }
 _bool ContactSpot::PntOnSurfGenerate(BRepAdaptor_Surface *surf, TopAbs_Orientation surfOrient, std::list<facePntCorrespond> *corPnts){
 	try{
@@ -529,100 +472,7 @@ _bool ContactSpot::SameVectorInSetAlready(gp_Ax1 &axis, std::vector<gp_Ax1> &col
 			return true;
 	}
 }
-_bool  ContactSpot::IsOverlaySS(_int NbIter, Extrema_POnSurf &p1, Extrema_POnSurf &p2){
-	try{
-	_real theorDist =0;
-	_real SSPntPair[4];
 
-	_real delta[4];
-	
-	ImportantSpotOfContact(f1,delta);
-	ImportantSpotOfContact(f2,&delta[2]);
-
-	extrema.Initialize(f2,bnd[4],bnd[5],bnd[6],bnd[7],LinTol());
-	extrema.Perform(f1,bnd[4],bnd[5],bnd[6],bnd[7],LinTol());
-	
-	if(extrema.IsDone())
-		if(extrema.IsParallel()){
-
-			_real theorDist = sqrt(extrema.SquareDistance(1));
-
-			if(theorDist<gap)
-				return false;
-
-			if(IsSimpleContact()){
-				/*Try simple some lighter algorithm */
-			
-			}
-			
-		/*General algorithm for parallel surface*/
-			_real point[2];
-
-				point[0] = rand(bnd[0],bnd[1]);
-				point[1] = rand(bnd[2], bnd[3]);
-				
-		
-			
-				gp_Pnt pnt = f1.Value(point[0],point[1]);
-				Extrema_ExtPS ext(pnt,f2,0.1,0.1,Extrema_ExtFlag_MIN);
-				if(ext.IsDone()){
-					_real U,V;
-					
-					ext.Point(1).Parameter(U,V);
-					
-					TopOpeBRep_PointClassifier classif;
-					//classif.Load(f1.Face);
-					TopAbs_State state = classif.Classify(f1.Face(),gp_Pnt2d(U,V),LinTol());
-					if(state == TopAbs_IN || state == TopAbs_ON )
-						if(ext.SquareDistance(1)+LinTol()>Min(gap,theorDist))
-						{
-						_real d = ext.SquareDistance(1);
-						}
-					Extrema_ExtPS ext2(ext.Point(1).Value(),f1,0.1,0.1,Extrema_ExtFlag_MIN);
-					if(ext2.IsDone())
-						ext2.Point(1).Parameter(U,V);
-					classif.Load(f1.Face());
-					state = classif.Classify(f1.Face(),gp_Pnt2d(U,V),LinTol());
-					if(state == TopAbs_IN || state == TopAbs_ON )
-					if(ext2.SquareDistance(1)+LinTol()>Min(gap,theorDist))
-						{
-						_real d = ext.SquareDistance(1);
-						}
-
-				}
-		}
-	
-	
-		/*We find some extrema right now*/
-		
-	for(_int i=1;i<=extrema.NbExt();i++)
-	{
-		if(extrema.SquareDistance(i)>SquareGap)
-			continue;
-		Extrema_POnSurf pnt1 ,pnt2;
-		extrema.Points(i,pnt1,pnt2);
-		gp_Vec tanU,tanV;
-		_real U,V;
-		gp_Pnt pntOnSurf;
-		pnt1.Parameter(U,V);
-		f1.D1(U,V,pntOnSurf,tanU,tanV);
-		gp_Vec blockDir(pnt1.Value(),pnt2.Value());
-
-		if(tanU.Crossed(tanV).IsParallel(gp_Vec(pnt1.Value(),pnt2.Value()),ContDirParPrecision))
-			f1VecSpot.push_back(gp_Ax1(pntOnSurf,gp_Dir(blockDir)));
-		
-	}
-	if(!f1VecSpot.size())
-		return false;
-		
-	}
-	catch(Standard_Failure)
-	{
-		
-		std::cerr<<__FILE__<<": "<<__LINE__<<":"<<Standard_Failure::Caught()->GetMessageString()<<endl;
-	}
-	return true;
-}
 
 _bool ContactSpot:: OverLayAreaEl( ){
 
@@ -655,7 +505,7 @@ _bool ContactSpot:: OverLayAreaEl( ){
 						return false;
 					}
 					_real dist = extEl.SquareDistance();
-					if (dist - LinTol() > SquareGap)
+					if (dist - LinTol() > SSGapSize)
 						return true;
 					gp_Ax1 f1Dir, f2Dir;
 					if (O_f1 == TopAbs_FORWARD)
@@ -693,8 +543,10 @@ _bool ContactSpot:: OverLayAreaEl( ){
 
 					
 					if(f1.Cylinder().Axis().IsCoaxial(f2.Cylinder().Axis(),AngTol(),LinTol())){
-						if(Abs(f1.Cylinder().Radius()-f2.Cylinder().Radius())>gap)
+						if (Abs(f1.Cylinder().Radius() - f2.Cylinder().Radius())>SSGapSize)
 							return true;
+						
+						_real u1i,u1s,v1i,v1s,u2i,u2s,v2i,v2s;
 
 						if(f1.IsUPeriodic() && f2.IsUPeriodic()){
 							gp_Pnt pnt1;
@@ -741,15 +593,17 @@ _bool ContactSpot:: OverLayAreaEl( ){
 				else if( f1.GetType()==GeomAbs_Cone){
 
 					if(f1.Cone().Axis().IsCoaxial(f2.Cone().Axis(),AngTol(),LinTol())){
+
+						_real u1i, u1s, v1i, v1s, u2i, u2s, v2i, v2s;
+
 						_real R_sup1 = f1.Cone().RefRadius();
 						_real R_inf1 = R_sup1 - std::sin(f1.Cone().SemiAngle())*(v1s-v1i);
 						_real R_sup2 = f2.Cone().RefRadius();
 						_real R_inf2 = R_sup2 - std::sin(f2.Cone().SemiAngle())*(v2s-v2i);
 						
-						if(R_sup1 <R_inf2 - LinTol() || R_sup2 < R_inf1-LinTol())
+						if(R_sup1 < R_inf2 - LinTol() || R_sup2 < R_inf1-LinTol())
 							return true;
 
-						
 						if(f1.IsUPeriodic() && f2.IsUPeriodic()){
 
 							
@@ -814,43 +668,6 @@ _bool ContactSpot:: OverLayAreaEl( ){
 		return false;
 }
 
-void ContactSpot::ImportantSpotOfContact(BRepAdaptor_Surface &surf, Standard_Real uvProportion[]){
-	 _real minLin = 1;/*for 1 mm part */
-
-	 _real minRad = 0.175; 
-	
-	 switch (surf.GetType()){
-		 case GeomAbs_Plane :
-			 uvProportion[0] = minLin;
-			 uvProportion[1] = minLin;
-			 break;
-			case GeomAbs_Cylinder :
-				uvProportion[0] = minRad;
-				uvProportion[1] = minLin;
-			 break;
-			case GeomAbs_Cone :
-				uvProportion[0] = minRad;
-				uvProportion[1] = minLin;
-				break;
-			case GeomAbs_Sphere :
-				uvProportion[0] = minRad;
-				uvProportion[1] = minRad;
-				break;
-			case GeomAbs_Torus :
-				uvProportion[0] = minRad;
-				uvProportion[1] = minRad;
-				break;
-			case GeomAbs_SurfaceOfExtrusion :
-				uvProportion[0] = minRad;
-				uvProportion[1] = minLin;
-				break;
-			default :
-				uvProportion[0] = minLin;
-				uvProportion[1] = minLin;
-				break;
-	 }
-	
- }
 inline _real ContactSpot::rand(_real min, _real max){
 	std::uniform_real_distribution<>::param_type param(min,max);
 	return dist(gen,param);
@@ -865,16 +682,7 @@ inline _real ContactSpot::rand(){
 	 Standard_Failure::Raise("Not implement function use");
 	 return true;
  }
- void ContactSpot::InternalBndInit(){
-	u1i = f1.FirstUParameter(); //U parameter from first surface infimum value
-	u1s = f1.LastUParameter(); // U supremum
-	v1i = f1.FirstVParameter();
-	v1s = f1.LastVParameter();
-	u2i = f2.FirstUParameter(); 
-	u2s = f2.LastUParameter(); 
-	v2i = f2.FirstVParameter();
-	v2s = f2.LastVParameter();
-}
+ 
  _bool ContactSpot::IsBiggerSurface(BRepAdaptor_Surface &f1, BRepAdaptor_Surface &f2)
  {
 	 //it is incorrect version but simple

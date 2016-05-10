@@ -56,6 +56,9 @@ public:
     QAction *menu_VariableControl;
     QAction *menu_VisualizationControl;
     QAction *action;
+    QAction *action_AssemlyInfoRequest;
+    QAction *action_SetFrameDisplayMode;
+    QAction *action_SetShadedDisplayMode;
     QWidget *mainwidget;
     QWidget *verticalLayoutWidget;
     QVBoxLayout *verticalLayout;
@@ -71,6 +74,7 @@ public:
     QMenu *menu_IMPORT;
     QMenu *menu_EXPORT;
     QMenu *menu_VIEW;
+    QMenu *menu_2;
     QMenu *menu_HELP;
     QMenu *menu;
     QStatusBar *ProgressBar;
@@ -190,6 +194,16 @@ public:
         menu_VisualizationControl->setObjectName(QString::fromUtf8("menu_VisualizationControl"));
         action = new QAction(MainFrame);
         action->setObjectName(QString::fromUtf8("action"));
+        action_AssemlyInfoRequest = new QAction(MainFrame);
+        action_AssemlyInfoRequest->setObjectName(QString::fromUtf8("action_AssemlyInfoRequest"));
+        action_SetFrameDisplayMode = new QAction(MainFrame);
+        action_SetFrameDisplayMode->setObjectName(QString::fromUtf8("action_SetFrameDisplayMode"));
+        action_SetFrameDisplayMode->setCheckable(false);
+        action_SetFrameDisplayMode->setChecked(false);
+        action_SetFrameDisplayMode->setEnabled(true);
+        action_SetShadedDisplayMode = new QAction(MainFrame);
+        action_SetShadedDisplayMode->setObjectName(QString::fromUtf8("action_SetShadedDisplayMode"));
+        action_SetShadedDisplayMode->setCheckable(false);
         mainwidget = new QWidget(MainFrame);
         mainwidget->setObjectName(QString::fromUtf8("mainwidget"));
         mainwidget->setMinimumSize(QSize(100, 50));
@@ -244,9 +258,6 @@ public:
         verticalLayout_2->addWidget(SecondWidgetWindow);
 
         MainFrame->setCentralWidget(mainwidget);
-        verticalLayoutWidget->raise();
-        verticalLayoutWidget_2->raise();
-        verticalLayoutWidget_2->raise();
         menubar = new QMenuBar(MainFrame);
         menubar->setObjectName(QString::fromUtf8("menubar"));
         menubar->setGeometry(QRect(0, 0, 997, 21));
@@ -258,6 +269,8 @@ public:
         menu_EXPORT->setObjectName(QString::fromUtf8("menu_EXPORT"));
         menu_VIEW = new QMenu(menubar);
         menu_VIEW->setObjectName(QString::fromUtf8("menu_VIEW"));
+        menu_2 = new QMenu(menu_VIEW);
+        menu_2->setObjectName(QString::fromUtf8("menu_2"));
         menu_HELP = new QMenu(menubar);
         menu_HELP->setObjectName(QString::fromUtf8("menu_HELP"));
         menu = new QMenu(menubar);
@@ -290,9 +303,14 @@ public:
         menu_EXPORT->addAction(actionSAVESEQ);
         menu_VIEW->addAction(actionCONTROLPANEL);
         menu_VIEW->addAction(action);
+        menu_VIEW->addAction(menu_2->menuAction());
+        menu_2->addSeparator();
+        menu_2->addAction(action_SetFrameDisplayMode);
+        menu_2->addAction(action_SetShadedDisplayMode);
         menu_HELP->addAction(actionABOUT);
         menu->addAction(menu_VariableControl);
         menu->addAction(menu_VisualizationControl);
+        menu->addAction(action_AssemlyInfoRequest);
         MainBar->addSeparator();
         MainBar->addAction(actionSTEP);
         MainBar->addAction(actionSAVESEQ);
@@ -352,10 +370,14 @@ public:
         menu_VariableControl->setText(QApplication::translate("MainFrame", "\320\237\320\265\321\200\320\265\320\274\320\265\320\275\320\275\321\213\320\265 \321\201\321\200\320\265\320\264\321\213", 0, QApplication::UnicodeUTF8));
         menu_VisualizationControl->setText(QApplication::translate("MainFrame", "\320\222\320\270\320\267\321\203\320\260\320\273\320\270\320\267\320\260\321\206\320\270\321\217", 0, QApplication::UnicodeUTF8));
         action->setText(QApplication::translate("MainFrame", "\320\224\320\265\321\200\320\265\320\262\320\276 \320\274\320\276\320\264\320\265\320\273\320\270", 0, QApplication::UnicodeUTF8));
+        action_AssemlyInfoRequest->setText(QApplication::translate("MainFrame", "\320\237\320\260\321\200\320\260\320\274\320\265\321\202\321\200\321\213 \321\201\320\261\320\276\321\200\320\272\320\270", 0, QApplication::UnicodeUTF8));
+        action_SetFrameDisplayMode->setText(QApplication::translate("MainFrame", "\320\232\320\260\321\200\320\272\320\260\321\201\320\275\321\213\320\271", 0, QApplication::UnicodeUTF8));
+        action_SetShadedDisplayMode->setText(QApplication::translate("MainFrame", "\320\242\320\262\320\265\321\200\320\264\320\276\321\202\320\265\320\273\321\214\320\275\321\213\320\271", 0, QApplication::UnicodeUTF8));
         menu_FILE->setTitle(QApplication::translate("MainFrame", "\320\244\320\260\320\271\320\273", 0, QApplication::UnicodeUTF8));
         menu_IMPORT->setTitle(QApplication::translate("MainFrame", "\320\236\321\202\320\272\321\200\321\213\321\202\321\214", 0, QApplication::UnicodeUTF8));
         menu_EXPORT->setTitle(QApplication::translate("MainFrame", "\320\241\320\276\321\205\321\200\320\260\320\275\320\270\321\202\321\214", 0, QApplication::UnicodeUTF8));
         menu_VIEW->setTitle(QApplication::translate("MainFrame", "\320\222\320\270\320\264", 0, QApplication::UnicodeUTF8));
+        menu_2->setTitle(QApplication::translate("MainFrame", "\320\222\320\270\320\264 \320\274\320\276\320\264\320\265\320\273\320\270", 0, QApplication::UnicodeUTF8));
         menu_HELP->setTitle(QApplication::translate("MainFrame", "\320\241\320\277\321\200\320\260\320\262\320\272\320\260", 0, QApplication::UnicodeUTF8));
         menu->setTitle(QApplication::translate("MainFrame", "\320\230\320\275\321\201\321\202\321\200\321\203\320\274\320\265\320\275\321\202\321\213", 0, QApplication::UnicodeUTF8));
         MainBar->setWindowTitle(QApplication::translate("MainFrame", "Main ToolBar", 0, QApplication::UnicodeUTF8));

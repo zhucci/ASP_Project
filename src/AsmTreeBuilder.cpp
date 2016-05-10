@@ -59,12 +59,12 @@ void AsmTreeBuilder::Init(Unit* product, MainFrame* mainWin){
 
 	myDBGBuilder.AddDBGRelation(myAssembly);
 
-	mainWindow->SetStatus(QString("Complite DBG"));
+	mainWindow->SetStatus(QString("DBG Complite"));
 
 	closedList.SetTarget(myAssembly->GetPartAmount());
 	backTraceIterCounter=0;
-	continueDisassembly(&asmSequence);
-		done = true;
+	//continueDisassembly(&asmSequence);
+	//	done = true;
 	
 	//closedList.clear();
 	

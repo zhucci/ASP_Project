@@ -22,6 +22,10 @@
 #include "AssemblyGraphBuilder.h"
 #include "assert.h"
 #include <AIS_InteractiveObject.hxx>
+#include "qmessagebox.h"
+
+extern Quantity_NameOfColor colorVar[];
+extern int ColorAmount;
 //====================
 //	aps namespace	 =
 //====================
@@ -29,11 +33,13 @@ using namespace asp;
  
 AspMainTool::AspMainTool():
 AsmVisualContextId{ -1 },
-showMustGoOn{true}{
+showMustGoOn{true},
+displayMode{AIS_DisplayMode::AIS_WireFrame}{
 	ocafApplication = XCAFApp_Application::GetApplication();
 }
 
 AspMainTool::~AspMainTool(){
+
 	if (!ocafDocument.IsNull() && ocafDocument->IsOpened()){
 		ocafApplication->Close(ocafDocument);
 		ocafApplication->NewDocument("MDTV-XCAF", ocafDocument);
@@ -427,11 +433,14 @@ Handle_TDocStd_Document AspMainTool::GetStdDoc(){
 void AspMainTool::ShowProduct(Viewer* aView){
 	//aView->getIC()->CloseAllContexts();
 	//aView->getIC()->OpenLocalContext();
+	int i =0;
 	for (auto &aisPart : mapOfShapes){
+		if (i>=ColorAmount)
+			i=0;
 		//aView->getIC()->LocalContext()->Display(aisPart.second, AIS_WireFrame);
 		aView->getIC()->Display(aisPart.second, false);
-		aView->getIC()->SetColor(aisPart.second, Quantity_NOC_GOLD3,false);
-		aView->getIC()->SetDisplayMode(aisPart.second, AIS_WireFrame, false);
+		aView->getIC()->SetColor(aisPart.second, colorVar[++i], false);
+		aView->getIC()->SetDisplayMode(aisPart.second, displayMode, false);
 		
 	}
 	aView->Fit();
@@ -460,6 +469,31 @@ std::vector<Part *> AspMainTool::GetSelectedPart(Handle_AIS_InteractiveContext c
 	return selectedParts;
 	
 }
+void AspMainTool::SetDisplayMode(AIS_DisplayMode dispMode, Viewer* aView){
+	displayMode = dispMode;
+	ShowProduct(aView);
+
+}
+void AspMainTool::ShowJustSelectedShape(Viewer* aView){
+
+	Handle_AIS_InteractiveContext context = aView->getIC();
+
+	std::vector<Part *> selectedParts = GetSelectedPart(context);
+
+	context->ClearSelected(false);
+	context->EraseAll(false);
+	//context->OpenLocalContext(true, true);
+
+	for (auto &p : selectedParts){
+		auto aisPart = this->mapOfShapes.find(p->GetUri());
+		if (aisPart != mapOfShapes.end())
+		aView->getIC()->Display(aisPart->second, false);
+		aView->getIC()->SetColor(aisPart->second, Quantity_NOC_GOLD3, false);
+		aView->getIC()->SetDisplayMode(aisPart->second, AIS_WireFrame, false);
+	}
+	aView->Fit();
+	aView->Update();
+}
 void AspMainTool::ShowInformAboutSelectedShape(Viewer* aView){
 	Handle_AIS_InteractiveContext context = aView->getIC();
 
@@ -473,6 +507,28 @@ void AspMainTool::ShowInformAboutSelectedShape(Viewer* aView){
 	}
 	aView->Update();
 }
+void AspMainTool::ShowAssemblyInfo(MainFrame* appWindow){
+
+	if (!product)
+		return;
+
+	_int fullAmount = product->UnitMap.size();
+	_int faceAmount = 0;
+	_int ContactAmount = 0;
+	for (auto &unit : product->UnitMap){
+		faceAmount += dynamic_cast<Part*>(unit.second)->colOfSurf.size();
+		ContactAmount += dynamic_cast<Part*>(unit.second)->colOfCont.size();
+	}
+	ContactAmount /=2;
+	QString status = "Parts# ";
+	status += std::to_string(fullAmount).c_str();
+	status += " & Faces# ";
+	status += std::to_string(faceAmount).c_str();
+	status += " & Contacts# ";
+	status += std::to_string(ContactAmount).c_str();
+	auto widget = QMessageBox::information(appWindow,"Assembly Information",status);
+	
+}
 void AspMainTool::ShowSurface(const Handle_AIS_InteractiveContext &context, SurfaceAttribute &surf){
 	Handle_AIS_Shape S = new AIS_Shape(surf.myShape);
 	Quantity_Color shapeColor;
@@ -480,8 +536,8 @@ void AspMainTool::ShowSurface(const Handle_AIS_InteractiveContext &context, Surf
 	switch (surf.Func){
 	case _Base:
 		shapeColor = Quantity_NOC_RED;
-		//DisplayMode = AIS_Shaded;
-		DisplayMode = AIS_WireFrame;
+		DisplayMode = AIS_Shaded;
+		//DisplayMode = AIS_WireFrame;
 		break;
 	case _UnknownFunction:
 		shapeColor = Quantity_NOC_BLUE1;
@@ -507,6 +563,19 @@ void AspMainTool::ShowArrow(const Handle_AIS_InteractiveContext &context, gp_Ax1
 
 	context->LocalContext()->Display(ais_axis, AIS_WireFrame);
 }
+void AspMainTool::HideSelectedPart(Viewer *aView){
+	Handle_AIS_InteractiveContext context = aView->getIC();
+
+	std::vector<Part *> selectedParts = GetSelectedPart(context);
+	context->ClearSelected(false);
+
+	for (auto &p : selectedParts){
+		auto aisShape = mapOfShapes.find(p->GetUri());
+		if (aisShape != mapOfShapes.end())
+			context->Erase(aisShape->second,false);	
+	}
+	aView->Update();
+}
 void AspMainTool::ShowBlkDirsOfPart(Part *part, Viewer *aView){
 
 	auto context = aView->getIC();
@@ -526,6 +595,8 @@ void AspMainTool::ShowBlkDirsOfPart(Part *part, Viewer *aView){
 
 	for (auto dir : asmSeq.getDirBlkGraph()->GetBlockedDirs(part->GetUri())){
 		Handle_ISession_Direction axis = new ISession_Direction(center, dir.Direction(), arrowSize);
+		axis->SetArrowColor(Quantity_NOC_BLACK);
+		context->Display(axis,true);
 		context->LocalContext()->Display(axis, AIS_WireFrame);
 	}
 }
