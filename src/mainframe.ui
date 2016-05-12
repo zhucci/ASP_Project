@@ -256,7 +256,7 @@
    <addaction name="actionT3"/>
    <addaction name="actionT4"/>
    <addaction name="actionT5"/>
-   <addaction name="actionVoxel"/>
+   <addaction name="actionBodyDescriptor"/>
    <addaction name="actionPartGraph"/>
    <addaction name="actionViewMode"/>
   </widget>
@@ -402,32 +402,47 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>T1</string>
+    <string>Contacts</string>
+   </property>
+   <property name="iconText">
+    <string>Contacts</string>
    </property>
   </action>
-  <action name="actionVoxel">
+  <action name="actionBodyDescriptor">
    <property name="text">
-    <string>Voxel</string>
+    <string>BodyDesc</string>
    </property>
   </action>
   <action name="actionT2">
    <property name="text">
     <string>T2</string>
    </property>
+   <property name="iconText">
+    <string>PointsOnFaces</string>
+   </property>
   </action>
   <action name="actionT3">
    <property name="text">
     <string>T3</string>
+   </property>
+   <property name="iconText">
+    <string>FaceTrait</string>
    </property>
   </action>
   <action name="actionT4">
    <property name="text">
     <string>T4</string>
    </property>
+   <property name="iconText">
+    <string>ToPartIso</string>
+   </property>
   </action>
   <action name="actionT5">
    <property name="text">
     <string>T5</string>
+   </property>
+   <property name="iconText">
+    <string>DBGTime</string>
    </property>
   </action>
   <action name="actionPartGraph">

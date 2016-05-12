@@ -53,7 +53,7 @@ private slots:
 	void Test5();
 	void PartGraph();
 	void TestVoxelGeneration();
-	
+	void TestBodyDescriptor();
 
 	
 protected:

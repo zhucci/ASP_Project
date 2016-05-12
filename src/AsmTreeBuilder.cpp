@@ -63,8 +63,8 @@ void AsmTreeBuilder::Init(Unit* product, MainFrame* mainWin){
 
 	closedList.SetTarget(myAssembly->GetPartAmount());
 	backTraceIterCounter=0;
-	//continueDisassembly(&asmSequence);
-	//	done = true;
+	continueDisassembly(&asmSequence);
+		done = true;
 	
 	//closedList.clear();
 	

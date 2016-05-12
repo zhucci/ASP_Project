@@ -96,7 +96,7 @@ void ISession_Direction::Compute (const Handle(PrsMgr_PresentationManager3d)& aP
    anArrowAspect->Aspect() = new Graphic3d_AspectLine3d(arrowColor,Aspect_TypeOfLine::Aspect_TOL_SOLID,1);
   anArrowAspect->SetLength (myArrowLength);
   anArrowAspect->SetColor(arrowColor);
-  anArrowAspect->SetAngle(0.14);
+  anArrowAspect->SetAngle(0.16);
   myDrawer->SetArrowAspect(anArrowAspect);
 
   this->SetColor(arrowColor);
@@ -110,7 +110,6 @@ void ISession_Direction::Compute (const Handle(PrsMgr_PresentationManager3d)& aP
   
   myDrawer->SetArrowAspect(anArrowAspect);
 
-  
  // if (myText.Length() == 0)
 //	  DsgPrs_LengthPresentation::Add(aPresentation, myDrawer, myPnt, aLastPoint, DsgPrs_AS_LASTAR);
 
@@ -125,13 +124,12 @@ void ISession_Direction::Compute (const Handle(PrsMgr_PresentationManager3d)& aP
   
   // Draw arrow
   
-  auto aDirection = myDir;
+
   auto anAngle = anArrowAspect->Angle();
-  
-  auto aLength  = myLength*0.2;
+  auto aLength  = myLength*0.15;
   auto aLocation = aLastPoint;
 
-  Quantity_Length dx, dy, dz;  aDirection.Coord(dx, dy, dz);
+  Quantity_Length dx, dy, dz;  myDir.Coord(dx, dy, dz);
   //
   // Point of the arrow:
   Quantity_Length xo, yo, zo;  aLocation.Coord(xo, yo, zo);

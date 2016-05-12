@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainFrame[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      26,   14, // methods
+      27,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -56,6 +56,7 @@ static const uint qt_meta_data_MainFrame[] = {
      318,   10,   10,   10, 0x08,
      326,   10,   10,   10, 0x08,
      338,   10,   10,   10, 0x08,
+     360,   10,   10,   10, 0x08,
 
        0        // eod
 };
@@ -71,6 +72,7 @@ static const char qt_meta_stringdata_MainFrame[] = {
     "about()\0pos\0contextMenu(QPoint)\0Exit()\0"
     "Test1()\0Test2()\0Test3()\0Test4()\0Test5()\0"
     "PartGraph()\0TestVoxelGeneration()\0"
+    "TestBodyDescriptor()\0"
 };
 
 void MainFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -105,6 +107,7 @@ void MainFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 23: _t->Test5(); break;
         case 24: _t->PartGraph(); break;
         case 25: _t->TestVoxelGeneration(); break;
+        case 26: _t->TestBodyDescriptor(); break;
         default: ;
         }
     }
@@ -144,9 +147,9 @@ int MainFrame::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 26)
+        if (_id < 27)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 26;
+        _id -= 27;
     }
     return _id;
 }

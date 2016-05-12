@@ -46,7 +46,7 @@ public:
     QAction *actionPrevSession;
     QAction *actionSaveSession;
     QAction *actionT1;
-    QAction *actionVoxel;
+    QAction *actionBodyDescriptor;
     QAction *actionT2;
     QAction *actionT3;
     QAction *actionT4;
@@ -173,8 +173,8 @@ public:
         actionT1 = new QAction(MainFrame);
         actionT1->setObjectName(QString::fromUtf8("actionT1"));
         actionT1->setCheckable(false);
-        actionVoxel = new QAction(MainFrame);
-        actionVoxel->setObjectName(QString::fromUtf8("actionVoxel"));
+        actionBodyDescriptor = new QAction(MainFrame);
+        actionBodyDescriptor->setObjectName(QString::fromUtf8("actionBodyDescriptor"));
         actionT2 = new QAction(MainFrame);
         actionT2->setObjectName(QString::fromUtf8("actionT2"));
         actionT3 = new QAction(MainFrame);
@@ -326,7 +326,7 @@ public:
         TestFunction->addAction(actionT3);
         TestFunction->addAction(actionT4);
         TestFunction->addAction(actionT5);
-        TestFunction->addAction(actionVoxel);
+        TestFunction->addAction(actionBodyDescriptor);
         TestFunction->addAction(actionPartGraph);
         TestFunction->addAction(actionViewMode);
 
@@ -359,12 +359,17 @@ public:
         actionSTEPFile->setText(QApplication::translate("MainFrame", "STEP \321\204\320\260\320\271\320\273", 0, QApplication::UnicodeUTF8));
         actionPrevSession->setText(QApplication::translate("MainFrame", "\320\237\321\200\320\265\320\264\321\213\320\264\321\203\321\211\321\203\321\216 \321\201\320\265\321\201\321\201\320\270\321\216", 0, QApplication::UnicodeUTF8));
         actionSaveSession->setText(QApplication::translate("MainFrame", "\320\242\320\265\320\272\321\203\321\211\321\203\321\216 \321\201\320\265\321\201\321\201\320\270\321\216", 0, QApplication::UnicodeUTF8));
-        actionT1->setText(QApplication::translate("MainFrame", "T1", 0, QApplication::UnicodeUTF8));
-        actionVoxel->setText(QApplication::translate("MainFrame", "Voxel", 0, QApplication::UnicodeUTF8));
+        actionT1->setText(QApplication::translate("MainFrame", "Contacts", 0, QApplication::UnicodeUTF8));
+        actionT1->setIconText(QApplication::translate("MainFrame", "Contacts", 0, QApplication::UnicodeUTF8));
+        actionBodyDescriptor->setText(QApplication::translate("MainFrame", "BodyDesc", 0, QApplication::UnicodeUTF8));
         actionT2->setText(QApplication::translate("MainFrame", "T2", 0, QApplication::UnicodeUTF8));
+        actionT2->setIconText(QApplication::translate("MainFrame", "PointsOnFaces", 0, QApplication::UnicodeUTF8));
         actionT3->setText(QApplication::translate("MainFrame", "T3", 0, QApplication::UnicodeUTF8));
+        actionT3->setIconText(QApplication::translate("MainFrame", "FaceTrait", 0, QApplication::UnicodeUTF8));
         actionT4->setText(QApplication::translate("MainFrame", "T4", 0, QApplication::UnicodeUTF8));
+        actionT4->setIconText(QApplication::translate("MainFrame", "ToPartIso", 0, QApplication::UnicodeUTF8));
         actionT5->setText(QApplication::translate("MainFrame", "T5", 0, QApplication::UnicodeUTF8));
+        actionT5->setIconText(QApplication::translate("MainFrame", "DBGTime", 0, QApplication::UnicodeUTF8));
         actionPartGraph->setText(QApplication::translate("MainFrame", "PartGraph", 0, QApplication::UnicodeUTF8));
         actionViewMode->setText(QApplication::translate("MainFrame", "ViewMode", 0, QApplication::UnicodeUTF8));
         menu_VariableControl->setText(QApplication::translate("MainFrame", "\320\237\320\265\321\200\320\265\320\274\320\265\320\275\320\275\321\213\320\265 \321\201\321\200\320\265\320\264\321\213", 0, QApplication::UnicodeUTF8));

@@ -25,7 +25,7 @@ MainFrame::MainFrame(void):QMainWindow(0)
 	connect(actionFoto, SIGNAL(triggered()),this,SLOT(ExportPhoto()));
 	connect(actionDBGShow, SIGNAL(triggered()),this,SLOT(DBGShow()));
 	connect(myViewer, SIGNAL(contextMenuSignal(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
-//debug functions
+//Test panel functions
 	connect(actionT1, SIGNAL(triggered()), this, SLOT(Test1()));
 	connect(actionT2, SIGNAL(triggered()), this, SLOT(Test2()));
 	connect(actionT3, SIGNAL(triggered()), this, SLOT(Test3()));
@@ -36,6 +36,7 @@ MainFrame::MainFrame(void):QMainWindow(0)
 	connect(action_AssemlyInfoRequest, SIGNAL(triggered()), this, SLOT(ShowAssemblyInfo()));
 	connect(action_SetFrameDisplayMode, SIGNAL(triggered()), this, SLOT(SetWireFrameMode()));
 	connect(action_SetShadedDisplayMode, SIGNAL(triggered()), this, SLOT(SetShadedMode()));
+	connect(actionBodyDescriptor, SIGNAL(triggered()), this, SLOT(TestBodyDescriptor()));
 }
 void MainFrame::ViewModeChanged(){
 	justViewMode=!justViewMode;
@@ -178,7 +179,12 @@ void MainFrame::Test5(){
 void MainFrame::TestVoxelGeneration(){
 
 }
-
+void MainFrame::TestBodyDescriptor(){
+	if (aspTool){
+		asp::AspMainTest test;
+		test.TestDescriptorOFSelectedPartCalculation(this, aspTool);
+	}
+}
 void MainFrame::PartGraph(){
 	if (aspTool){
 		asp::AspMainTest test;
