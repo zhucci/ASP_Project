@@ -27,7 +27,7 @@ namespace asp{
 
 	private:
 
-		_int AmtPntForCS{ 5 };
+		_int AmtPntForCS{ 6 };
 		_real MinContactSquare{ 4 };
 		_real MinContactPntDistance{ 1 };
 		_real MinContactPntAngDistance{ M_PI / 3 };

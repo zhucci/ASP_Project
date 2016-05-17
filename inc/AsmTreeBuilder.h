@@ -15,7 +15,7 @@ class AsmTreeBuilder{
 public:
 
 	friend class AspMainTest;
-
+	friend class AspMainTool;
 
 						AsmTreeBuilder();
 		
@@ -38,6 +38,8 @@ public:
 private:								//Functions
 		void							InitDirBlockGraph			();
 
+		Standard_Integer			ShapeOfRotationDBGHeal();
+
 		void							InitAssemblySequence		();
 
 		_bool							continueDisassembly		(AsmTreeNode * root);
@@ -50,7 +52,7 @@ private:								//Functions
 
 		std::list<AsmTreeNode>  FreePartFromDBGView		(AsmTreeNode * root);
 		
-		std::vector<asp_Ax1>		FreeDirs						(_int PartUri, 
+		std::vector<asp_Ax1>		FreeDirs						(Part* part, 
 																		 AsmTreeNode *curNodeInTree);
 
 		_bool							IsBlocked					(asp_Ax1 dir, 
@@ -72,7 +74,7 @@ private:								//Functions
 																		 _int Distance, 
 																		 std::vector<_int> &ObstacleURI);
 
-		static	_bool				IsLineIntersectPart		(Handle(Geom_TrimmedCurve) line, Part* const part);
+		static	_bool				IsLineIntersectPart(Handle(Geom_TrimmedCurve) line, gp_Ax1 axis, Part* const part);
 
 		
 										//DATA
@@ -83,6 +85,10 @@ private:								//Functions
 		MainFrame					*mainWindow;
 //disassembled parts
 		closed_list<_int>			closedList;
+//assembled parts
+		std::list<_int>			partList;
+
+	
 //DBG Structure with it's builder
 		DBGBuilder					myDBGBuilder;
 //Assembly sequence representation

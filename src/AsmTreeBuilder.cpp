@@ -8,6 +8,7 @@
 #include "Geom_Surface.hxx"
 #include "BRepClass_FaceClassifier.hxx"
 #include "MainFrame.h"
+#include <BRepLib_MakeVertex.hxx>
 using namespace asp;
 
 extern AssemblyPartPriorityCompare Compare;
@@ -59,17 +60,65 @@ void AsmTreeBuilder::Init(Unit* product, MainFrame* mainWin){
 
 	myDBGBuilder.AddDBGRelation(myAssembly);
 
+	ShapeOfRotationDBGHeal();
+
 	mainWindow->SetStatus(QString("DBG Complite"));
 
 	closedList.SetTarget(myAssembly->GetPartAmount());
-	backTraceIterCounter=0;
+	//backTraceIterCounter=0;
 	continueDisassembly(&asmSequence);
 		done = true;
 	
 	//closedList.clear();
 	
 }
+Standard_Integer AsmTreeBuilder::ShapeOfRotationDBGHeal(){
+	for (auto &prt : myAssembly->UnitMap){
+	gp_Ax1 newDir;
+	std::vector<asp_Ax1> *blkDirs;
+	bool justOnes = true;
+	Part * part = dynamic_cast<Part*>(prt.second);
 
+	for (auto &surf : *part){
+
+		if (surf.Func == _Base){
+			bool dirInit=false;
+			if(surf.Type == GeomAbs_Cylinder){
+				newDir = gp_Ax1(surf.surf.Cylinder().Axis());
+				dirInit = true;
+			}
+			else if(surf.Type == GeomAbs_Cone){
+				newDir = gp_Ax1(surf.surf.Cone().Axis());
+				dirInit = true;
+			}
+			else if(surf.Type == GeomAbs_SurfaceOfRevolution){
+				newDir = gp_Ax1(surf.surf.AxeOfRevolution());
+				dirInit = true;
+			}
+			if (dirInit){
+				part->SetAsmDir(newDir);
+				newDir.Reverse();
+				part->SetAsmDir(newDir);
+			}
+		}
+
+		
+			/*
+			if (justOnes){
+				blkDirs = &(myDBGBuilder.GetBlockedDirs(part->GetUri()));
+				justOnes = false;
+			}
+			bool isBlocked = false;
+			if(IsBlocked(asp_Ax1(newDir,_ContactBlk),blkDirs)){
+
+
+			}
+			*/
+		
+	}
+	}
+	return 0;
+}
 _bool AsmTreeBuilder::continueDisassembly(AsmTreeNode * root){
 	
 	if (acceptedDisassembly(root)) return true;
@@ -109,14 +158,16 @@ _bool AsmTreeBuilder::continueDisassembly(AsmTreeNode * root){
 		if (continueDisassembly(current)){
 			return true;
 		}
-		
-		backTrack= true;
+		else 
+			break;
 
-		if (++backTraceIterCounter > backTraceMaxAmount)
-			return false;
+		//backTrack= true;
+
+	//	if (++backTraceIterCounter > backTraceMaxAmount)
+		//	return false;
 	//Mark previosly closed part as open
-		closedList.OpenPrev();
-		root->childNodes.pop_front();
+	//	closedList.OpenPrev();
+	//	root->childNodes.pop_front();
 	}
 	return false;
 }
@@ -190,10 +241,10 @@ std::list<AsmTreeNode> AsmTreeBuilder::FreePartFromDBGView(AsmTreeNode *root){
 
 	for (auto iter = unitMap->begin(); iter != unitMap->end(); iter++){
 		if (!closedList.IsClose((*iter).first)){
-
-			auto freeDirs = FreeDirs((*iter).first, root);
+			auto myPart = dynamic_cast<Part*>((*iter).second);
+			auto freeDirs = FreeDirs(myPart, root);
 			if (freeDirs.size()){
-				auto myPart = dynamic_cast<Part*>((*iter).second);
+				
 				for (auto &dsmDir : freeDirs){
 					gp_Vec moveVec(dsmDir.Direction());
 					_real Dist = DistanceToBndBorder(myPart, gp_Ax1(myPart->GetCenter(),moveVec), myAssembly->BndBox());
@@ -215,9 +266,9 @@ std::list<AsmTreeNode> AsmTreeBuilder::FreePartFromDBGView(AsmTreeNode *root){
 void IsPartMoveBlock(){
 	
 }
-std::vector<asp_Ax1> AsmTreeBuilder::FreeDirs(_int PartUri,AsmTreeNode *curNodeInTree){
+std::vector<asp_Ax1> AsmTreeBuilder::FreeDirs(Part *part,AsmTreeNode *curNodeInTree){
 	
-	auto blkDirs = myDBGBuilder.GetUnBlkMoveDirs(PartUri);
+	auto blkDirs = myDBGBuilder.GetUnBlkMoveDirs(part->GetUri());
 	if (blkDirs.size()){
 		for (auto &dir : blkDirs){
 			dir.State = _ContactFree;
@@ -226,20 +277,26 @@ std::vector<asp_Ax1> AsmTreeBuilder::FreeDirs(_int PartUri,AsmTreeNode *curNodeI
 	}
 
 	std::vector<asp_Ax1> freeDirs;
-	blkDirs = myDBGBuilder.GetBlockedDirs(PartUri);
-	if (blkDirs.size()){
-		//if (std::find_if(blkDirs.begin(), blkDirs.end(),
-		//	[](const asp_Ax1& ax){return ax.State == StateOfDir::_MoveBlk; }) != blkDirs.end())
-		//	return freeDirs;
+	blkDirs = myDBGBuilder.GetBlockedDirs(part->GetUri());
+
+	for (auto & dir : part->PotentialDirs){
+		asp_Ax1 dsmDir = asp_Ax1(dir, _ContactFree);
+		if (!IsBlocked(dsmDir, &blkDirs)){
+			freeDirs.push_back(dsmDir);
+		}
+	}
+
+	if (!freeDirs.size() && blkDirs.size()){
 
 		for (auto &dir : blkDirs){
 			asp_Ax1 dsmDir = asp_Ax1(dir.Reversed(), _ContactFree);
 			if (!IsBlocked(dsmDir, &blkDirs)){
 				freeDirs.push_back(dsmDir);
-			}
-			
+			}		
 		}
 	}
+
+	/*
 	else{
 		
 		if (!curNodeInTree->IsAbsNode()){
@@ -257,7 +314,7 @@ std::vector<asp_Ax1> AsmTreeBuilder::FreeDirs(_int PartUri,AsmTreeNode *curNodeI
 
 			
 	}
-
+	*/
 	return freeDirs;
 }
 _bool AsmTreeBuilder::IsBlocked(asp_Ax1 dir, std::vector<asp_Ax1> *colOfBlkDir){
@@ -287,8 +344,8 @@ void AsmTreeBuilder::FindPointsOnPartSurface(Part *pPart){
 			static BRepClass_FaceClassifier classifier;
 			static _bool notFound;
 			notFound = true;
-			dltU = face.surf.IsUPeriodic() ? M_PI / 8 : 2;
-			dltV = face.surf.IsVPeriodic() ? M_PI / 8 : 2;
+			dltU = face.surf.IsUPeriodic() ? M_PI / 8 : 1;
+			dltV = face.surf.IsVPeriodic() ? M_PI / 8 : 1;
 
 			static _real Urange, Vrange, uInf, vInf;
 			uInf = face.surf.FirstUParameter();
@@ -373,7 +430,7 @@ _bool AsmTreeBuilder::IsMoveAlongDirBlocked(Part *part, gp_Ax1 axis, _int Distan
 		if (Uri == partUri || std::find(closedList.begin(), closedList.end(), Uri) != closedList.end())
 			continue;
 		
-		if (IsLineIntersectPart(mLine, obstPart)){
+		if (IsLineIntersectPart(mLine, axis,obstPart)){
 			ObstacleURI.push_back(obst.first);
 			findBlocks = true;
 		}
@@ -382,7 +439,7 @@ _bool AsmTreeBuilder::IsMoveAlongDirBlocked(Part *part, gp_Ax1 axis, _int Distan
 	
 	return findBlocks;
 }
-_bool AsmTreeBuilder::IsLineIntersectPart(Handle(Geom_TrimmedCurve) line, Part* const part){
+_bool AsmTreeBuilder::IsLineIntersectPart(Handle(Geom_TrimmedCurve) line,gp_Ax1 axis, Part* const part){
 
 	Handle_Geom_Line moveLine = Handle_Geom_Line::DownCast(line->BasisCurve());
 	if (moveLine.IsNull())
@@ -398,16 +455,42 @@ _bool AsmTreeBuilder::IsLineIntersectPart(Handle(Geom_TrimmedCurve) line, Part* 
 		Handle_Geom_Surface testedSurf = Handle_Geom_Surface::DownCast(surf.surf.Surface().Surface()->Transformed(surf.surf.Trsf()));
 		
 		if (testedSurf){
+			_real U, V, W;
+			gp_Vec tanU, tanV;
+			gp_Pnt pnt;
+
 			GeomAPI_IntCS CS(line, testedSurf);
 			if (CS.IsDone() && CS.NbPoints()){
 				
 				BRepClass_FaceClassifier classifyThis;
+				
+				BRepExtrema_ExtPF extrema;
 				for (_int i = 1; i <= CS.NbPoints(); i++){
+
+					//Surface proper orientation check
+					
+					CS.Parameters(i, U, V, W);
+					surf.surf.D1(U, V, pnt,tanU,tanV);
+					tanU.Cross(tanV);
+					tanU.Normalize();
+					if (surf.myShape.Orientation()!=TopAbs_FORWARD)
+						tanU.Reverse();
+					if (IsOneBlkOther(tanU,axis.Direction()))
+						continue;
+
+					//Pnt on face check
+					if (surf.myBox.IsOut(pnt))
+						continue;
+//					extrema.Perform(BRepLib_MakeVertex(pnt),surf.myShape);
+				
 					classifyThis.Perform(surf.myShape, CS.Point(i), Precision::Confusion());
+					
 					TopAbs_State state = classifyThis.State();
 					
-					if (state==TopAbs_State::TopAbs_IN)
+					if (state == TopAbs_State::TopAbs_IN){
 						return true;
+					}
+						
 				}
 				
 			}
@@ -424,13 +507,16 @@ _real AsmTreeBuilder::DistanceToBndBorder(Part *part, gp_Ax1 axis, Bnd_Box *bnd)
 		target.Translate(move);
 	}
 	_real dist = target.Distance(axis.Location());
+	/*
 	if (dist){
 		dist = PartSize;
 	}
-	else if (dist > 1.3* PartSize){
-		dist = PartSize;
+	*/
+	if (dist > 3* PartSize){
+		dist = 3*PartSize;
 	}
-	return dist;
+	
+	return dist ? dist : 30;
 }
 _real AsmTreeBuilder::DistanceToBndBorder(gp_Ax1 axis, Bnd_Box *bnd){
 	gp_Pnt target = axis.Location();

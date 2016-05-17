@@ -65,8 +65,8 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 			try{
 				_bool isRef =XCAFDoc_ShapeTool::IsReference(iter.Value());
 				_bool isAssembly= XCAFDoc_ShapeTool::IsAssembly(iter.Value());
-
-				if(isAssembly || isRef)
+				_bool isShape = XCAFDoc_ShapeTool::IsShape(iter.Value());
+				if (isShape)
 				{
 				TopoDS_Shape shape =XCAFDoc_ShapeTool::GetShape(iter.Value());
 				
@@ -86,12 +86,15 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 				//else {
 				///	continue;
 				//}
-				//if (!subUnit->IsDone())
+				//
 				//	continue;
+				if (subUnit->IsDone()){
+
 				ColSubUnit.push_back(subUnit);
 
-				if (subUnit->Type()==_Part)
-					UnitMap.emplace(subUnit->GetUri(),subUnit);
+					if (subUnit->Type()==_Part)
+						UnitMap.emplace(subUnit->GetUri(),subUnit);
+					}
 				}
 			}
 			catch(Standard_Failure){
@@ -152,6 +155,7 @@ std::vector<Unit *>::iterator asp::Assembly::end()
 
 void Assembly::Dump(Standard_OStream &stream, Standard_Integer rank)
 {
+	if (IsDone()){
 		for(int i=0;i<rank;i++)
 			stream<<"    ";
 		if(rank)
@@ -186,6 +190,7 @@ void Assembly::Dump(Standard_OStream &stream, Standard_Integer rank)
 		else 
 			dynamic_cast<Assembly *>(u)->Dump(stream,rank+1);
 			
+	}
 	}
 }
 

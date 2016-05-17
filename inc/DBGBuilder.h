@@ -33,11 +33,14 @@ namespace asp{
 		}
 		~DBGEdge(){}
 	};
+	
+	typedef	std::list<DBGEdge *> EdgeL;
+	
 
 //! Directional blocking graph representation
 //! std::list<DBGEdge> DBG
 	typedef std::list<DBGEdge> DBG;
-
+	
 	template<typename T>
 	class closed_list : public std::list<T>{
 	public :
@@ -123,6 +126,7 @@ namespace asp{
 		_bool DBGBuilder::IsMoveDirStillBlock(_int PartUri, asp_Ax1 axis);
 
 		std::list<DBGEdge> myDBG;
+		std::map<Standard_Integer, EdgeL> dbgGraph;
 		std::map<_int, Unit*> *unitMap;
 
 	//!Unactive nodes e.i. parts have disassembled
@@ -131,7 +135,8 @@ namespace asp{
 		//std::list<_int> openedList;
 
 		Standard_Integer DBGEdgeBuild(Part *part, Part *obst, Standard_Boolean allowGap=Standard_True);
-
+	//	Standard_Integer ShapeOfRotationDBGHeal(asp::SurfaceAttribute &attribute, std::vector<gp_Ax1> *alreadyBlockedDirs);
+		Standard_Integer ShapeOfRotationDBGHeal(Part* part);
 		//!function: isEnvelopBndBox
 		//! purpose: check if 'box' is wraped by 'wrapBox'
 		Standard_Boolean isEnvelopBndBox(Bnd_Box *box, Bnd_Box *wrapBox);

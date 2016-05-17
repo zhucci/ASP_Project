@@ -36,11 +36,13 @@ _bool DBGBuilder::AddDBGRelation(Unit* product){
 	for (auto iter=unitMap->begin(); iter!=unitMap->end(); ++iter){
 		
 		auto subIter = iter;
+		Part * part = dynamic_cast<Part*>((*iter).second);
 		for (++subIter; subIter != unitMap->end(); ++subIter){
 
-			DBGEdgeBuild(dynamic_cast<Part*>((*iter).second),
+			DBGEdgeBuild(part,
 				dynamic_cast<Part*>((*subIter).second), true);
 		}
+		
 	
 	}
 	return true;
@@ -321,17 +323,21 @@ Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boole
 			for (auto &obstSp : *obst){
 				if (obstSp.myBox.Distance(sp.myBox)>Gap)
 					continue;
-
+				//Simple surface can be contact just with same type surface
+				if (sp.Type<(int)GeomAbs_BezierSurface &&
+					obstSp.Type<(int)GeomAbs_BezierSurface &&
+					sp.Type != obstSp.Type)
+					continue;
 				//Posibility be at contact check
 				if (NotInContact(sp, obstSp, Overlay, Gap))
 					continue;
 
-				
+				//Distance check
 				BRepExtrema_ExtFF Ext(sp.myShape, obstSp.myShape);
 			
 				const Standard_Integer NbExtrema = Ext.IsDone() ? Ext.NbExt() : 0;
 				
-				if (NbExtrema > 0)
+				if (NbExtrema)
 				{
 					_real minDist = Gap+Gap;
 					for (int i = 1; i <= NbExtrema; i++){

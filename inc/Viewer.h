@@ -62,6 +62,7 @@ protected:
 
 protected slots:
 	void ChangeShadingMode();
+	void HideSelectedShape();
 	void ShapeDecomposition();
 	void CloseLocalContext();
 	void DisplayAll();

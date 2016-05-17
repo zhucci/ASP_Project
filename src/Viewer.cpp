@@ -280,13 +280,14 @@ void Viewer::setDegenerateMode(const bool on)
 void Viewer::ShapeDecomposition(){
 	
 }
+void Viewer::HideSelectedShape(){
+	myIC->InitSelected();
+	myIC->EraseSelected();
+}
 void Viewer::ChangeShadingMode(){
 	
 	myIC->InitCurrent();
-	Standard_Boolean isChanged = Standard_False;
-	if (!myIC->MoreCurrent()){
-	
-	}
+
 	while(myIC->MoreCurrent()){
 		
 		Handle_AIS_InteractiveObject obj = myIC->Current();

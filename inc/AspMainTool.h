@@ -42,6 +42,8 @@ public:
 	void								StopAssemblyAnimation(){ if (AsmTreeBuilding) asmSeq.Stop(); showMustGoOn = false; }
 
 	void								ShowProduct(Viewer* aViewer);
+
+	void								HideDisassembled(Viewer* aViewer);
 	
 	void								SetAsmTreeCalcStatus(Standard_Boolean status){AsmTreeCalculation = status;}
 
@@ -58,6 +60,8 @@ protected:
 	std::vector<Part *>  		AspMainTool::GetSelectedPart(Handle_AIS_InteractiveContext context);
 
 	void								ShowBlkDirsOfPart(Part *part, Viewer *aViewer);
+
+	
 
 	void								ShowSurface(const Handle_AIS_InteractiveContext &context, SurfaceAttribute &surf);
 

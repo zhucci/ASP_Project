@@ -168,15 +168,19 @@ std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Par
 	for (auto iter = part->colOfSurf.begin(); iter != end; ++iter){
 		auto Vert1Prop = getFaceType(*iter);
 
-		if (justBaseAndGripFaces){
-			if((iter->Func == _Base || iter->Func==_Grip))
-			Vert1Prop.Vertex_Index = add_vertex(fullG);
+		
+		if (justBaseAndGripFaces && (iter->Func == _Base || iter->Func == _Grip)){
+				Vert1Prop.Vertex_Index = add_vertex(fullG);
+				fullG[Vert1Prop.Vertex_Index] = Vert1Prop;
+				faceToFullGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
 		}
-		else
+		else if (!justBaseAndGripFaces){
 			Vert1Prop.Vertex_Index = add_vertex(fullG);
+			fullG[Vert1Prop.Vertex_Index] = Vert1Prop;
+			faceToFullGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
+		}
 
-		fullG[Vert1Prop.Vertex_Index] = Vert1Prop;
-		faceToFullGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
+		
 		if (iter->Func == _Base){
 			Vert1Prop.Vertex_Index = add_vertex(smallG);
 			smallG[Vert1Prop.Vertex_Index] = Vert1Prop;
@@ -255,7 +259,9 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1Status = true;
 		traitPntF1Status = true;
 	}
-	else if (f1Type == GeomAbs_Cylinder){
+	else if (f1Type == GeomAbs_Cylinder && (s1.surf.IsUClosed() || s1.surf.IsVClosed())){
+		
+
 		traitVecF1 = s1.surf.Cylinder().Axis().Direction();
 		gp_Pnt loc = s1.surf.Cylinder().Axis().Location();
 		_real ui, us, vi, vs;
@@ -272,7 +278,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1Status = true;
 		traitPntF1Status = true;
 	}
-	else if (f1Type == GeomAbs_Cone){
+	else if (f1Type == GeomAbs_Cone && (s1.surf.IsUClosed() || s1.surf.IsVClosed())){
 		traitVecF1 = s1.surf.Cone().Axis().Direction();
 		gp_Pnt loc = s1.surf.Cone().Axis().Location();
 		_real ui, us, vi, vs;
@@ -289,7 +295,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1Status = true;
 		traitPntF1Status = true;
 	}
-	else if (f1Type == GeomAbs_Torus){
+	else if (f1Type == GeomAbs_Torus && (s1.surf.IsUClosed() || s1.surf.IsVClosed())){
 		traitVecF1 = s1.surf.Torus().Axis().Direction();
 		gp_Pnt loc = s1.surf.Torus().Axis().Location();
 		_real ui, us, vi, vs;
@@ -306,7 +312,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1Status = true;
 		traitPntF1Status = true;
 	}
-	else if (f1Type == GeomAbs_SurfaceOfRevolution){
+	else if (f1Type == GeomAbs_SurfaceOfRevolution && (s1.surf.IsUClosed() || s1.surf.IsVClosed())){
 		traitVecF1 = s1.surf.AxeOfRevolution().Direction();
 		gp_Pnt loc = s1.surf.AxeOfRevolution().Location();
 		_real ui, us, vi, vs;
@@ -323,6 +329,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1Status = true;
 		traitPntF1Status = true;
 	}
+	/*
 	else if (f1Type == GeomAbs_SurfaceOfExtrusion){
 		auto surf = *((Handle(Geom_SurfaceOfLinearExtrusion)*)&s1.surf);
 		if (!surf.IsNull()){
@@ -331,14 +338,30 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 			traitVecF1Status = true;
 		}
 	}
-	
-	GProp_GProps propsTester;
+	*/
+	//GProp_GProps propsTester;
 
 	if (!traitPntF1Status){
 		
-		BRepGProp::LinearProperties(s1.myShape, propsTester);
-		traitPntF1 = propsTester.CentreOfMass();
+		//BRepGProp::LinearProperties(s1.myShape, propsTester);
+		//traitPntF1 = propsTester.CentreOfMass();
+		_real ui, us, vi, vs;
+		gp_Vec tanU, tanV;
+		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		
+		s1.surf.D1((ui + us) / 2., (vi + vs) / 2., traitPntF1,tanU,tanV );
+
+		tanU.Cross(tanV);
+
+		if (s1.myShape.Orientation() == TopAbs_REVERSED)
+			tanU.Reverse();
+		tanU.Normalize();
+
+		traitVecF1 = tanU;
+		
 		traitPntF1Status=true;
+		traitVecF1Status=true;
+
 	}
 	if (!traitVecF1Status){
 		Extrema_ExtPS extrema;
@@ -359,8 +382,9 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 				tanU.Reverse();
 			tanU.Normalize();
 			traitVecF1=tanU;
+			traitVecF1Status = true;
 		}	
-		traitVecF1Status=true;
+		
 	}
 	if (!traitPntF1Status || !traitVecF1Status)
 		return false;

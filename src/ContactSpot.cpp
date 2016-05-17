@@ -278,7 +278,7 @@ _bool ContactSpot::OverLayAreaGen(){
 		std::list<ContactSpot::facePntCorrespond> mainPnts;
 
 		PntOnSurfGenerate(smlSurf, smlFaceOrientation, &mainPnts);
-		if (mainPnts.size()<2*NeedPntAmount)
+		if (mainPnts.size()<3*NeedPntAmount)
 			PntOnFaceEdgesGenerate(smlSurf, smlFaceOrientation, &mainPnts);
 
 		//Extremum points on bigger face

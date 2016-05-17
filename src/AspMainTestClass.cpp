@@ -486,9 +486,7 @@ void AspMainTest::TestIsoFaceForPartCalculation(MainFrame* frame, AspMainTool *t
 		return;
 
 	auto &PartMap = selectedParts[0]->UnitMap;
-	context->ClearSelected(false);
-	context->EraseAll();
-	context->OpenLocalContext(true, true);
+	
 
 	
 	AssemblyGraphBuilder builder;
@@ -496,13 +494,34 @@ void AspMainTest::TestIsoFaceForPartCalculation(MainFrame* frame, AspMainTool *t
 	//for (new)
 	auto p1G = builder.GetPartGraphsSet(selectedParts[0],false);
 	auto p2G = builder.GetPartGraphsSet(selectedParts[1], false);
-
+	
 	std::vector<PartIsomorphism> res;
-
-	if(!builder.IsomorphismOfPartCompare(p1G, p2G,&res))
+	bool result;
+	bool isReversed = false;
+	if (p1G.first.vertex_set().size() > p2G.first.vertex_set().size() ||
+		p1G.second.vertex_set().size() > p2G.second.vertex_set().size())
+	{
+		result = builder.IsomorphismOfPartCompare(p2G, p1G, &res);
+		isReversed= true;
+	}
+	else{
+		result = builder.IsomorphismOfPartCompare(p1G, p2G, &res);
+	}
+	context->ClearSelected(false);
+	
+	if(!result)
 		return;
-	res[0].isoPart.first = selectedParts[0]->GetUri();
-	res[0].isoPart.second = selectedParts[1]->GetUri();
+
+	context->EraseAll();
+	context->OpenLocalContext(true, true);
+	if (!isReversed){
+		res[0].isoPart.first = selectedParts[0]->GetUri();
+		res[0].isoPart.second = selectedParts[1]->GetUri();
+	}
+	else{
+		res[0].isoPart.first = selectedParts[1]->GetUri();
+		res[0].isoPart.second = selectedParts[0]->GetUri();
+	}
 
 	_int cColor=0;
 	for (auto &iso : res){

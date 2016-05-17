@@ -251,8 +251,8 @@ struct FaceTypeCompare{
 
 	bool operator()(const graph_traits<partGraph>::vertex_descriptor &v1,
 		const graph_traits<partGraph>::vertex_descriptor &v2){
-		if (sGraph[v1].FaceFunctionType == bGraph[v2].FaceFunctionType &&
-			sGraph[v1].FaceFormType == bGraph[v2].FaceFormType)
+		if (sGraph[v1].FaceFunctionType == bGraph[v2].FaceFunctionType //&& sGraph[v1].FaceFormType == bGraph[v2].FaceFormType
+			)
 			return true;
 		else
 			return false;
@@ -271,7 +271,7 @@ struct FaceSpartialCompare{
 
 	bool operator()(const graph_traits<partGraph>::edge_descriptor &v1,
 		const graph_traits<partGraph>::edge_descriptor &v2){
-		return std::abs(sGraph[v1].DistDesc - bGraph[v2].DistDesc)<0.1 &&
+		return std::abs(sGraph[v1].DistDesc - bGraph[v2].DistDesc)<0.3 &&
 			std::abs(sGraph[v1].AngDesc - bGraph[v2].AngDesc)<0.05;
 	}
 

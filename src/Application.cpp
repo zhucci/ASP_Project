@@ -23,7 +23,7 @@
 #include <Voxel_ROctBoolDS.hxx>
 #include <Voxel_BooleanOperation.hxx>
 #include <Voxel_CollisionDetection.hxx>
-#include <Voxel_FastConverter.hxx>
+#include <Voxel_CollisionDetection.hxx>
 #include <Voxel_Writer.hxx>
 #include <Voxel_Reader.hxx>
 #include <VoxelClient_VisDrawer.h>

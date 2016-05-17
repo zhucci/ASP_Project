@@ -187,7 +187,16 @@ std::string AspMainTool::GetSequence(AsmTreeNode::AsmMoveType type){
 	}
 	return std::string("No sequence was obtained\n");
 }
-
+void AspMainTool::HideDisassembled( Viewer* aViewer){
+	auto context = aViewer->getIC();
+	for (auto &dismounted : asmSeq.closedList){
+		auto hided = this->mapOfShapes.find(dismounted);
+		if (hided!= mapOfShapes.end())
+		context->Erase(hided->second,false);
+	}
+	aViewer->Update();
+	asmState = asmSeq.GetWholeProductNode();
+}
 void AspMainTool::PlayAssemblyAnimation(AsmTreeNode::AsmMoveType processType, Viewer* aViewer){
 	try{
 		
@@ -311,8 +320,8 @@ void AspMainTool::ShowAssemblyStep(AsmTreeNode::AsmMoveType processType, Viewer 
 			if (!helpShape.IsNull()){
 
 				if (context->IsDisplayed(helpShape)){
-					context->SetColor(helpShape,Quantity_NOC_GOLD3,false);
-					context->SetDisplayMode(helpShape, AIS_WireFrame, false);
+					//context->SetColor(helpShape,Quantity_NOC_GOLD3,false);
+					//context->SetDisplayMode(helpShape, AIS_WireFrame, false);
 					context->Erase(helpShape, false);
 				}
 			}
@@ -338,8 +347,8 @@ void AspMainTool::ShowAssemblyStep(AsmTreeNode::AsmMoveType processType, Viewer 
 						else{
 							//context->Unhilight(aisShape, false);					
 						context->Display(aisShape, false);
-						context->SetDisplayMode(helpShape, AIS_WireFrame, false);
-						context->SetColor(aisShape, Quantity_NOC_GOLD3,false);
+						//context->SetDisplayMode(helpShape, AIS_WireFrame, false);
+						//context->SetColor(aisShape, Quantity_NOC_GOLD3,false);
 						}
 							
 					}
@@ -569,11 +578,13 @@ void AspMainTool::HideSelectedPart(Viewer *aView){
 	std::vector<Part *> selectedParts = GetSelectedPart(context);
 	context->ClearSelected(false);
 
+	/*
 	for (auto &p : selectedParts){
 		auto aisShape = mapOfShapes.find(p->GetUri());
 		if (aisShape != mapOfShapes.end())
 			context->Erase(aisShape->second,false);	
 	}
+	*/
 	aView->Update();
 }
 void AspMainTool::ShowBlkDirsOfPart(Part *part, Viewer *aView){

@@ -35,6 +35,8 @@ namespace asp
 		SurfaceAttribute &GetSurfAtt(Standard_Integer index){return colOfSurf[index];}
 
 		void SetContact(Contact &cont){colOfCont.push_back(cont);}
+
+		void SetAsmDir(gp_Ax1 &dir){ PotentialDirs.push_back(dir); }
 		
 	protected:
 		
@@ -44,6 +46,7 @@ namespace asp
 
 		std::vector<Contact>  colOfCont; 
 
+		 std::vector<gp_Ax1> PotentialDirs;
 
 //!calculate bounding box and update myBox variable
 		void bndBoxCalc();

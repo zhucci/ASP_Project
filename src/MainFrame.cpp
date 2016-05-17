@@ -132,10 +132,12 @@ void MainFrame::PlayBack(){
 	//QMessageBox::about(this, "Sequence", sequence.c_str());
 }
 void MainFrame::PlayFoward(){
-
-	//std::string sequence = aspTool->GetSequence(asp::AsmTreeNode::DISMANTLE);
-	aspTool->PlayAssemblyAnimation(asp::AsmTreeNode::DISMANTLE, myViewer);
-	//QMessageBox::about(this, "Sequence", sequence.c_str());
+	if (aspTool){
+		aspTool->HideDisassembled(myViewer);
+	}
+	
+	//aspTool->PlayAssemblyAnimation(asp::AsmTreeNode::DISMANTLE, myViewer);
+	
 }
 void MainFrame::DBGShow(){
 	if (aspTool){
@@ -224,7 +226,7 @@ void MainFrame::contextMenu(const QPoint &pos){
 	QAction *displayHiddenPart = new QAction(tr("Display hidden parts"), this);
 	connect(displayHiddenPart, SIGNAL(triggered()), this, SLOT(ShowFullProduct()));
 	QAction *HidePart = new QAction(tr("Hide part"), this);
-	connect(HidePart, SIGNAL(triggered()), this, SLOT(HideSelectedPart()));
+	connect(HidePart, SIGNAL(triggered()), myViewer, SLOT(HideSelectedShape()));
 	QAction *displayJustSelected = new QAction(tr("Keep just this"), this);
 	connect(displayJustSelected, SIGNAL(triggered()), this, SLOT(DisplayJustSelected()));
 	QMenu menu(tr("Context"), this);
