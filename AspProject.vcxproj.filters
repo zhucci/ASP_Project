@@ -109,6 +109,9 @@
     <ClCompile Include="src\AspMainTestClass.cpp">
       <Filter>AspTool\src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GoodColor.cpp">
+      <Filter>AspTool\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\AspMainTool.h">
@@ -181,6 +184,9 @@
       <Filter>AspTool\inc</Filter>
     </ClInclude>
     <ClInclude Include="inc\AspMainTestClass.h">
+      <Filter>AspTool\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\GoodColor.h">
       <Filter>AspTool\inc</Filter>
     </ClInclude>
   </ItemGroup>

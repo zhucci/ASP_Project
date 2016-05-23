@@ -125,16 +125,9 @@ _bool AsmTreeBuilder::continueDisassembly(AsmTreeNode * root){
 
 	ExploreNode(root);
 
-	_bool backTrack = false;
-	_int partUri=-1;
 	_int childAmount =root->childNodes.size();
 	
 	while( root->childNodes.begin()!=root->childNodes.end()){
-
-		if (backTrack && root->childNodes.begin()->MovedPartUri() == partUri){
-				root->childNodes.pop_front();
-				continue;
-			}
 
 		QString status = "Dismounted ";
 		status += std::to_string(closedList.size()).c_str();
@@ -152,7 +145,7 @@ _bool AsmTreeBuilder::continueDisassembly(AsmTreeNode * root){
 			root->childNodes.pop_front();
 			continue;
 		}
-		partUri = current->MovedPartUri();
+		
 		closedList.Close(current->myPart->GetUri());
 
 		if (continueDisassembly(current)){
@@ -160,14 +153,6 @@ _bool AsmTreeBuilder::continueDisassembly(AsmTreeNode * root){
 		}
 		else 
 			break;
-
-		//backTrack= true;
-
-	//	if (++backTraceIterCounter > backTraceMaxAmount)
-		//	return false;
-	//Mark previosly closed part as open
-	//	closedList.OpenPrev();
-	//	root->childNodes.pop_front();
 	}
 	return false;
 }
@@ -183,7 +168,6 @@ _bool AsmTreeBuilder::rejectDisassembly(AsmTreeNode * node){
 _bool AsmTreeBuilder::acceptedDisassembly(AsmTreeNode * node){
 
 	if (closedList.IsTargetDone()){
-		node->childNodes.push_back(AsmTreeNode(node));
 		return true;
 	}
 	return false;
@@ -280,7 +264,7 @@ std::vector<asp_Ax1> AsmTreeBuilder::FreeDirs(Part *part,AsmTreeNode *curNodeInT
 	blkDirs = myDBGBuilder.GetBlockedDirs(part->GetUri());
 
 	for (auto & dir : part->PotentialDirs){
-		asp_Ax1 dsmDir = asp_Ax1(dir, _ContactFree);
+		asp_Ax1 dsmDir = asp_Ax1(dir.axis, _ContactFree);
 		if (!IsBlocked(dsmDir, &blkDirs)){
 			freeDirs.push_back(dsmDir);
 		}
@@ -296,25 +280,12 @@ std::vector<asp_Ax1> AsmTreeBuilder::FreeDirs(Part *part,AsmTreeNode *curNodeInT
 		}
 	}
 
-	/*
-	else{
-		
-		if (!curNodeInTree->IsAbsNode()){
-			curNodeInTree->SetOperationType(AsmTreeNode::DISMANTLE);
-			freeDirs.push_back(asp_Ax1(myAssembly->GetUnitMap()->find(PartUri)->second->GetCenter(), *curNodeInTree->asmMove.begin(), _ContactFree));
-		}
-		
-			auto center = myAssembly->GetUnitMap()->find(PartUri)->second->GetCenter();
-			freeDirs.push_back(asp_Ax1(gp_Ax1(center, gp_Dir(1, 0, 0)), _ContactFree));
-			freeDirs.push_back(asp_Ax1(gp_Ax1(center, gp_Dir(0, 1, 0)), _ContactFree));
+	
+	else if (!blkDirs.size()){
+			auto center = part->GetCenter();
 			freeDirs.push_back(asp_Ax1(gp_Ax1(center, gp_Dir(0, 0, 1)), _ContactFree));
-			freeDirs.push_back(asp_Ax1(gp_Ax1(center, gp_Dir(-1, 0, 0)), _ContactFree));
-			freeDirs.push_back(asp_Ax1(gp_Ax1(center, gp_Dir(0, -1, 0)), _ContactFree));
-			freeDirs.push_back(asp_Ax1(gp_Ax1(center, gp_Dir(0, 0, -1)), _ContactFree));
-
-			
 	}
-	*/
+	
 	return freeDirs;
 }
 _bool AsmTreeBuilder::IsBlocked(asp_Ax1 dir, std::vector<asp_Ax1> *colOfBlkDir){

@@ -50,9 +50,6 @@ namespace asp{
 
 		void IsNear(_real *Direction, _real GapAllowSize,_int MaxIter);
 
-		_bool IsSimpleContact();
-		
-		_bool OverLayAreaPar(_int NbIter, _real delta []);
 
 		_bool OverLayAreaEl();
 
@@ -63,14 +60,11 @@ namespace asp{
 		_int CheckPntPairs(std::list<ContactSpot::facePntCorrespond> &mainPnts, _bool ShapeSwap, _int GoodPntRequirement);
 
 	//For random points generation
-		inline _real rand(_real min, _real max);
+		//inline _real rand(_real min, _real max);
 
-		inline _real rand();
+		//inline _real rand();
 
-
-		 _bool IsBiggerSurface(BRepAdaptor_Surface &surf1, BRepAdaptor_Surface &surf2);
-
-		 void InternalBndInit();
+		// void InternalBndInit();
 		
 /*data*/
 
@@ -84,8 +78,8 @@ namespace asp{
 
 		_bool ErrorInContactIdentification;
 
-		std::mt19937 gen;
-		std::uniform_real_distribution<> dist;
+		//std::mt19937 gen;
+		//std::uniform_real_distribution<> dist;
 
 		//Contact spot area bounds
 		Bnd_Box2d ContactBnd[2];

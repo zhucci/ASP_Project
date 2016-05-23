@@ -93,7 +93,20 @@ private:
 	AIS_DisplayMode displayMode;
 
 	_int AsmVisualContextId;
-	Handle_AIS_Shape helpShape;
+	struct PrevAsmStep{
+		PrevAsmStep() :PartShape{ NULL },
+		PartsHelpedShape{NULL},
+		PartUri{0},
+		ContextId{0}{}
+
+		AsmTreeNode::AsmMoveType type;
+		_int PartUri;
+		_int ContextId;
+		Handle_AIS_Shape PartShape;
+		Handle_AIS_Shape PartsHelpedShape;
+
+	} prevStep;
+	
 	_int ProductContext;
 	Assembly *product;
 	AsmTreeBuilder asmSeq;

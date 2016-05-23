@@ -24,6 +24,7 @@ Timer::~Timer()
 void Timer::Start() {
 	myTimer.Reset();
 	myTimer.Start();
+
 }
 
 void Timer::Stop() {

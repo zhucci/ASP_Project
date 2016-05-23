@@ -8,18 +8,17 @@ gp_Ax3 Unit::WCS;
 
 _int Unit::UnitNumberCounter(1);
 
-Unit::Unit(const TopoDS_Shape &shape, Unit *root)
+Unit::Unit(const TopoDS_Shape &shape, Unit *root):
+IsCorrectBuild{ false }
 {
-
-	//TopAbs_ShapeEnum terminateAt = TopAbs_FACE;
-	IsCorrectBuild = false;
+	
 	myshape = shape;
 	uri = UnitNumberCounter++;
 	bndBoxVolume = 0.;
 	unitVolume = 0.;
 	mass = 0.0;
 	myShapeType = myshape.ShapeType();
-	check=Standard_False;
+	
 	Name=nullptr;
 	myLoc = shape.Location();
 	myBox=nullptr;
@@ -41,19 +40,19 @@ Unit::Unit(const TopoDS_Shape &shape, Unit *root)
 }
 
 
-Unit::Unit(const  TDF_Label &label, Unit *root)
+Unit::Unit(const  TDF_Label &label, Unit *root):
+IsCorrectBuild{ false }, myLabel{label}
 {
 	
 	if(label.IsNull()){
 		Standard_Failure::Raise("Label is null");
 	}
-	IsCorrectBuild=false;
-	myLabel = label;
+	
 	uri = UnitNumberCounter++;
 	bndBoxVolume = 0.;
 	unitVolume = 0.;
 	mass = 0.0;
-	check = Standard_False;
+	
 	Name = nullptr;
 	myBox = nullptr;
 	root = nullptr;

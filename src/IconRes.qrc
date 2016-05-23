@@ -1,5 +1,7 @@
 <RCC>
   <qresource>
+    <file alias="emptyAsmState.png">img/EmptyAssembly.png</file>
+    <file alias="fullAssemblyState.png">img/FullProduct_32.png</file>
     <file alias="downloads.png">img/download-32.png</file>
     <file alias="check.png">img/checkmark-32.png</file>
     <file alias="file.png">img/file-open.png</file>

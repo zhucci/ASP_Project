@@ -9,8 +9,10 @@ _bool IsOneBlkOther(const gp_Dir &one, const gp_Dir& other){
 }
 
  Standard_Boolean IsCodirectional(gp_Dir &D1, gp_Dir &D2){
+
 	 if(D1.XYZ()*D2.XYZ()+ParTol()>1)
 		 return Standard_True;
+
 	 return Standard_False;
  }
 Standard_PCharacter ReadName(const TDF_Label &lbl)
@@ -278,20 +280,12 @@ Handle(XCAFDoc_ShapeTool) STool =		XCAFDoc_DocumentTool::ShapeTool(lbl);
 
 		}
 
-
 		if(lbl.HasChild() && rank<=maxRank)
 		for(TDF_ChildIterator iter(lbl,false);iter.More();iter.Next())
 		{
 				TDF_Label cld=iter.Value();
-				Standard_Boolean isSub = XCAFDoc_ShapeTool::IsSubShape(cld);
-				Standard_Boolean isShape = XCAFDoc_ShapeTool::IsShape(cld);
-				Standard_Boolean isComponent = XCAFDoc_ShapeTool::IsComponent(cld);
-				Standard_Boolean isCompound = XCAFDoc_ShapeTool::IsCompound(cld);
-				Standard_Boolean isAssembly =  XCAFDoc_ShapeTool::IsAssembly(cld);
-			
-						labelsDump(cld);
-					
-			}
+				labelsDump(cld);
+		}
 
 }
 void  DumpChildren(const TDF_Label& lbl) 

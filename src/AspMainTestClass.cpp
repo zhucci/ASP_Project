@@ -4,7 +4,7 @@
 #include <AIS_LocalContext.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <Geom_CartesianPoint.hxx>
-
+#include <qstatusbar.h>
 #include "ISession_Direction.h"
 #include "ISession_Text.h"
 #include "Viewer.h"
@@ -27,223 +27,13 @@
 #include "AspMainTool.h"
 #include "DBGBuilder.h"
 #include "qmessagebox.h"
+#include "GoodColor.h"
+#include "Voxel_BoolDS.hxx"
+#include "Voxel_FastConverter.hxx"
+#include "Voxel_CollisionDetection.hxx"
+
 using namespace asp;
-int ColorAmount = 129;
-Quantity_NameOfColor colorVar[] = {
-	Quantity_NOC_RED,
-	Quantity_NOC_ROSYBROWN,
 
-	Quantity_NOC_ROYALBLUE,
-
-	Quantity_NOC_SALMON,
-
-	Quantity_NOC_SANDYBROWN,
-
-	Quantity_NOC_SEASHELL,
-	Quantity_NOC_SEASHELL2,
-
-	Quantity_NOC_BEET,
-	Quantity_NOC_TEAL,
-	Quantity_NOC_SIENNA,
-
-	Quantity_NOC_SKYBLUE3,
-
-	Quantity_NOC_SLATEBLUE,
-
-	Quantity_NOC_SLATEGRAY,
-	Quantity_NOC_SNOW,
-
-	Quantity_NOC_SPRINGGREEN,
-
-	Quantity_NOC_STEELBLUE,
-
-Quantity_NOC_BURLYWOOD,
-Quantity_NOC_BLUE4,
-
-Quantity_NOC_ALICEBLUE,
-Quantity_NOC_AZURE2,
-
-Quantity_NOC_AZURE4,
-Quantity_NOC_BEIGE,
-Quantity_NOC_BISQUE,
-Quantity_NOC_BISQUE2,
-
-Quantity_NOC_BISQUE4,
-Quantity_NOC_BLANCHEDALMOND,
-Quantity_NOC_BLUE1,
-
-Quantity_NOC_BLUEVIOLET,
-Quantity_NOC_BROWN,
-
-Quantity_NOC_BROWN3,
-Quantity_NOC_BROWN4,
-
-
-Quantity_NOC_BURLYWOOD3,
-Quantity_NOC_CADETBLUE,
-
-Quantity_NOC_CHARTREUSE,
-
-
-
-Quantity_NOC_CORAL,
-
-Quantity_NOC_CORNFLOWERBLUE,
-
-Quantity_NOC_CYAN1,
-
-Quantity_NOC_CYAN4,
-Quantity_NOC_DARKGOLDENROD,
-Quantity_NOC_DARKGOLDENROD4,
-Quantity_NOC_DARKGREEN,
-Quantity_NOC_DARKKHAKI,
-Quantity_NOC_DARKOLIVEGREEN,
-
-Quantity_NOC_DARKOLIVEGREEN4,
-Quantity_NOC_DARKORANGE,
-
-Quantity_NOC_DARKORANGE4,
-Quantity_NOC_DARKORCHID,
-Quantity_NOC_DARKORCHID4,
-Quantity_NOC_DARKSALMON,
-
-
-Quantity_NOC_DARKSEAGREEN2,
-
-Quantity_NOC_DARKSLATEBLUE,
-
-Quantity_NOC_DARKSLATEGRAY,
-Quantity_NOC_DARKTURQUOISE,
-Quantity_NOC_DARKVIOLET,
-Quantity_NOC_DEEPPINK,
-
-Quantity_NOC_DEEPSKYBLUE2,
-
-Quantity_NOC_DODGERBLUE2,
-
-Quantity_NOC_FIREBRICK,
-
-Quantity_NOC_FLORALWHITE,
-Quantity_NOC_FORESTGREEN,
-Quantity_NOC_GAINSBORO,
-Quantity_NOC_GHOSTWHITE,
-Quantity_NOC_GOLD,
-
-Quantity_NOC_GOLDENROD,
-
-Quantity_NOC_GRAY,
-
-Quantity_NOC_GRAY26,
-
-Quantity_NOC_GRAY5,
-
-Quantity_NOC_GRAY7,
-
-Quantity_NOC_GREEN2,
-
-Quantity_NOC_GREENYELLOW,
-Quantity_NOC_GRAY97,
-
-
-Quantity_NOC_HONEYDEW2,
-
-Quantity_NOC_HOTPINK,
-
-Quantity_NOC_INDIANRED,
-Quantity_NOC_INDIANRED1,
-
-Quantity_NOC_IVORY,
-
-Quantity_NOC_KHAKI,
-
-Quantity_NOC_LAVENDER,
-
-Quantity_NOC_LAWNGREEN,
-
-Quantity_NOC_LIGHTBLUE,
-
-Quantity_NOC_LIGHTBLUE4,
-Quantity_NOC_LIGHTCORAL,
-
-Quantity_NOC_LIGHTGOLDENROD,
-
-Quantity_NOC_LIGHTGOLDENRODYELLOW,
-Quantity_NOC_LIGHTGRAY,
-
-Quantity_NOC_LIGHTSALMON2,
-Quantity_NOC_LIGHTSEAGREEN,
-Quantity_NOC_LIGHTSKYBLUE,
-
-Quantity_NOC_LIGHTSLATEBLUE,
-Quantity_NOC_LIGHTSLATEGRAY,
-Quantity_NOC_LIGHTSTEELBLUE,
-
-Quantity_NOC_LIGHTYELLOW,
-
-Quantity_NOC_LIMEGREEN,
-Quantity_NOC_LINEN,
-Quantity_NOC_MAGENTA1,
-
-Quantity_NOC_MAROON,
-
-Quantity_NOC_MEDIUMAQUAMARINE,
-Quantity_NOC_MEDIUMORCHID,
-
-Quantity_NOC_MEDIUMPURPLE,
-
-Quantity_NOC_MEDIUMSEAGREEN,
-Quantity_NOC_MEDIUMSLATEBLUE,
-Quantity_NOC_MEDIUMSPRINGGREEN,
-Quantity_NOC_MEDIUMTURQUOISE,
-Quantity_NOC_MEDIUMVIOLETRED,
-Quantity_NOC_MIDNIGHTBLUE,
-Quantity_NOC_MINTCREAM,
-Quantity_NOC_MISTYROSE,
-
-Quantity_NOC_MOCCASIN,
-
-Quantity_NOC_OLDLACE,
-Quantity_NOC_OLIVEDRAB,
-
-Quantity_NOC_ORANGE,
-
-Quantity_NOC_ORANGERED,
-
-Quantity_NOC_ORCHID,
-
-Quantity_NOC_PALEGOLDENROD,
-
-Quantity_NOC_PALETURQUOISE,
-
-Quantity_NOC_PALEVIOLETRED,
-
-Quantity_NOC_PAPAYAWHIP,
-
-Quantity_NOC_PERU,
-
-Quantity_NOC_PINK4,
-
-Quantity_NOC_POWDERBLUE,
-Quantity_NOC_PURPLE,
-
-
-Quantity_NOC_TAN,
-
-Quantity_NOC_THISTLE,
-
-Quantity_NOC_TOMATO,
-
-Quantity_NOC_TURQUOISE,
-
-Quantity_NOC_VIOLET,
-
-Quantity_NOC_WHEAT,
-Quantity_NOC_WHEAT1,
-
-
-Quantity_NOC_YELLOW3,
-
-};
 
 void AspMainTest::TestGraphIso(MainFrame * frame, AspMainTool *tool){
 	
@@ -337,7 +127,7 @@ void AspMainTest::TestFindPartsPointsFunction(MainFrame * frame, AspMainTool *to
 				frame->SetStatus(st);
 			}
 		}
-		inPointsAmount += pPart->pntInPart.size();
+		inPointsAmount += (_int) pPart->pntInPart.size();
 	}
 	timer.Stop();
 
@@ -448,21 +238,21 @@ void AspMainTest::TestSpartialDescriptorCalculation(MainFrame *frame, AspMainToo
 				}
 			}
 	}
-
+	context->CloseLocalContext(curLC);
 	
 }
 void AspMainTest::TestDescriptorOFSelectedPartCalculation(MainFrame *frame, AspMainTool *tool){
 
 	auto aView = frame->myViewer;
 
-	Handle_AIS_InteractiveContext context = frame->myViewer->getIC();
+	Handle_AIS_InteractiveContext context = aView->getIC();
 
 	std::vector<Part *> selectedParts = tool->GetSelectedPart(context);
 
 	if (selectedParts.size() < 1){
 		QString status = "Firstly, choose one part then try again!";
 		
-		auto widget = QMessageBox::information(frame, "Assembly Information", status);
+		QMessageBox::information(frame, "Assembly Information", status);
 		return;
 	}
 		
@@ -485,7 +275,7 @@ void AspMainTest::TestIsoFaceForPartCalculation(MainFrame* frame, AspMainTool *t
 	if (selectedParts.size()<2)
 		return;
 
-	auto &PartMap = selectedParts[0]->UnitMap;
+	/*auto &PartMap = */selectedParts[0]->UnitMap;
 	
 
 	
@@ -553,7 +343,7 @@ void AspMainTest::TestIsoFaceForPartCalculation(MainFrame* frame, AspMainTool *t
 			Handle_AIS_Shape S1 = new AIS_Shape(surfP1.myShape);
 			Handle_AIS_Shape S2 = new AIS_Shape(surfP2->myShape);
 
-			Quantity_Color shapeColor = colorVar[++cColor];
+			Quantity_Color shapeColor = Color::name(++cColor);
 
 			_int DisplayMode= AIS_Shaded;
 			
@@ -576,10 +366,10 @@ void AspMainTest::TestContactSpotTimeCalc(MainFrame * frame, asp::AspMainTool *t
 	
 	if (!tool->product)
 		return;
-	_int fullAmount = tool->product->UnitMap.size();
+	_int fullAmount =(_int) tool->product->UnitMap.size();
 	_int faceAmount = 0;
 	for (auto &unit : tool->product->UnitMap){
-		faceAmount += dynamic_cast<Part*>(unit.second)->colOfSurf.size();
+		faceAmount += (_int) dynamic_cast<Part*>(unit.second)->colOfSurf.size();
 	}
 	Timer timer;
 	
@@ -612,7 +402,7 @@ void AspMainTest::FillPartWithPoints(MainFrame * mainWindow, AspMainTool *tool){
 		QString status = "Pnt gen ";
 		status += std::to_string(i).c_str();
 		status += " / ";
-		status += tool->product->UnitMap.size();
+		status += std::to_string( tool->product->UnitMap.size()).c_str();
 		mainWindow->SetStatus(status);
 
 		static BRepClass3d_SolidClassifier solidClsf;
@@ -675,7 +465,7 @@ void AspMainTest::FillPartWithPoints(MainFrame * mainWindow, AspMainTool *tool){
 			status += timer.WhatTime().c_str();
 			mainWindow->SetStatus(status);
 		}
-		inPointsAMount += pointsInsidePart.size();
+		inPointsAMount += (_int) pointsInsidePart.size();
 	}
 	timer.Stop();
 
@@ -698,7 +488,9 @@ void AspMainTest::TestContactSpotProcess(MainFrame * frame, AspMainTool *tool){
 	Handle_AIS_InteractiveContext context = view->getIC();
 	if (context->HasOpenedContext())
 		context->CloseAllContexts();
+
 	context->EraseAll(true);
+
 	Standard_Integer curLC = context->OpenLocalContext();
 
 	for (auto iter = unitMap->begin(); iter != unitMap->end(); iter++){
@@ -732,8 +524,7 @@ void AspMainTest::TestContactSpotProcess(MainFrame * frame, AspMainTool *tool){
 					tool->ShowSurface(context, obstSp);
 					view->getView()->Redraw();
 					//==========================================
-					TopAbs_Orientation orient1 = sp.myShape.Orientation();
-					TopAbs_Orientation orient2 = obstSp.myShape.Orientation();
+					
 					//==========================================
 					//			Launch function Contact Spot
 
@@ -766,5 +557,37 @@ void AspMainTest::TestContactSpotProcess(MainFrame * frame, AspMainTool *tool){
 
 		}
 	}
+	context->CloseLocalContext(curLC);
 
+}
+void AspMainTest::TestVoxelBuilder(MainFrame* frame, AspMainTool *tool){
+	Timer timer;
+	timer.Start();
+
+	auto assemblyShape = tool->product->ColSubUnit.front();
+	//Amount of voxel calculation
+	gp_Pnt min = assemblyShape->myBox->CornerMin();
+	gp_Pnt max = assemblyShape->myBox->CornerMax();
+	_real voxelSize = 3.;
+	int ThreadAmount = 1;
+	int nbX = (int)((max.X() - min.X())/voxelSize );
+	int nbY = (int)((max.Y() - min.Y())/voxelSize);
+	int nbZ = (int)((max.Z() - min.Z())/voxelSize);
+	if (assemblyShape->myShapeType==TopAbs_COMPOUND){
+
+		Voxel_BoolDS voxelShape;
+		Voxel_FastConverter converter(assemblyShape->myshape, voxelShape, 0.1, nbX, nbY, nbZ, ThreadAmount);
+		frame->ProgressBar->show();
+		int status;
+		converter.Convert(status,ThreadAmount);
+		
+	}
+	timer.Stop();
+
+	QString status = "Voxels# ";
+	status += std::to_string(nbX*nbY*nbZ).c_str();
+	status += "T: ";
+	status += timer.WhatTime().c_str();
+	frame->SetStatus(status);
+	
 }

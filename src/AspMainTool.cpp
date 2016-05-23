@@ -23,9 +23,8 @@
 #include "assert.h"
 #include <AIS_InteractiveObject.hxx>
 #include "qmessagebox.h"
+#include "GoodColor.h"
 
-extern Quantity_NameOfColor colorVar[];
-extern int ColorAmount;
 //====================
 //	aps namespace	 =
 //====================
@@ -34,7 +33,8 @@ using namespace asp;
 AspMainTool::AspMainTool():
 AsmVisualContextId{ -1 },
 showMustGoOn{true},
-displayMode{AIS_DisplayMode::AIS_WireFrame}{
+displayMode{AIS_DisplayMode::AIS_WireFrame},
+prevStep{PrevAsmStep()}{
 	ocafApplication = XCAFApp_Application::GetApplication();
 }
 
@@ -310,76 +310,63 @@ void AspMainTool::ShowAssemblyStep(AsmTreeNode::AsmMoveType processType, Viewer 
 			return;
 
 		auto context = aViewer->getIC();
+		//Set operation status in AsmTreeNode structure
 		asmState->SetOperationType(processType);
+
 		//Close prev context with some garbage	
-		if (AsmVisualContextId!=-1){
 
-			aViewer->getIC()->CloseLocalContext(AsmVisualContextId);
-			AsmVisualContextId = -1;
+		if (prevStep.ContextId){
+			aViewer->getIC()->CloseLocalContext(prevStep.ContextId);
+			prevStep.ContextId=0;
+		}
 
-			if (!helpShape.IsNull()){
+		//Discard previous changes in assembly view
+		if (prevStep.PartUri){
 
-				if (context->IsDisplayed(helpShape)){
-					//context->SetColor(helpShape,Quantity_NOC_GOLD3,false);
-					//context->SetDisplayMode(helpShape, AIS_WireFrame, false);
-					context->Erase(helpShape, false);
+			if (processType == AsmTreeNode::DISMANTLE){
+				context->SetColor(prevStep.PartShape, Color::name(prevStep.PartUri),false);
+				context->Erase(prevStep.PartShape,false);	
 				}
+			else if (processType == AsmTreeNode::MOUNT){
+				context->SetColor(prevStep.PartShape, Color::name(prevStep.PartUri), false);
+				context->SetDisplayMode(prevStep.PartShape,displayMode,false);
+				context->Display(prevStep.PartShape, false);
+				
 			}
-
-			if (asmState && !asmState->IsAbsNode()){
-
-				auto aisShape = mapOfShapes.find(asmState->MovedPartUri())->second;
-
-				if (!aisShape.IsNull()){
-					if (processType == AsmTreeNode::DISMANTLE){
-						if (context->IsDisplayed(aisShape)){
-							//context->Unhilight(aisShape, false);
-							context->Erase(aisShape, false);
-						}
-					}
-					else if (processType == AsmTreeNode::MOUNT){
 						
-						if (context->IsDisplayed(aisShape)){
-							//context->SetDisplayMode(helpShape, AIS_WireFrame, false);
-							//context->SetColor(aisShape, Quantity_NOC_GOLD3);
-							//context->Unhilight(aisShape,false);
-						}
-						else{
-							//context->Unhilight(aisShape, false);					
-						context->Display(aisShape, false);
-						//context->SetDisplayMode(helpShape, AIS_WireFrame, false);
-						//context->SetColor(aisShape, Quantity_NOC_GOLD3,false);
-						}
-							
-					}
-				}
+		}
 			
-			}
-		}
-
-		
+		//Step forward
 		if (!asmState->InTheEnd()){
-			asmState = asmState->Next();
-			asmState->SetOperationType(processType);
-		}
 
-		//Display assembly operation
-		
-		if (!asmState->IsAbsNode()){
+			if (prevStep.PartUri || asmState->IsAbsNode()){
+				asmState = asmState->Next();
+			asmState->SetOperationType(processType);
+			}
 			auto pPart = asmState->MovedPart();
 				if (pPart){
 
+					prevStep.PartUri = pPart->GetUri();
+					prevStep.type = processType;
+					
 					gp_Pnt partCenter = pPart->GetCenter();
+
+					auto curDispShape = mapOfShapes.find(pPart->GetUri())->second;
+
+					if (curDispShape && !curDispShape.IsNull()){
+
+						prevStep.PartShape = curDispShape;
+
+					//Open local context for axis visualization
+					prevStep.ContextId = aViewer->getIC()->OpenLocalContext(false, false);
 
 					if (processType == AsmTreeNode::MOUNT){
 
-						auto curDispShape = mapOfShapes.find(pPart->GetUri())->second;
-						if (curDispShape && curDispShape.IsNull())
-							context->Erase(curDispShape);
-
+						context->Erase(curDispShape);
+						
 						TopoDS_Shape partShape((const TopoDS_Shape&)pPart->getShape());
 						gp_Trsf move;
-
+						
 						asmState->SetOperationType(AsmTreeNode::DISMANTLE);
 
 						if (asmState->InitMove()){
@@ -392,44 +379,34 @@ void AspMainTool::ShowAssemblyStep(AsmTreeNode::AsmMoveType processType, Viewer 
 							} while (asmState->MoreMove());
 						}
 
-						helpShape = new AIS_Shape(partShape);
-						
-					}
-					else
-					{
-						helpShape = mapOfShapes.find(pPart->GetUri())->second;
-					}
-
+						Handle_AIS_Shape helpShape = new AIS_Shape(partShape);
 					
-					if (!helpShape.IsNull()){
-						if (context->IsDisplayed(helpShape)){
-							context->SetDisplayMode(helpShape, AIS_Shaded, false);
-							context->SetColor(helpShape, Quantity_NOC_RED,false);
-						}
-						else{
-							context->Display(helpShape, false);
-							context->SetDisplayMode(helpShape, AIS_Shaded, false);
-							context->SetColor(helpShape, Quantity_NOC_RED, false);
-							//context->Hilight(helpShape, false);
-						}
-						//Open local context for axis visualization
-						AsmVisualContextId = aViewer->getIC()->OpenLocalContext(false, false);
+						
+						context->LocalContext()->Display(helpShape, AIS_Shaded,false, false);
+						context->SetColor(helpShape, Quantity_NOC_RED, false);
+					}
+					else if (processType == AsmTreeNode::DISMANTLE){
+						context->SetDisplayMode(curDispShape,AIS_Shaded,false);
+						context->SetColor(curDispShape, Quantity_NOC_RED, false);
+					}
 
+					asmState->SetOperationType(processType);
 
-						if (asmState->InitMove()){
-							auto trsf = asmState->Move();
-							if (processType == AsmTreeNode::MOUNT)
-								trsf.Reverse();
+					if (asmState->InitMove()){
+						auto trsf = asmState->Move();
 							//This arrow will be added to local contact and deleteded with one	
 							ShowArrow(aViewer->getIC(), gp_Ax1(partCenter, trsf), trsf.Magnitude());
 						}
 					}
-				}	
-		}
-		
+					
+				}
 
+			
+		}
+		else{
+			prevStep = PrevAsmStep();
+		}
 		aViewer->Update();
-		
 	}
 	catch (Standard_Failure){
 		std::cerr << __FILE__ << " " << __LINE__ << Standard_Failure::Caught()->GetMessageString() << std::endl;
@@ -442,13 +419,10 @@ Handle_TDocStd_Document AspMainTool::GetStdDoc(){
 void AspMainTool::ShowProduct(Viewer* aView){
 	//aView->getIC()->CloseAllContexts();
 	//aView->getIC()->OpenLocalContext();
-	int i =0;
 	for (auto &aisPart : mapOfShapes){
-		if (i>=ColorAmount)
-			i=0;
 		//aView->getIC()->LocalContext()->Display(aisPart.second, AIS_WireFrame);
 		aView->getIC()->Display(aisPart.second, false);
-		aView->getIC()->SetColor(aisPart.second, colorVar[++i], false);
+		aView->getIC()->SetColor(aisPart.second, Color::name(aisPart.first), false);
 		aView->getIC()->SetDisplayMode(aisPart.second, displayMode, false);
 		
 	}
@@ -497,8 +471,8 @@ void AspMainTool::ShowJustSelectedShape(Viewer* aView){
 		auto aisPart = this->mapOfShapes.find(p->GetUri());
 		if (aisPart != mapOfShapes.end())
 		aView->getIC()->Display(aisPart->second, false);
-		aView->getIC()->SetColor(aisPart->second, Quantity_NOC_GOLD3, false);
-		aView->getIC()->SetDisplayMode(aisPart->second, AIS_WireFrame, false);
+	//	aView->getIC()->SetColor(aisPart->second, Quantity_NOC_GOLD3, false);
+	//	aView->getIC()->SetDisplayMode(aisPart->second, AIS_WireFrame, false);
 	}
 	aView->Fit();
 	aView->Update();
@@ -529,13 +503,15 @@ void AspMainTool::ShowAssemblyInfo(MainFrame* appWindow){
 		ContactAmount += dynamic_cast<Part*>(unit.second)->colOfCont.size();
 	}
 	ContactAmount /=2;
-	QString status = "Parts# ";
+	QString status = "   Parts    : ";
 	status += std::to_string(fullAmount).c_str();
-	status += " & Faces# ";
+	status += "\n Surfaces : ";
 	status += std::to_string(faceAmount).c_str();
-	status += " & Contacts# ";
+	status += "\n Contacts : ";
 	status += std::to_string(ContactAmount).c_str();
-	auto widget = QMessageBox::information(appWindow,"Assembly Information",status);
+	status += "\n Volume   : ";
+	status += std::to_string(product->BoundVolume()).c_str();
+	QMessageBox::information(appWindow,"Assembly Information",status);
 	
 }
 void AspMainTool::ShowSurface(const Handle_AIS_InteractiveContext &context, SurfaceAttribute &surf){

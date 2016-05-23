@@ -145,7 +145,7 @@
      <x>0</x>
      <y>0</y>
      <width>997</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_FILE">
@@ -230,11 +230,13 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_ShowFullProduct"/>
    <addaction name="actionPlayBack"/>
    <addaction name="actionSTEPBack"/>
    <addaction name="actionStop"/>
    <addaction name="actionNextStep"/>
    <addaction name="actionPlayFoward"/>
+   <addaction name="action_HideDisassembled"/>
    <addaction name="actionDBGShow"/>
    <addaction name="actionFoto"/>
   </widget>
@@ -249,16 +251,17 @@
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+    <bool>true</bool>
    </attribute>
-   <addaction name="actionT1"/>
-   <addaction name="actionT2"/>
-   <addaction name="actionT3"/>
-   <addaction name="actionT4"/>
-   <addaction name="actionT5"/>
+   <addaction name="action_DBGTime"/>
+   <addaction name="action_VoxelGeneration"/>
+   <addaction name="actionViewMode"/>
+   <addaction name="action_FaceTrait"/>
+   <addaction name="action_PartIso"/>
    <addaction name="actionBodyDescriptor"/>
    <addaction name="actionPartGraph"/>
-   <addaction name="actionViewMode"/>
+   <addaction name="action_ContactTest"/>
+   <addaction name="action_PointOnFace"/>
   </widget>
   <action name="actionEXIT">
    <property name="icon">
@@ -397,7 +400,7 @@
     <string>Текущую сессию</string>
    </property>
   </action>
-  <action name="actionT1">
+  <action name="action_ContactTest">
    <property name="checkable">
     <bool>false</bool>
    </property>
@@ -413,7 +416,7 @@
     <string>BodyDesc</string>
    </property>
   </action>
-  <action name="actionT2">
+  <action name="action_PointOnFace">
    <property name="text">
     <string>T2</string>
    </property>
@@ -421,7 +424,7 @@
     <string>PointsOnFaces</string>
    </property>
   </action>
-  <action name="actionT3">
+  <action name="action_FaceTrait">
    <property name="text">
     <string>T3</string>
    </property>
@@ -429,7 +432,7 @@
     <string>FaceTrait</string>
    </property>
   </action>
-  <action name="actionT4">
+  <action name="action_PartIso">
    <property name="text">
     <string>T4</string>
    </property>
@@ -437,7 +440,7 @@
     <string>ToPartIso</string>
    </property>
   </action>
-  <action name="actionT5">
+  <action name="action_DBGTime">
    <property name="text">
     <string>T5</string>
    </property>
@@ -498,6 +501,29 @@
    </property>
    <property name="text">
     <string>Твердотельный</string>
+   </property>
+  </action>
+  <action name="action_VoxelGeneration">
+   <property name="text">
+    <string>Voxel</string>
+   </property>
+  </action>
+  <action name="action_HideDisassembled">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/emptyAsmState.png</normaloff>:/emptyAsmState.png</iconset>
+   </property>
+   <property name="text">
+    <string>E</string>
+   </property>
+  </action>
+  <action name="action_ShowFullProduct">
+   <property name="icon">
+    <iconset resource="IconRes.qrc">
+     <normaloff>:/fullAssemblyState.png</normaloff>:/fullAssemblyState.png</iconset>
+   </property>
+   <property name="text">
+    <string>F</string>
    </property>
   </action>
  </widget>

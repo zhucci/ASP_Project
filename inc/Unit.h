@@ -38,7 +38,8 @@ class Unit : public UnitInterface
 	Unit(const TDF_Label &label, Unit* root=NULL);
 
 	Unit::Unit(const TopoDS_Shape &shape, Unit *root=nullptr);
-	bool IsDone(){return IsCorrectBuild;}
+
+	Standard_Boolean IsDone(){return IsCorrectBuild;}
 	~Unit(){ }
 
 	TopoDS_Shape getShape(){return myshape;}
@@ -59,12 +60,14 @@ class Unit : public UnitInterface
 	
 //! Real volume of unit
 //! Return -1 if Volume is not calculated
-	Standard_Real MaterialVolume() { if(check)
+	Standard_Real MaterialVolume() {
+								if (IsCorrectBuild)
 									return unitVolume; 
 										else return -1;}
 //! Volume is wraped by bounding box
 //! Return -1 if Volume is not calculated
-	Standard_Real BoundVolume() { if(check) 
+	Standard_Real BoundVolume() {
+									  if (IsCorrectBuild)
 										return bndBoxVolume;
 									  else return -1;}
 
@@ -100,14 +103,14 @@ class Unit : public UnitInterface
 
 		Standard_Integer uri;
 		Standard_PCharacter Name;
-		bool IsCorrectBuild;
+		Standard_Boolean IsCorrectBuild;
 		unitType myUnitType;
 		TopAbs_ShapeEnum myShapeType;
 
 		TopoDS_Shape myshape;
 		TopLoc_Location myLoc;
 //! Volume calculation status
-		Standard_Boolean check;
+		
 		Bnd_Box *myBox;
 		Standard_Real bndBoxVolume;
 		Standard_Real unitVolume;

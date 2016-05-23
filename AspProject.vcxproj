@@ -62,15 +62,19 @@
     <SourcePath>H:\boost_1_57_0;inc;src;generatedFiles;$(VC_SourcePath)</SourcePath>
     <LibraryPath>H:\boost_1_57_0\lib64-msvc-12.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>H:\boost_1_57_0\lib64-msvc-12.0;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <SourcePath>H:\boost_1_57_0;inc;src;generatedFiles;$(VC_SourcePath)</SourcePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(CSF_OPT_INC);inc;src;win64\vc12\srcd;..\..\..\inc;$(QTDIR)\include\ActiveQt;$(QTDIR)\mkspecs\default;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>inc;generatedFiles;src;$(CSF_OPT_INC);$(QTDIR)\include\ActiveQt;$(QTDIR)\mkspecs\default;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtCore;$(QTDIR)\include\Qt;$(QTDIR)\include\;$(SourcePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-w34100 -w34189 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>win64\vc10\obj\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>win64\vc10\obj\</ObjectFileName>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;CSFDB;NDEBUG;WNT;WIN32;NO_COMMONSAMPLE_EXPORTS;NO_IESAMPLE_EXPORTS;QT_DLL;QT_NO_DEBUG;QT_GUI_LIB;QT_CORE_LIB;QT_HAVE_MMX;QT_HAVE_3DNOW;QT_HAVE_SSE;QT_HAVE_MMXEXT;QT_HAVE_SSE2;QT_THREAD_SUPPORT;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>.\</ProgramDataBaseFileName>
@@ -78,10 +82,16 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level3</WarningLevel>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;qtmain.lib;TKCAF.lib;TKXCAF.lib;TKXCAFSchema.lib;TKLCAF.lib;TKXDESTEP.lib;TKService.lib;TKV3d.lib;TKOpenGl.lib;TKBRep.lib;TKIGES.lib;TKSTL.lib;TKVRML.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKXSBase.lib;TKSTEPBase.lib;TKShapeSchema.lib;TKGeomBase.lib;TKGeomAlgo.lib;TKG3d.lib;TKG2d.lib;TKPShape.lib;TKShHealing.lib;TKHLR.lib;TKTopAlgo.lib;TKMesh.lib;TKPrim.lib;TKCDF.lib;TKBool.lib;TKBO.lib;TKFillet.lib;TKOffset.lib;TKernel.lib;PTKernel.lib;TKMath.lib;TKVoxel.lib;QtGui4.lib;QtCore4.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>c:\OpenCASCADE6.9.1-vc10-64\qt486-vc10-64\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(CSF_OPT_LIB64);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -165,6 +175,9 @@
       <Outputs>
       </Outputs>
     </CustomBuildStep>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="generatedFiles\moc_MainFrame.cpp" />
@@ -177,6 +190,7 @@
     <ClCompile Include="inc\ISession_Text.cpp" />
     <ClCompile Include="src\Application.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\AsmShowManager.cpp" />
     <ClCompile Include="src\AspMainTestClass.cpp" />
@@ -185,6 +199,7 @@
     <ClCompile Include="src\AssemblyGraphBuilder.cpp" />
     <ClCompile Include="src\ContactSpot.cpp" />
     <ClCompile Include="src\FoundationMethods.cpp" />
+    <ClCompile Include="src\GoodColor.cpp" />
     <ClCompile Include="src\ISession_Part.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MainFrame.cpp" />
@@ -202,6 +217,7 @@
     <ClInclude Include="generatedFiles\ui_mainwindow.h" />
     <ClInclude Include="inc\Application.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="inc\AsmTreeNode.h" />
     <ClInclude Include="inc\AspMainTestClass.h" />
@@ -211,6 +227,7 @@
     <ClInclude Include="inc\ContactSpot.h" />
     <ClInclude Include="inc\DBGBuilder.h" />
     <ClInclude Include="inc\FoundationClasses.h" />
+    <ClInclude Include="inc\GoodColor.h" />
     <ClInclude Include="inc\ISession_Direction.h" />
     <ClInclude Include="inc\ISession_Part.h" />
     <ClInclude Include="inc\ISession_Surface.h" />
@@ -248,6 +265,9 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe "%(FullPath)" -o "%(ProjectDir)generatedFiles\ui_%(Filename).h"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UIC compile %(Filename)</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">generatedFiles\ui_%(Filename).h</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\uic.exe "%(FullPath)" -o "%(ProjectDir)generatedFiles\ui_%(Filename).h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">generatedFiles\ui_%(Filename).h</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UIC compile %(Filename)</Message>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

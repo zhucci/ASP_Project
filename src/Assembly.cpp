@@ -38,7 +38,6 @@ Assembly::Assembly(TopoDS_Shape &shape, Unit* root):Unit(shape,root){
 
 	MaterialVolumeUpdate();
 	BoundVolumeUpdate();
-
 	IsCorrectBuild = true;
 }
 
@@ -63,8 +62,9 @@ Assembly::Assembly(const TDF_Label &label, Unit* root/*=NULL*/):
 		//for (; iter.More(); iter.Next()){
 		if (iter.More()){
 			try{
-				_bool isRef =XCAFDoc_ShapeTool::IsReference(iter.Value());
-				_bool isAssembly= XCAFDoc_ShapeTool::IsAssembly(iter.Value());
+
+			//_bool isRef =XCAFDoc_ShapeTool::IsReference(iter.Value());
+			//	_bool isAssembly= XCAFDoc_ShapeTool::IsAssembly(iter.Value());
 				_bool isShape = XCAFDoc_ShapeTool::IsShape(iter.Value());
 				if (isShape)
 				{

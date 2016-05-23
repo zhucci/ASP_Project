@@ -39,6 +39,7 @@ private slots:
 	void ExportPhoto();
 	void ShowFullProduct();
 	void HideSelectedPart();
+	void HideDisaasembledPart();
 	void DisplayJustSelected();
 	void SetShadedMode();
 	void SetWireFrameMode();
@@ -46,11 +47,11 @@ private slots:
 	void contextMenu(const QPoint &pos);
 	void Exit();
 //Debug session
-	void Test1();
-	void Test2();
-	void Test3();
-	void Test4();
-	void Test5();
+	void TestContactSpotVerbose();
+	void TestPointOnPart();
+	void TestSpartialDesc();
+	void TestIsoFaceForPart();
+	void TestDBGTime();
 	void PartGraph();
 	void TestVoxelGeneration();
 	void TestBodyDescriptor();

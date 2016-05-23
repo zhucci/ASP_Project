@@ -26,23 +26,32 @@ MainFrame::MainFrame(void):QMainWindow(0)
 	connect(actionDBGShow, SIGNAL(triggered()),this,SLOT(DBGShow()));
 	connect(myViewer, SIGNAL(contextMenuSignal(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
 //Test panel functions
-	connect(actionT1, SIGNAL(triggered()), this, SLOT(Test1()));
-	connect(actionT2, SIGNAL(triggered()), this, SLOT(Test2()));
-	connect(actionT3, SIGNAL(triggered()), this, SLOT(Test3()));
-	connect(actionT4, SIGNAL(triggered()), this, SLOT(Test4()));
-	connect(actionT5, SIGNAL(triggered()), this, SLOT(Test5()));
+	connect(action_ContactTest, SIGNAL(triggered()), this, SLOT(TestContactSpotVerbose()));
+	connect(action_PointOnFace, SIGNAL(triggered()), this, SLOT(TestPointOnPart()));
+	connect(action_FaceTrait, SIGNAL(triggered()), this, SLOT(TestSpartialDesc()));
+	connect(action_PartIso, SIGNAL(triggered()), this, SLOT(TestIsoFaceForPart()));
+	connect(action_DBGTime, SIGNAL(triggered()), this, SLOT(TestDBGTime()));
 	connect(actionPartGraph, SIGNAL(triggered()), this, SLOT(PartGraph()));
 	connect(actionViewMode, SIGNAL(triggered()), this, SLOT(ViewModeChanged()));
 	connect(action_AssemlyInfoRequest, SIGNAL(triggered()), this, SLOT(ShowAssemblyInfo()));
 	connect(action_SetFrameDisplayMode, SIGNAL(triggered()), this, SLOT(SetWireFrameMode()));
 	connect(action_SetShadedDisplayMode, SIGNAL(triggered()), this, SLOT(SetShadedMode()));
 	connect(actionBodyDescriptor, SIGNAL(triggered()), this, SLOT(TestBodyDescriptor()));
+	connect(action_VoxelGeneration, SIGNAL(triggered()), this, SLOT(TestVoxelGeneration()));
+	
+	connect(action_ShowFullProduct, SIGNAL(triggered()), this, SLOT(ShowFullProduct()));
+	connect(action_HideDisassembled, SIGNAL(triggered()), this, SLOT(HideDisaasembledPart()));
 }
 void MainFrame::ViewModeChanged(){
 	justViewMode=!justViewMode;
 }
 MainFrame::~MainFrame(){
 
+}
+void MainFrame::HideDisaasembledPart(){
+	if (aspTool){
+		aspTool->HideDisassembled(myViewer);
+	}
 }
 void MainFrame::ShowAssemblyInfo(){
 	if (aspTool){
@@ -133,11 +142,8 @@ void MainFrame::PlayBack(){
 }
 void MainFrame::PlayFoward(){
 	if (aspTool){
-		aspTool->HideDisassembled(myViewer);
+		aspTool->PlayAssemblyAnimation(asp::AsmTreeNode::DISMANTLE,myViewer);
 	}
-	
-	//aspTool->PlayAssemblyAnimation(asp::AsmTreeNode::DISMANTLE, myViewer);
-	
 }
 void MainFrame::DBGShow(){
 	if (aspTool){
@@ -145,7 +151,7 @@ void MainFrame::DBGShow(){
 	}
 }
 
-void MainFrame::Test1(){
+void MainFrame::TestContactSpotVerbose(){
 	if (aspTool){
 		asp::AspMainTest test;
 		test.TestContactSpotProcess(this, aspTool);
@@ -153,25 +159,25 @@ void MainFrame::Test1(){
 	
 }
 
-void MainFrame::Test2(){
+void MainFrame::TestPointOnPart(){
 	if (aspTool){
 		asp::AspMainTest test;
 		test.FillPartWithPoints(this, aspTool);
 	}
 }
-void MainFrame::Test3(){
+void MainFrame::TestSpartialDesc(){
 	if (aspTool){
 		asp::AspMainTest test;
 		test.TestSpartialDescriptorCalculation(this, aspTool);
 	}
 }
-void MainFrame::Test4(){
+void MainFrame::TestIsoFaceForPart(){
 	if (aspTool){
 		asp::AspMainTest test;
 		test.TestIsoFaceForPartCalculation(this, aspTool);
 	}
 }
-void MainFrame::Test5(){
+void MainFrame::TestDBGTime(){
 	if (aspTool){
 		asp::AspMainTest test;
 		test.TestContactSpotTimeCalc(this, aspTool);
@@ -179,7 +185,10 @@ void MainFrame::Test5(){
 	
 }
 void MainFrame::TestVoxelGeneration(){
-
+	if (aspTool){
+		asp::AspMainTest test;
+		test.TestVoxelBuilder(this,aspTool);
+	}
 }
 void MainFrame::TestBodyDescriptor(){
 	if (aspTool){

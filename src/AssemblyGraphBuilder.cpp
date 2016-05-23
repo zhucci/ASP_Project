@@ -156,7 +156,7 @@ bool AssemblyGraphBuilder::IsomorphismOfPartCompare(partGraph smallGSet, partGra
 	return true;
 }
 std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Part* part, bool justBaseAndGripFaces){
-	PartUri pUri = part->GetUri();
+	//PartUri pUri = part->GetUri();
 	partGraph smallG;
 	partGraph fullG;
 	_real MaxDistance = 0;
@@ -191,7 +191,7 @@ std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Par
 	for (auto iter = part->colOfSurf.begin(); iter != end; ++iter){
 		auto coIter = iter;
 		auto v1 = faceToFullGraphMap.find(iter->uri);
-		int res = v1->second;
+//		int res = v1->second;
 		if (v1 != faceToFullGraphMap.end())
 		for (coIter++; coIter != end; ++coIter){
 			auto v2 = faceToFullGraphMap.find(coIter->uri);
@@ -449,12 +449,12 @@ FaceType AssemblyGraphBuilder::getFaceType(const asp::SurfaceAttribute &surface1
 	return fType;
 }
 _int AssemblyGraphBuilder::getContactDesc(asp::Part* part1, asp::Part* part2, ContactDesc &desc){
-	ContactDesc cType;
+//	ContactDesc cType;
 	_int cntTypeValue{0};
 	_int ObstPartUri = part2->GetUri();
 	for (asp::Contact &cont : part1->colOfCont){
 		if (cont.obstURI == ObstPartUri){
-			cntTypeValue += std::pow(2,10*(int)cont.Type);
+			cntTypeValue += (int) std::pow(2,10*(int)cont.Type);
 		}
 	}
 	desc.contactType = cntTypeValue;

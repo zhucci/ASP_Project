@@ -105,8 +105,6 @@ namespace asp{
 		_bool AddDBGRelation(Unit* product);
 
 		void Add(DBGEdge &edge);
-
-		_bool Remove(_int NodeUri);
 		
 		//_bool IsOpenListEmpty();
 		//_bool IsClosedListEmpty();

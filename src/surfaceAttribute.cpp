@@ -10,6 +10,7 @@ SurfaceAttribute::SurfaceAttribute(const TopoDS_Shape &surfShape)
 	myShape = TopoDS::Face(surfShape);
 
 	surf.Initialize(myShape);
+
 	
 	Func=_Default;
 

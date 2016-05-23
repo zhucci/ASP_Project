@@ -71,9 +71,7 @@ _bool DBGBuilder::FindSameEdge(DBGEdge &edge, std::list<DBGEdge>::iterator &poin
 	}
 	return false;
 }
-_bool DBGBuilder::Remove(_int NodeUri){
-	return true;
-}
+
 _bool DBGBuilder::IsClose(_int PartUri){
 	if (std::find(closedList->begin(), closedList->end(), PartUri) != closedList->end())
 		return true;
@@ -112,7 +110,6 @@ _bool DBGBuilder::IsMoveDirStillBlock(_int PartUri, asp_Ax1 axis){
 std::vector<asp_Ax1> DBGBuilder::GetBlockedDirs(_int PartUri){
 
 	std::vector<asp_Ax1> blkDirs;
-	
 	for (auto iter = myDBG.begin(); iter != myDBG.end(); iter++){
 		
 		if ((*iter).part == PartUri){
@@ -185,8 +182,6 @@ DBGBuilder::operator DBG && (){
 
 Standard_Boolean DBGBuilder::isEnvelopBndBox(Bnd_Box *box, Bnd_Box *wrapBox){
 
-	Standard_Real eps = Precision::Confusion();
-
 	if (wrapBox->IsOut(box->CornerMax()) ||
 		wrapBox->IsOut(box->CornerMin()) ||
 		!wrapBox->IsWhole() ||
@@ -254,7 +249,6 @@ _bool DBGBuilder::NotOverlay(Bnd_Box *box1, Bnd_Box *box2, _real OverLaySize){
 	gp_Pnt b2_s = box2->CornerMax();
 
 
-	Standard_Boolean bRet = false;
 	Standard_Real delta;
 
 	delta = box2->GetGap() + box2->GetGap() + OverLaySize;
@@ -295,7 +289,7 @@ void DBGBuilder::MergeCollectionOfDirs(std::vector<asp_Ax1> &colOfDir, std::vect
 		container.push_back(dir);
 	
 }
-Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boolean allowGap)
+Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boolean )
 {
 	try{
 

@@ -423,7 +423,7 @@ _bool ContactSpot::OverLayAreaGen(){
 						
 				}
 			}
-				_int CrossPnt{ 0 }, GapPnt{ 0 }, ContPnt{ 0 };
+			//	_int CrossPnt{ 0 }, GapPnt{ 0 }, ContPnt{ 0 };
 				_int typesCount[3]={0,0,0};
 
 				for (auto & p : mainPnts){
@@ -477,7 +477,7 @@ _bool ContactSpot::SameVectorInSetAlready(gp_Ax1 &axis, std::vector<gp_Ax1> &col
 _bool ContactSpot:: OverLayAreaEl( ){
 
 	
-	_real SSPntPair[4];
+//	_real SSPntPair[4];
 
 	Extrema_POnSurf p1, p2;
 
@@ -548,6 +548,9 @@ _bool ContactSpot:: OverLayAreaEl( ){
 						
 						_real u1i,u1s,v1i,v1s,u2i,u2s,v2i,v2s;
 
+						BRepTools::UVBounds(f1.Face(), u1i, u1s, v1i, v1s);
+						BRepTools::UVBounds(f2.Face(),u2i,u2s,v2i,v2s);
+
 						if(f1.IsUPeriodic() && f2.IsUPeriodic()){
 							gp_Pnt pnt1;
 							gp_Vec tanU,tanV;
@@ -595,6 +598,9 @@ _bool ContactSpot:: OverLayAreaEl( ){
 					if(f1.Cone().Axis().IsCoaxial(f2.Cone().Axis(),AngTol(),LinTol())){
 
 						_real u1i, u1s, v1i, v1s, u2i, u2s, v2i, v2s;
+
+						BRepTools::UVBounds(f1.Face(), u1i, u1s, v1i, v1s);
+						BRepTools::UVBounds(f2.Face(), u2i, u2s, v2i, v2s);
 
 						_real R_sup1 = f1.Cone().RefRadius();
 						_real R_inf1 = R_sup1 - std::sin(f1.Cone().SemiAngle())*(v1s-v1i);
@@ -667,7 +673,7 @@ _bool ContactSpot:: OverLayAreaEl( ){
 	
 		return false;
 }
-
+/*
 inline _real ContactSpot::rand(_real min, _real max){
 	std::uniform_real_distribution<>::param_type param(min,max);
 	return dist(gen,param);
@@ -675,19 +681,4 @@ inline _real ContactSpot::rand(_real min, _real max){
 inline _real ContactSpot::rand(){
 			return dist(gen);
 }
-
-
- _bool ContactSpot::IsSimpleContact()
- {
-	 Standard_Failure::Raise("Not implement function use");
-	 return true;
- }
- 
- _bool ContactSpot::IsBiggerSurface(BRepAdaptor_Surface &f1, BRepAdaptor_Surface &f2)
- {
-	 //it is incorrect version but simple
-	if(f1.LastUParameter()-f1.FirstUParameter()+f1.LastVParameter()-f1.FirstVParameter() >
-		f2.LastUParameter()-f2.FirstUParameter()+f2.LastVParameter()-f2.FirstVParameter())
-		return true;
-	return false; 		
- }
+*/

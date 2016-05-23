@@ -133,13 +133,12 @@ void Part::BoundVolumeUpdate()
 
 void Part::MaterialVolumeUpdate()
 {
-
 		GProp_GProps props;
 
 		BRepGProp::VolumeProperties(myshape, props, Standard_True);
 		unitVolume = props.Mass();
 		ShapeCentre = props.CentreOfMass();
-		check = true;
+		
 }
 void Part::Dump(Standard_OStream &stream, Standard_Integer rank)
 {

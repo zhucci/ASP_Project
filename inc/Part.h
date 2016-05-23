@@ -36,7 +36,10 @@ namespace asp
 
 		void SetContact(Contact &cont){colOfCont.push_back(cont);}
 
-		void SetAsmDir(gp_Ax1 &dir){ PotentialDirs.push_back(dir); }
+		void SetAsmDir(gp_Ax1 dir){
+			PDir pdir(dir);
+			PotentialDirs.push_back(pdir);
+		}
 		
 	protected:
 		
@@ -45,8 +48,12 @@ namespace asp
 		std::vector<gp_Pnt> pntInPart;
 
 		std::vector<Contact>  colOfCont; 
-
-		 std::vector<gp_Ax1> PotentialDirs;
+		struct PDir{
+		public:
+			PDir(gp_Ax1 ax):axis{ax}{}
+			gp_Ax1 axis;
+		};
+		 std::vector<PDir> PotentialDirs;
 
 //!calculate bounding box and update myBox variable
 		void bndBoxCalc();

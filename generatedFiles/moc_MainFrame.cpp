@@ -22,7 +22,7 @@ static const uint qt_meta_data_MainFrame[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      27,   14, // methods
+      28,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -44,19 +44,20 @@ static const uint qt_meta_data_MainFrame[] = {
      153,   10,   10,   10, 0x08,
      171,   10,   10,   10, 0x08,
      190,   10,   10,   10, 0x08,
-     212,   10,   10,   10, 0x08,
-     228,   10,   10,   10, 0x08,
-     247,   10,   10,   10, 0x08,
-     259,  255,   10,   10, 0x08,
-     279,   10,   10,   10, 0x08,
-     286,   10,   10,   10, 0x08,
-     294,   10,   10,   10, 0x08,
+     213,   10,   10,   10, 0x08,
+     235,   10,   10,   10, 0x08,
+     251,   10,   10,   10, 0x08,
+     270,   10,   10,   10, 0x08,
+     282,  278,   10,   10, 0x08,
      302,   10,   10,   10, 0x08,
-     310,   10,   10,   10, 0x08,
-     318,   10,   10,   10, 0x08,
-     326,   10,   10,   10, 0x08,
-     338,   10,   10,   10, 0x08,
-     360,   10,   10,   10, 0x08,
+     309,   10,   10,   10, 0x08,
+     334,   10,   10,   10, 0x08,
+     352,   10,   10,   10, 0x08,
+     371,   10,   10,   10, 0x08,
+     392,   10,   10,   10, 0x08,
+     406,   10,   10,   10, 0x08,
+     418,   10,   10,   10, 0x08,
+     440,   10,   10,   10, 0x08,
 
        0        // eod
 };
@@ -67,12 +68,14 @@ static const char qt_meta_stringdata_MainFrame[] = {
     "ImportStep()\0PlayBack()\0StepBack()\0"
     "Stop()\0NextStep()\0PlayFoward()\0DBGShow()\0"
     "ExportPhoto()\0ShowFullProduct()\0"
-    "HideSelectedPart()\0DisplayJustSelected()\0"
-    "SetShadedMode()\0SetWireFrameMode()\0"
-    "about()\0pos\0contextMenu(QPoint)\0Exit()\0"
-    "Test1()\0Test2()\0Test3()\0Test4()\0Test5()\0"
-    "PartGraph()\0TestVoxelGeneration()\0"
-    "TestBodyDescriptor()\0"
+    "HideSelectedPart()\0HideDisaasembledPart()\0"
+    "DisplayJustSelected()\0SetShadedMode()\0"
+    "SetWireFrameMode()\0about()\0pos\0"
+    "contextMenu(QPoint)\0Exit()\0"
+    "TestContactSpotVerbose()\0TestPointOnPart()\0"
+    "TestSpartialDesc()\0TestIsoFaceForPart()\0"
+    "TestDBGTime()\0PartGraph()\0"
+    "TestVoxelGeneration()\0TestBodyDescriptor()\0"
 };
 
 void MainFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -94,20 +97,21 @@ void MainFrame::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 10: _t->ExportPhoto(); break;
         case 11: _t->ShowFullProduct(); break;
         case 12: _t->HideSelectedPart(); break;
-        case 13: _t->DisplayJustSelected(); break;
-        case 14: _t->SetShadedMode(); break;
-        case 15: _t->SetWireFrameMode(); break;
-        case 16: _t->about(); break;
-        case 17: _t->contextMenu((*reinterpret_cast< const QPoint(*)>(_a[1]))); break;
-        case 18: _t->Exit(); break;
-        case 19: _t->Test1(); break;
-        case 20: _t->Test2(); break;
-        case 21: _t->Test3(); break;
-        case 22: _t->Test4(); break;
-        case 23: _t->Test5(); break;
-        case 24: _t->PartGraph(); break;
-        case 25: _t->TestVoxelGeneration(); break;
-        case 26: _t->TestBodyDescriptor(); break;
+        case 13: _t->HideDisaasembledPart(); break;
+        case 14: _t->DisplayJustSelected(); break;
+        case 15: _t->SetShadedMode(); break;
+        case 16: _t->SetWireFrameMode(); break;
+        case 17: _t->about(); break;
+        case 18: _t->contextMenu((*reinterpret_cast< const QPoint(*)>(_a[1]))); break;
+        case 19: _t->Exit(); break;
+        case 20: _t->TestContactSpotVerbose(); break;
+        case 21: _t->TestPointOnPart(); break;
+        case 22: _t->TestSpartialDesc(); break;
+        case 23: _t->TestIsoFaceForPart(); break;
+        case 24: _t->TestDBGTime(); break;
+        case 25: _t->PartGraph(); break;
+        case 26: _t->TestVoxelGeneration(); break;
+        case 27: _t->TestBodyDescriptor(); break;
         default: ;
         }
     }
@@ -147,9 +151,9 @@ int MainFrame::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 27)
+        if (_id < 28)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 27;
+        _id -= 28;
     }
     return _id;
 }

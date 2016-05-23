@@ -28,7 +28,7 @@ namespace asp{
 		void TestDescriptorOFSelectedPartCalculation(MainFrame *frame, AspMainTool *tool);
 //Color isomarph faces of selected two part
 		void TestIsoFaceForPartCalculation(MainFrame* frame, AspMainTool *tool);
-
+		void TestVoxelBuilder(MainFrame*frame, AspMainTool *tool);
 	};
 
 
