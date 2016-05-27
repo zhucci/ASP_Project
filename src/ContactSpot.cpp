@@ -21,8 +21,8 @@ ContactSpot::ContactSpot(SurfaceAttribute &surface1,
 	f1{surface1.surf},f2{surface2.surf},prt1{Part1},prt2{Part2}{
 
 	isDone = false;
-	O_f1 = surface1.myShape.Orientation();
-	O_f2 = surface2.myShape.Orientation();
+	O_f1 = surface1.surf.Face().Orientation();
+	O_f2 = surface2.surf.Face().Orientation();
 	
 	Perform();
 }

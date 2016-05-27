@@ -106,7 +106,7 @@ void AspMainTest::TestFindPartsPointsFunction(MainFrame * frame, AspMainTool *to
 						v += dltV;
 						pnt.SetY(v);
 
-						classifier.Perform(face.myShape, pnt, Precision::Confusion());
+						classifier.Perform(face.surf.Face(), pnt, Precision::Confusion());
 
 						++fullAmount;
 						// ### Can be TopAbs_IN situation ?
@@ -162,45 +162,24 @@ void AspMainTest::TestSpartialDescriptorCalculation(MainFrame *frame, AspMainToo
 	auto unitMap = tool->product->GetUnitMap();
 	auto view = frame->myViewer;
 
-
 	Handle_AIS_InteractiveContext context = view->getIC();
-	if (context->HasOpenedContext())
-		context->CloseAllContexts();
-	context->EraseAll(true);
+
+	std::vector<Part *> selectedParts = tool->GetSelectedPart(context);
+
+	if (selectedParts.size() < 1){
+		QString status = "Firstly, choose one part then try again!";
+
+		QMessageBox::information(frame, "Assembly Information", status);
+		return;
+	}
 
 	Standard_Integer curLC = context->OpenLocalContext();
 
-	for (auto iter = unitMap->begin(); iter != unitMap->end(); iter++){
-		Part *part = dynamic_cast<Part *>(iter->second);
-	
-			//==========================================
-			//			Visualise current Parts
-			context->ClearLocalContext(AIS_ClearMode::AIS_CM_Interactive);
-
-			Handle_AIS_Shape shape = tool->mapOfShapes.find(part->GetUri())->second;
-			context->LocalContext()->Display(shape, AIS_Shaded);
-			view->getView()->Redraw();
-
-			AssemblyGraphBuilder builder;
-			auto form = builder.getBodyDescriptor(part);
-			
-			frame->statusBar()->showMessage(std::to_string(form.MatVolRatio).c_str());
-
+	AssemblyGraphBuilder builder;
+	for (auto &part : selectedParts){
 			auto end = part->colOfSurf.end();
 
 			for (auto sp=part->colOfSurf.begin();sp!=end;sp++){
-				auto op = sp;
-				for (++op;  op != end; op++){
-
-					//==========================================
-					//			Visualise current surface
-
-					context->ClearLocalContext(AIS_ClearMode::AIS_CM_Interactive);
-					tool->ShowSurface(context, *sp);
-					tool->ShowSurface(context, *op);
-					view->getView()->Redraw();
-					//==========================================
-					
 					//==========================================
 					//			Test 
 					//==========================================
@@ -219,27 +198,9 @@ void AspMainTest::TestSpartialDescriptorCalculation(MainFrame *frame, AspMainToo
 						context->LocalContext()->Display(axis, AIS_WireFrame);
 						
 					}
-					if (builder.GetTraitOfFace(*op, s1Desc)){
-						Handle_Geom_CartesianPoint adaptPnt = new Geom_CartesianPoint(s1Desc.first);
-						Handle_AIS_Point aisPoint = new AIS_Point(adaptPnt);
-
-						context->LocalContext()->Display(aisPoint);
-						Handle_ISession_Direction axis = new ISession_Direction(s1Desc.first, s1Desc.second*20, 5);
-						axis->SetColor(Quantity_NOC_BLACK);
-						context->LocalContext()->Display(axis, AIS_WireFrame);
-						
-					}
-					auto FaceDesc = builder.getFaceSpartialDescriptor(*sp,*op);
-					std::ostringstream message;
-					message << "Ang = " << std::to_string(FaceDesc.AngDesc) << "  Dist  " << std::to_string(FaceDesc.DistDesc);
-					frame->statusBar()->showMessage(message.str().c_str());
-					view->getView()->Redraw();
-					message.clear();
-				}
 			}
 	}
-	context->CloseLocalContext(curLC);
-	
+	view->getView()->Redraw();
 }
 void AspMainTest::TestDescriptorOFSelectedPartCalculation(MainFrame *frame, AspMainTool *tool){
 
@@ -340,8 +301,8 @@ void AspMainTest::TestIsoFaceForPartCalculation(MainFrame* frame, AspMainTool *t
 			if (surfP2 == coPartSurfCol.end())
 					continue;
 
-			Handle_AIS_Shape S1 = new AIS_Shape(surfP1.myShape);
-			Handle_AIS_Shape S2 = new AIS_Shape(surfP2->myShape);
+			Handle_AIS_Shape S1 = new AIS_Shape(surfP1.surf.Face());
+			Handle_AIS_Shape S2 = new AIS_Shape(surfP2->surf.Face());
 
 			Quantity_Color shapeColor = Color::name(++cColor);
 
@@ -565,6 +526,7 @@ void AspMainTest::TestVoxelBuilder(MainFrame* frame, AspMainTool *tool){
 	timer.Start();
 
 	auto assemblyShape = tool->product->ColSubUnit.front();
+	
 	//Amount of voxel calculation
 	gp_Pnt min = assemblyShape->myBox->CornerMin();
 	gp_Pnt max = assemblyShape->myBox->CornerMax();
@@ -573,9 +535,9 @@ void AspMainTest::TestVoxelBuilder(MainFrame* frame, AspMainTool *tool){
 	int nbX = (int)((max.X() - min.X())/voxelSize );
 	int nbY = (int)((max.Y() - min.Y())/voxelSize);
 	int nbZ = (int)((max.Z() - min.Z())/voxelSize);
+	Voxel_BoolDS voxelShape;
 	if (assemblyShape->myShapeType==TopAbs_COMPOUND){
 
-		Voxel_BoolDS voxelShape;
 		Voxel_FastConverter converter(assemblyShape->myshape, voxelShape, 0.1, nbX, nbY, nbZ, ThreadAmount);
 		frame->ProgressBar->show();
 		int status;
@@ -584,9 +546,56 @@ void AspMainTest::TestVoxelBuilder(MainFrame* frame, AspMainTool *tool){
 	}
 	timer.Stop();
 
-	QString status = "Voxels# ";
+	_int counter=0;
+	Timer collision;
+
+	for (_int i=0;i<nbX;i++)
+		for (_int j=0;j<nbY;j++)
+			for (_int k=0;k<nbZ;k++)
+				if (voxelShape.Get(i,j,k))
+					counter++;
+
+
+	_real MemoryAllocation = counter/(8.*1024.);
+	QString status = "Voxels : ";
+	status += std::to_string(counter).c_str();
+	status += "  /  ";
 	status += std::to_string(nbX*nbY*nbZ).c_str();
-	status += "T: ";
+	status += "   Time : ";
+	status += timer.WhatTime().c_str();
+	status += "   Memory Kbyte : ";
+	status += std::to_string(MemoryAllocation).c_str();
+	frame->SetStatus(status);
+	
+}
+void AspMainTest::TestCollitionDetecton(MainFrame *frame, AspMainTool *tool){
+	Voxel_CollisionDetection detector;
+	
+	
+}
+void AspMainTest::TestCurvePartIntersectionFunction(MainFrame *frame, AspMainTool *tool){
+
+	Timer timer;
+	timer.Start();
+
+	auto assemblyShape = tool->product->ColSubUnit.front();
+
+	//Amount of voxel calculation
+	gp_Pnt min = assemblyShape->myBox->CornerMin();
+	gp_Pnt max = assemblyShape->myBox->CornerMax();
+	gp_Ax1 axis(min,gp_Vec(min,max));
+	_int ItersectCount=0;
+	Handle(Geom_TrimmedCurve) mLine = GC_MakeSegment(min, max);
+	for (auto &part : tool->product->UnitMap){
+		if(tool->asmSeq.IsLineIntersectPart(mLine, axis, dynamic_cast<Part*>(part.second)))
+			ItersectCount++;
+	}
+
+	timer.Stop();
+
+	QString status = "Find Intersect : ";
+	status += std::to_string(ItersectCount).c_str();
+	status += "   Time : ";
 	status += timer.WhatTime().c_str();
 	frame->SetStatus(status);
 	

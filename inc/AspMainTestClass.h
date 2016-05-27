@@ -29,6 +29,8 @@ namespace asp{
 //Color isomarph faces of selected two part
 		void TestIsoFaceForPartCalculation(MainFrame* frame, AspMainTool *tool);
 		void TestVoxelBuilder(MainFrame*frame, AspMainTool *tool);
+		void TestCollitionDetecton(MainFrame *frame, AspMainTool *tool);
+		void TestCurvePartIntersectionFunction(MainFrame *frame, AspMainTool *tool);
 	};
 
 

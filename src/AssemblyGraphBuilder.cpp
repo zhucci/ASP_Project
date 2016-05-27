@@ -45,11 +45,10 @@ assemblyGraph AssemblyGraphBuilder::GetAssemblyGraph(std::vector<Part*> *parts){
 
 	for (auto &part : *parts){
 
-		//addEdgeToAssemblyGraph(p.first, dynamic_cast<Part*> (p.second));
 
 		auto vertex_desc = getBodyDescriptor(part);
 		auto desc = add_vertex(*asmGraph);
-		vertex_desc.Vertex_Index = desc;
+		vertex_desc.Vertex_Index = (_int) desc;
 		(*asmGraph)[desc] = vertex_desc;
 
 		partUri_VertexDescMap.emplace(part->uri, desc);
@@ -73,7 +72,7 @@ assemblyGraph AssemblyGraphBuilder::GetAssemblyGraph(std::vector<Part*> *parts){
 	}
 	return 0;
 }
-int AssemblyGraphBuilder::GripFacesIsomorphism(std::vector<Part*> *partsWithGripFaces, std::vector<PartIsomorphism> isomorphism, bool ReturnFirstResult){
+int AssemblyGraphBuilder::GripFacesIsomorphism(std::vector<Part*> *partsWithGripFaces, std::vector<PartIsomorphism> isomorphism, bool ){
 
 	assemblyGraph patternAsm(GetAssemblyGraph(partsWithGripFaces));
 	partGraphMap gripedPartMap;
@@ -97,9 +96,10 @@ int AssemblyGraphBuilder::GripFacesIsomorphism(std::vector<Part*> *partsWithGrip
 	vf2_subgraph_iso(patternAsm, *asmGraph, result, get(&BodyForm::Vertex_Index, patternAsm), get(&BodyForm::Vertex_Index, *asmGraph), vertex_order_by_mult(patternAsm), ContactDescCompare(patternAsm, *asmGraph), BodyFormCompare(patternAsm,*asmGraph));
 	return 0;
 }
-void AssemblyGraphBuilder::ShowAssemblyIsomorphism(std::map<int, int> *PartToPartMap){
+void AssemblyGraphBuilder::ShowAssemblyIsomorphism(std::map<int, int> *){
 
 }
+
 bool AssemblyGraphBuilder::IsomorphismOfPartCompare(std::map<int, int> *currentIsoResult, bool SaveResultFlag){
 	if(!currentGraphSetForMatch)
 		return false;
@@ -170,19 +170,19 @@ std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Par
 
 		
 		if (justBaseAndGripFaces && (iter->Func == _Base || iter->Func == _Grip)){
-				Vert1Prop.Vertex_Index = add_vertex(fullG);
+			Vert1Prop.Vertex_Index = (_int) add_vertex(fullG);
 				fullG[Vert1Prop.Vertex_Index] = Vert1Prop;
 				faceToFullGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
 		}
 		else if (!justBaseAndGripFaces){
-			Vert1Prop.Vertex_Index = add_vertex(fullG);
+			Vert1Prop.Vertex_Index = (_int) add_vertex(fullG);
 			fullG[Vert1Prop.Vertex_Index] = Vert1Prop;
 			faceToFullGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
 		}
 
 		
 		if (iter->Func == _Base){
-			Vert1Prop.Vertex_Index = add_vertex(smallG);
+			Vert1Prop.Vertex_Index = (_int)add_vertex(smallG);
 			smallG[Vert1Prop.Vertex_Index] = Vert1Prop;
 			faceToSmallGraphMap.emplace(Vert1Prop.faceUri, Vert1Prop.Vertex_Index);
 		}
@@ -223,22 +223,6 @@ std::pair<partGraph, partGraph> AssemblyGraphBuilder::GetPartGraphsSet( asp::Par
 			return std::pair<partGraph,partGraph>(smallG,fullG);
 }
 
-_int AssemblyGraphBuilder::pushToPartSetGraph(PartUri pUri, asp::Part* part){
-	//if pUri is already in map
-	if (!partGraphSet)
-		return -1;
-	if (partGraphSet->find(pUri) != partGraphSet->end())
-		return -2;
-
-
-	return 0;
-}
-_int AssemblyGraphBuilder::addEdgeToAssemblyGraph(PartUri pUri, Part* part){
-	if (!asmGraph)
-		return -1;
-	
-	return 0;
-}
 
 _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<gp_Pnt, gp_Vec> &traits){
 
@@ -251,10 +235,10 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 	if (f1Type == GeomAbs_Plane){
 
 		traitVecF1 = s1.surf.Plane().Axis().Direction();
-		if (s1.myShape.Orientation() == TopAbs_REVERSED)
+		if (s1.surf.Face().Orientation() == TopAbs_REVERSED)
 			traitVecF1.Reverse();
 		_real ui, us, vi, vs;
-		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		BRepTools::UVBounds(s1.surf.Face(), ui, us, vi, vs);
 		s1.surf.D0((us + ui) / 2., (vs + vi) / 2., traitPntF1);
 		traitVecF1Status = true;
 		traitPntF1Status = true;
@@ -265,7 +249,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1 = s1.surf.Cylinder().Axis().Direction();
 		gp_Pnt loc = s1.surf.Cylinder().Axis().Location();
 		_real ui, us, vi, vs;
-		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		BRepTools::UVBounds(s1.surf.Face(), ui, us, vi, vs);
 		gp_Pnt p;
 		s1.surf.D0((us + ui) / 2., (vs + vi) / 2., p);
 		gp_Vec p_Loc(loc, p);
@@ -282,7 +266,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1 = s1.surf.Cone().Axis().Direction();
 		gp_Pnt loc = s1.surf.Cone().Axis().Location();
 		_real ui, us, vi, vs;
-		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		BRepTools::UVBounds(s1.surf.Face(), ui, us, vi, vs);
 		gp_Pnt p;
 		s1.surf.D0((us + ui) / 2., (vs + vi) / 2., p);
 		gp_Vec p_Loc(loc, p);
@@ -299,7 +283,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1 = s1.surf.Torus().Axis().Direction();
 		gp_Pnt loc = s1.surf.Torus().Axis().Location();
 		_real ui, us, vi, vs;
-		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		BRepTools::UVBounds(s1.surf.Face(), ui, us, vi, vs);
 		gp_Pnt p;
 		s1.surf.D0((us + ui) / 2., (vs + vi) / 2., p);
 		gp_Vec p_Loc(loc, p);
@@ -316,7 +300,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 		traitVecF1 = s1.surf.AxeOfRevolution().Direction();
 		gp_Pnt loc = s1.surf.AxeOfRevolution().Location();
 		_real ui, us, vi, vs;
-		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		BRepTools::UVBounds(s1.surf.Face(), ui, us, vi, vs);
 		gp_Pnt p;
 		s1.surf.D0((us + ui) / 2., (vs + vi) / 2., p);
 		gp_Vec p_Loc(loc, p);
@@ -343,17 +327,17 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 
 	if (!traitPntF1Status){
 		
-		//BRepGProp::LinearProperties(s1.myShape, propsTester);
+		//BRepGProp::LinearProperties(s1.surf.Face(), propsTester);
 		//traitPntF1 = propsTester.CentreOfMass();
 		_real ui, us, vi, vs;
 		gp_Vec tanU, tanV;
-		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		BRepTools::UVBounds(s1.surf.Face(), ui, us, vi, vs);
 		
 		s1.surf.D1((ui + us) / 2., (vi + vs) / 2., traitPntF1,tanU,tanV );
 
 		tanU.Cross(tanV);
 
-		if (s1.myShape.Orientation() == TopAbs_REVERSED)
+		if (s1.surf.Face().Orientation() == TopAbs_REVERSED)
 			tanU.Reverse();
 		tanU.Normalize();
 
@@ -366,7 +350,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 	if (!traitVecF1Status){
 		Extrema_ExtPS extrema;
 		_real ui, us, vi, vs;
-		BRepTools::UVBounds(s1.myShape, ui, us, vi, vs);
+		BRepTools::UVBounds(s1.surf.Face(), ui, us, vi, vs);
 		extrema.Initialize(s1.surf,ui,us,vi,vs,Precision::Confusion(),
 			Precision::Confusion());
 		extrema.Perform(traitPntF1);
@@ -378,7 +362,7 @@ _bool AssemblyGraphBuilder::GetTraitOfFace(asp::SurfaceAttribute &s1, std::pair<
 			gp_Pnt pnt;
 			s1.surf.D1(U,V,pnt,tanU,tanV);
 			tanU.Cross(tanV);
-			if (s1.myShape.Orientation() == TopAbs_REVERSED)
+			if (s1.surf.Face().Orientation() == TopAbs_REVERSED)
 				tanU.Reverse();
 			tanU.Normalize();
 			traitVecF1=tanU;
@@ -444,7 +428,7 @@ FaceType AssemblyGraphBuilder::getFaceType(const asp::SurfaceAttribute &surface1
 	else
 		fType.FaceFunctionType = (0);
 
-	fType.FaceFormType=(int)surface1.Type;
+	fType.FaceFormType=(int)surface1.surf.GetType();
 
 	return fType;
 }
@@ -462,8 +446,9 @@ _int AssemblyGraphBuilder::getContactDesc(asp::Part* part1, asp::Part* part2, Co
 	return cntTypeValue;
 	
 }
-std::string AssemblyGraphBuilder::GetPartGraphImageFileName(_int PartUri){
-	std::string FileName("djfdj");
+std::string AssemblyGraphBuilder::GetPartGraphImageFileName(_int /*PartUri*/){
+
+	std::string FileName;
 
 	return FileName;
 }

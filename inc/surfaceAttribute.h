@@ -41,13 +41,8 @@ namespace asp
 		SurfaceAttribute &SurfaceAttribute::operator=(const SurfaceAttribute &att);
 	
 		BRepAdaptor_Surface surf;
-		TopoDS_Face myShape;
 		Bnd_Box myBox;
-		gp_Dir dir;
 		Standard_Integer uri;
-		GeomAbs_SurfaceType Type;
-		
-		std::vector<AdjacencySS> colOfAdjSurf;
 		SurfaceFunction Func;
 	private:
 		static Standard_Integer counter;

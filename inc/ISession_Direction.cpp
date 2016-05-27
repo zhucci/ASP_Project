@@ -114,6 +114,7 @@ void ISession_Direction::Compute (const Handle(PrsMgr_PresentationManager3d)& aP
 //	  DsgPrs_LengthPresentation::Add(aPresentation, myDrawer, myPnt, aLastPoint, DsgPrs_AS_LASTAR);
 
   Handle(Graphic3d_ArrayOfSegments) aPrims = new Graphic3d_ArrayOfSegments (2);
+
   aPrims->AddVertex (myPnt);
   aPrims->AddVertex (aLastPoint);
   aPrims->SetVertexColor(1,arrowColor);
@@ -181,11 +182,11 @@ void ISession_Direction::Compute (const Handle(PrsMgr_PresentationManager3d)& aP
 	  if (i == 1) p1 = pp;
 	  aPrims2->AddVertex(pp);
 
-	  aPrims1->SetVertexColor(i, color);
+	  aPrims1->SetVertexColor(i, arrowColor);
 	  
   }
   aPrims2->AddVertex(p1);
-  aPrims2->SetVertexColor(1,color);
+  aPrims2->SetVertexColor(1, color);
   aPrims2->SetBoundColor(1,arrowColor);
 
   Prs3d_Root::CurrentGroup(aPresentation)->AddPrimitiveArray(aPrims1);

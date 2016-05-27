@@ -319,11 +319,8 @@ private:
 
 	_int LastRetrivale{0};
 
-	_int pushToPartSetGraph(PartUri pUri, asp::Part* part);
-
 	std::pair<partGraph, partGraph> GetPartGraphsSet( asp::Part* part, bool justBaseAndGripFaces);
 
-	_int addEdgeToAssemblyGraph(PartUri pUri, asp::Part* part);
 
 	FaceSpartial getFaceSpartialDescriptor(asp::SurfaceAttribute &surface1,
 		asp::SurfaceAttribute &surface2);

@@ -212,7 +212,7 @@ Standard_Boolean DBGBuilder::fastCheckIntersect(Part *part, Part *obst)
 					}
 					else{
 
-						BRepExtrema_ExtFF cheker(sp.myShape, obstSp.myShape);
+						BRepExtrema_ExtFF cheker(sp.surf.Face(), obstSp.surf.Face());
 						if (!cheker.IsDone())
 							Standard_Failure::Raise("cheker is not  done");
 
@@ -267,8 +267,9 @@ _bool DBGBuilder::NotOverlay(Bnd_Box *box1, Bnd_Box *box2, _real OverLaySize){
 
 }
 _bool DBGBuilder::NotInContact(SurfaceAttribute &sp, SurfaceAttribute &obstSp, _real OverLaySize, _real gap){
-
-	if ((0<sp.Type && sp.Type<4 || sp.Type == GeomAbs_SurfaceOfRevolution) && (0<obstSp.Type && obstSp.Type<4 || sp.Type == GeomAbs_SurfaceOfRevolution))
+	auto type = sp.surf.GetType();
+	auto typeObst = obstSp.surf.GetType();
+	if ((0<type && type<4 || type == GeomAbs_SurfaceOfRevolution) && (0<typeObst && typeObst<4 || type == GeomAbs_SurfaceOfRevolution))
 		return obstSp.myBox.IsOut(sp.myBox) || NotOverlay(&sp.myBox, &obstSp.myBox, OverLaySize);
 	else {
 		_bool Dist = sp.myBox.Distance(obstSp.myBox)>gap;
@@ -318,16 +319,18 @@ Standard_Integer DBGBuilder::DBGEdgeBuild(Part *part, Part *obst, Standard_Boole
 				if (obstSp.myBox.Distance(sp.myBox)>Gap)
 					continue;
 				//Simple surface can be contact just with same type surface
-				if (sp.Type<(int)GeomAbs_BezierSurface &&
-					obstSp.Type<(int)GeomAbs_BezierSurface &&
-					sp.Type != obstSp.Type)
+				auto typeSp = sp.surf.GetType();
+				auto typeObst = obstSp.surf.GetType();
+				if (typeSp<(int)GeomAbs_BezierSurface &&
+					typeObst<(int)GeomAbs_BezierSurface &&
+					typeSp != typeObst)
 					continue;
 				//Posibility be at contact check
 				if (NotInContact(sp, obstSp, Overlay, Gap))
 					continue;
 
 				//Distance check
-				BRepExtrema_ExtFF Ext(sp.myShape, obstSp.myShape);
+				BRepExtrema_ExtFF Ext(sp.surf.Face(), obstSp.surf.Face());
 			
 				const Standard_Integer NbExtrema = Ext.IsDone() ? Ext.NbExt() : 0;
 				

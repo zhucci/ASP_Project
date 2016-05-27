@@ -25,22 +25,24 @@ MainFrame::MainFrame(void):QMainWindow(0)
 	connect(actionFoto, SIGNAL(triggered()),this,SLOT(ExportPhoto()));
 	connect(actionDBGShow, SIGNAL(triggered()),this,SLOT(DBGShow()));
 	connect(myViewer, SIGNAL(contextMenuSignal(const QPoint &)), this, SLOT(contextMenu(const QPoint &)));
-//Test panel functions
+	connect(actionViewMode, SIGNAL(triggered()), this, SLOT(ViewModeChanged()));
+	connect(action_AssemlyInfoRequest, SIGNAL(triggered()), this, SLOT(ShowAssemblyInfo()));
+	connect(action_SetFrameDisplayMode, SIGNAL(triggered()), this, SLOT(SetWireFrameMode()));
+	connect(action_SetShadedDisplayMode, SIGNAL(triggered()), this, SLOT(SetShadedMode()));
+	connect(action_ShowFullProduct, SIGNAL(triggered()), this, SLOT(ShowFullProduct()));
+	connect(action_HideDisassembled, SIGNAL(triggered()), this, SLOT(HideDisaasembledPart()));
+
+
+	//Test panel functions
 	connect(action_ContactTest, SIGNAL(triggered()), this, SLOT(TestContactSpotVerbose()));
 	connect(action_PointOnFace, SIGNAL(triggered()), this, SLOT(TestPointOnPart()));
 	connect(action_FaceTrait, SIGNAL(triggered()), this, SLOT(TestSpartialDesc()));
 	connect(action_PartIso, SIGNAL(triggered()), this, SLOT(TestIsoFaceForPart()));
 	connect(action_DBGTime, SIGNAL(triggered()), this, SLOT(TestDBGTime()));
 	connect(actionPartGraph, SIGNAL(triggered()), this, SLOT(PartGraph()));
-	connect(actionViewMode, SIGNAL(triggered()), this, SLOT(ViewModeChanged()));
-	connect(action_AssemlyInfoRequest, SIGNAL(triggered()), this, SLOT(ShowAssemblyInfo()));
-	connect(action_SetFrameDisplayMode, SIGNAL(triggered()), this, SLOT(SetWireFrameMode()));
-	connect(action_SetShadedDisplayMode, SIGNAL(triggered()), this, SLOT(SetShadedMode()));
 	connect(actionBodyDescriptor, SIGNAL(triggered()), this, SLOT(TestBodyDescriptor()));
 	connect(action_VoxelGeneration, SIGNAL(triggered()), this, SLOT(TestVoxelGeneration()));
-	
-	connect(action_ShowFullProduct, SIGNAL(triggered()), this, SLOT(ShowFullProduct()));
-	connect(action_HideDisassembled, SIGNAL(triggered()), this, SLOT(HideDisaasembledPart()));
+
 }
 void MainFrame::ViewModeChanged(){
 	justViewMode=!justViewMode;
@@ -199,7 +201,7 @@ void MainFrame::TestBodyDescriptor(){
 void MainFrame::PartGraph(){
 	if (aspTool){
 		asp::AspMainTest test;
-		test.TestGraphIso(this,aspTool);
+		test.TestCurvePartIntersectionFunction(this,aspTool);
 	}
 }
 void MainFrame::HideSelectedPart(){

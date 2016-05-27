@@ -42,23 +42,23 @@ void Part::AdjacencyCalc()
 		for(Standard_Integer i=0;i<colOfSurf.size();i++){
 
 			//GeomAdaptor_HSurface adaptorS1(colOfSurf[i].surf);
-			auto &S1 = colOfSurf[i].myShape;
+			auto &S1 = colOfSurf[i].surf.Face();
 			GeomLProp_SLProps prop_S1(BRep_Tool::Surface(S1),1,LinTol());
 			ShapeAnalysis_Surface toolS1(BRep_Tool::Surface(S1));
 
 			for(Standard_Integer j=i+1;j<colOfSurf.size();j++)
 
-				if(colOfSurf[i].myShape.IsPartner(colOfSurf[j].myShape)){
+			if (colOfSurf[i].surf.Face().IsPartner(colOfSurf[j].surf.Face())){
 
 					Standard_Real CosFi=-2;
 
-					auto &S2 = colOfSurf[j].myShape;
+					auto &S2 = colOfSurf[j].surf.Face();
 					//GeomAdaptor_HSurface adaptorS2(colOfSurf[j].surf);
 					ShapeAnalysis_Surface toolS2(BRep_Tool::Surface(S2));
 					GeomLProp_SLProps prop_S2(BRep_Tool::Surface(S2),1,LinTol());
 					
-					TopExp_Explorer exp1(colOfSurf[i].myShape,TopAbs_EDGE);
-					TopExp_Explorer exp2(colOfSurf[j].myShape,TopAbs_EDGE);
+					TopExp_Explorer exp1(colOfSurf[i].surf.Face(), TopAbs_EDGE);
+					TopExp_Explorer exp2(colOfSurf[j].surf.Face(), TopAbs_EDGE);
 
 					for(;exp1.More();exp1.Next()){
 						for(;exp2.More();exp2.Next())
@@ -85,8 +85,8 @@ _exit_:
 				if(CosFi<-1)
 					Standard_Failure::Raise("Cos of Partner Surfaces less -1");
 
-				colOfSurf[i].colOfAdjSurf.push_back(AdjacencySS(CosFi,j));
-				colOfSurf[j].colOfAdjSurf.push_back(AdjacencySS(CosFi,i));
+				//colOfSurf[i].colOfAdjSurf.push_back(AdjacencySS(CosFi,j));
+				//colOfSurf[j].colOfAdjSurf.push_back(AdjacencySS(CosFi,i));
 				
 			}
 
@@ -175,7 +175,7 @@ void Part::Dump(Standard_OStream &stream, Standard_Integer rank)
 			if(rank)
 				stream<<"\\_";
 
-				stream<<"Type:"<<static_cast<const char *> (typeToStr(s.Type));
+				stream<<"Type:"<<static_cast<const char *> (typeToStr(s.surf.GetType()));
 				stream<<"U ["<<s.surf.FirstUParameter()<<","<<s.surf.LastUParameter()<<"] ";
 				stream<<"V ["<<s.surf.FirstVParameter()<<","<<s.surf.LastVParameter()<<"] ";
 				//stream<<" Dir:["<<s.dir.X()<<","<<s.dir.Y()<<","<<s.dir.Z()<<"] ";

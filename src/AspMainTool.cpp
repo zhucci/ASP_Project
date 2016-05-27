@@ -515,7 +515,7 @@ void AspMainTool::ShowAssemblyInfo(MainFrame* appWindow){
 	
 }
 void AspMainTool::ShowSurface(const Handle_AIS_InteractiveContext &context, SurfaceAttribute &surf){
-	Handle_AIS_Shape S = new AIS_Shape(surf.myShape);
+	Handle_AIS_Shape S = new AIS_Shape(surf.surf.Face());
 	Quantity_Color shapeColor;
 	_int DisplayMode;	
 	switch (surf.Func){

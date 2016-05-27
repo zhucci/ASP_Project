@@ -83,15 +83,16 @@ Standard_Integer AsmTreeBuilder::ShapeOfRotationDBGHeal(){
 
 		if (surf.Func == _Base){
 			bool dirInit=false;
-			if(surf.Type == GeomAbs_Cylinder){
+			GeomAbs_SurfaceType type = surf.surf.GetType();
+			if (type == GeomAbs_Cylinder){
 				newDir = gp_Ax1(surf.surf.Cylinder().Axis());
 				dirInit = true;
 			}
-			else if(surf.Type == GeomAbs_Cone){
+			else if (type == GeomAbs_Cone){
 				newDir = gp_Ax1(surf.surf.Cone().Axis());
 				dirInit = true;
 			}
-			else if(surf.Type == GeomAbs_SurfaceOfRevolution){
+			else if (type == GeomAbs_SurfaceOfRevolution){
 				newDir = gp_Ax1(surf.surf.AxeOfRevolution());
 				dirInit = true;
 			}
@@ -340,7 +341,7 @@ void AsmTreeBuilder::FindPointsOnPartSurface(Part *pPart){
 					v += dltV;
 					pnt.SetY(v);
 
-					classifier.Perform(face.myShape, pnt, Precision::Confusion());
+					classifier.Perform(face.surf.Face(), pnt, Precision::Confusion());
 
 
 					if (classifier.State() == TopAbs_ON || classifier.State() == TopAbs_IN){
@@ -350,7 +351,7 @@ void AsmTreeBuilder::FindPointsOnPartSurface(Part *pPart){
 						
 						gp_Vec norm = vU.Crossed(vV);
 						
-						if (face.myShape.Orientation()==TopAbs_FORWARD)
+						if (face.surf.Face().Orientation() == TopAbs_FORWARD)
 							norm.Reverse();
 
 						norm.Normalize();
@@ -393,7 +394,7 @@ _bool AsmTreeBuilder::IsMoveAlongDirBlocked(Part *part, gp_Ax1 axis, _int Distan
 	gp_Pnt p2 = p1.XYZ() + myDir;
 
 	Handle(Geom_TrimmedCurve) mLine = GC_MakeSegment(p1, p2);
-	mLine->SetTrim(2, mLine->LastParameter());
+	//mLine->SetTrim(0, mLine->LastParameter());
 
 	for (auto obst : *(myAssembly->GetUnitMap())){
 		Part * obstPart = dynamic_cast<Part *> (obst.second);
@@ -444,7 +445,7 @@ _bool AsmTreeBuilder::IsLineIntersectPart(Handle(Geom_TrimmedCurve) line,gp_Ax1 
 					surf.surf.D1(U, V, pnt,tanU,tanV);
 					tanU.Cross(tanV);
 					tanU.Normalize();
-					if (surf.myShape.Orientation()!=TopAbs_FORWARD)
+					if (surf.surf.Face().Orientation() != TopAbs_FORWARD)
 						tanU.Reverse();
 					if (IsOneBlkOther(tanU,axis.Direction()))
 						continue;
@@ -454,7 +455,7 @@ _bool AsmTreeBuilder::IsLineIntersectPart(Handle(Geom_TrimmedCurve) line,gp_Ax1 
 						continue;
 //					extrema.Perform(BRepLib_MakeVertex(pnt),surf.myShape);
 				
-					classifyThis.Perform(surf.myShape, CS.Point(i), Precision::Confusion());
+					classifyThis.Perform(surf.surf.Face(), CS.Point(i), Precision::Confusion());
 					
 					TopAbs_State state = classifyThis.State();
 					
